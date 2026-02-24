@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\OnlineLearningPlatform.Repository\OnlineLearningPlatform.Repository.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -6,4 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\OnlineLearningPlatform.Services\OnlineLearningPlatform.Services.csproj" />
+  </ItemGroup>
+
 </Project>
