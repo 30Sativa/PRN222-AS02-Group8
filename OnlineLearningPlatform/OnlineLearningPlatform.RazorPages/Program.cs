@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using OnlineLearningPlatform.Models;
+
 namespace OnlineLearningPlatform.RazorPages
 {
     public class Program
@@ -5,6 +8,12 @@ namespace OnlineLearningPlatform.RazorPages
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            // Cấu hình DbContext với SQL Server
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            // Cấu hình Identity
 
             // Add services to the container.
             builder.Services.AddRazorPages();
