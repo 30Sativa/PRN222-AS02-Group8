@@ -1,30 +1,92 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OnlineLearningPlatform.Models;
+using OnlineLearningPlatform.Models.Entities.Identity;
+using OnlineLearningPlatform.Models.Migrations.Data;
+using OnlineLearningPlatform.Repository.Implement;
+using OnlineLearningPlatform.Repository.Interface;
+using OnlineLearningPlatform.Services.Implement;
+using OnlineLearningPlatform.Services.Interface;
 
 namespace OnlineLearningPlatform.RazorPages
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Cấu hình DbContext với SQL Server
+            // ================= DB CONTEXT =================
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(
+                    builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            // Cấu hình Identity
+            // ================= IDENTITY =================
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                options.SignIn.RequireConfirmedAccount = false;
 
-            // Add services to the container.
-            builder.Services.AddRazorPages();
+                // Password rule (tuỳ chỉnh nếu muốn)
+                options.Password.RequireDigit = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 6;
+            })
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
+
+            // ================= COOKIE CONFIG =================
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Auth/Login";
+                options.AccessDeniedPath = "/Auth/AccessDenied";
+            });
+            //================== SERVICES =================
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            // ================= AUTHORIZATION POLICIES =================
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Admin", policy =>
+                    policy.RequireRole("Admin"));
+
+                options.AddPolicy("Teacher", policy =>
+                    policy.RequireRole("Teacher"));
+
+                options.AddPolicy("Student", policy =>
+                    policy.RequireRole("Student"));
+            });
+
+            // ================= RAZOR PAGES =================
+            builder.Services.AddRazorPages(options =>
+            {
+                // Admin Area
+                options.Conventions.AuthorizeAreaFolder("Admin", "/", "Admin");
+
+                // Teacher Area
+                options.Conventions.AuthorizeAreaFolder("Teacher", "/", "Teacher");
+
+                // Student Area
+                options.Conventions.AuthorizeAreaFolder("Student", "/", "Student");
+
+                // Cho phép Login/Register không cần đăng nhập
+                options.Conventions.AllowAnonymousToFolder("/Auth");
+            });
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // ================= SEED DATA =================
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                await SeedData.InitializeAsync(services);
+            }
+
+            // ================= PIPELINE =================
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
@@ -33,8 +95,9 @@ namespace OnlineLearningPlatform.RazorPages
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
-
+            app.MapGet("/", () => Results.Redirect("/Auth/Login"));
             app.MapRazorPages();
 
             app.Run();

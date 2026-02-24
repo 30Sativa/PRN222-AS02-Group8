@@ -1,0 +1,29 @@
+﻿@page
+@model OnlineLearningPlatform.RazorPages.Pages.Auth.LoginModel
+@{
+}
+
+<h2>Login</h2>
+<form method="post">
+    <div>
+        <label>Email</label>
+        <input asp-for="LoginRequest.Email" />
+        <span asp-validation-for="LoginRequest.Email"></span>
+    </div>
+    <div>
+        <label>Password</label>
+        <input asp-for="LoginRequest.Password" type="password" />
+        <span asp-validation-for="LoginRequest.Password"></span>
+    </div>
+    <button type="submit">Login</button>
+</form>
+<div asp-validation-summary="All"></div>
+<div>
+    <p>
+        Don't have an account? 
+        <a asp-page="/Auth/Register">Register here</a>.
+    </p>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
