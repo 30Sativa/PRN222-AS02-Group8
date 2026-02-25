@@ -1,6 +1,9 @@
-﻿namespace OnlineLearningPlatform.Models.Entities.Identity
+namespace OnlineLearningPlatform.Models.Entities.Identity
 {
-    public class Roles
+    /// <summary>
+    /// Tên các role sử dụng trong hệ thống.
+    /// </summary>
+    public static class Roles
     {
         public const string Admin = "Admin";
         public const string Teacher = "Teacher";
