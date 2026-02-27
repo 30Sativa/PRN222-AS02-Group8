@@ -1,0 +1,70 @@
+@page "{id:guid}"
+@model OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses.DetailsModel
+@{
+    ViewData["Title"] = "Course Details";
+}
+
+@if (Model.Course is null)
+{
+    <div class="alert alert-warning">Course not found.</div>
+}
+else
+{
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">@Model.Course.Title</h2>
+            <p class="text-muted mb-0">Course details overview</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" asp-area="Teacher" asp-page="/Courses/Index">Back to List</a>
+            <a class="btn btn-primary" asp-area="Teacher" asp-page="/Courses/Edit" asp-route-id="@Model.Course.CourseId">Edit</a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div><strong>Course Code:</strong> @Model.Course.CourseCode</div>
+                </div>
+                <div class="col-md-6">
+                    <div><strong>Status:</strong> @Model.Course.Status</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div><strong>Category ID:</strong> @(Model.Course.CategoryId?.ToString() ?? "N/A")</div>
+                </div>
+                <div class="col-md-6">
+                    <div><strong>Level:</strong> @Model.Course.Level</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div><strong>Price:</strong> @Model.Course.Price.ToString("N0")</div>
+                </div>
+                <div class="col-md-6">
+                    <div><strong>Discount Price:</strong> @(Model.Course.DiscountPrice?.ToString("N0") ?? "N/A")</div>
+                </div>
+
+                <div class="col-md-6">
+                    <div><strong>Language:</strong> @Model.Course.Language</div>
+                </div>
+                <div class="col-md-6">
+                    <div><strong>Created At:</strong> @Model.Course.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</div>
+                </div>
+
+                <div class="col-12">
+                    <div><strong>Slug:</strong> @Model.Course.Slug</div>
+                </div>
+
+                <div class="col-12">
+                    <div><strong>Thumbnail URL:</strong> @Model.Course.ThumbnailUrl</div>
+                </div>
+
+                <div class="col-12">
+                    <div><strong>Description:</strong></div>
+                    <div class="border rounded p-3 bg-light mt-1">@Model.Course.Description</div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

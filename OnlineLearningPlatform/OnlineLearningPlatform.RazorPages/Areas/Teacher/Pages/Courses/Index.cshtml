@@ -32,7 +32,7 @@
                         <th>Title</th>
                         <th>Price</th>
                         <th>Status</th>
-                        <th class="text-end" style="width: 220px;">Actions</th>
+                        <th class="text-end" style="width: 320px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -52,6 +52,25 @@
                                 <td>@course.Price.ToString("N0")</td>
                                 <td>@course.Status</td>
                                 <td class="text-end">
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-info me-2 btn-course-details"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#courseDetailsModal"
+                                            data-code="@course.CourseCode"
+                                            data-title="@course.Title"
+                                            data-status="@course.Status"
+                                            data-categoryid="@(course.CategoryId?.ToString() ?? "N/A")"
+                                            data-level="@course.Level"
+                                            data-price="@course.Price.ToString("N0")"
+                                            data-discount="@(course.DiscountPrice?.ToString("N0") ?? "N/A")"
+                                            data-language="@course.Language"
+                                            data-slug="@course.Slug"
+                                            data-thumbnail="@(course.ThumbnailUrl ?? "N/A")"
+                                            data-description="@(course.Description ?? "N/A")"
+                                            data-createdat="@course.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")">
+                                        Details
+                                    </button>
+
                                     <a class="btn btn-sm btn-outline-warning me-2" asp-area="Teacher" asp-page="/Courses/Edit" asp-route-id="@course.CourseId">Edit</a>
                                     <a class="btn btn-sm btn-outline-danger" asp-area="Teacher" asp-page="/Courses/Delete" asp-route-id="@course.CourseId">Delete</a>
                                 </td>
@@ -63,3 +82,61 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="courseDetailsModal" tabindex="-1" aria-labelledby="courseDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="courseDetailsModalLabel">Course Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6"><strong>Course Code:</strong> <span id="mCode"></span></div>
+                    <div class="col-md-6"><strong>Status:</strong> <span id="mStatus"></span></div>
+                    <div class="col-md-6"><strong>Category ID:</strong> <span id="mCategoryId"></span></div>
+                    <div class="col-md-6"><strong>Level:</strong> <span id="mLevel"></span></div>
+                    <div class="col-md-6"><strong>Price:</strong> <span id="mPrice"></span></div>
+                    <div class="col-md-6"><strong>Discount Price:</strong> <span id="mDiscount"></span></div>
+                    <div class="col-md-6"><strong>Language:</strong> <span id="mLanguage"></span></div>
+                    <div class="col-md-6"><strong>Created At:</strong> <span id="mCreatedAt"></span></div>
+                    <div class="col-12"><strong>Title:</strong> <span id="mTitle"></span></div>
+                    <div class="col-12"><strong>Slug:</strong> <span id="mSlug"></span></div>
+                    <div class="col-12"><strong>Thumbnail URL:</strong> <span id="mThumbnail"></span></div>
+                    <div class="col-12">
+                        <strong>Description:</strong>
+                        <div id="mDescription" class="border rounded p-3 bg-light mt-1"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const buttons = document.querySelectorAll('.btn-course-details');
+
+        buttons.forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.getElementById('mCode').textContent = this.dataset.code || 'N/A';
+                document.getElementById('mTitle').textContent = this.dataset.title || 'N/A';
+                document.getElementById('mStatus').textContent = this.dataset.status || 'N/A';
+                document.getElementById('mCategoryId').textContent = this.dataset.categoryid || 'N/A';
+                document.getElementById('mLevel').textContent = this.dataset.level || 'N/A';
+                document.getElementById('mPrice').textContent = this.dataset.price || 'N/A';
+                document.getElementById('mDiscount').textContent = this.dataset.discount || 'N/A';
+                document.getElementById('mLanguage').textContent = this.dataset.language || 'N/A';
+                document.getElementById('mSlug').textContent = this.dataset.slug || 'N/A';
+                document.getElementById('mThumbnail').textContent = this.dataset.thumbnail || 'N/A';
+                document.getElementById('mDescription').textContent = this.dataset.description || 'N/A';
+                document.getElementById('mCreatedAt').textContent = this.dataset.createdat || 'N/A';
+            });
+        });
+    });
+</script>
+}
