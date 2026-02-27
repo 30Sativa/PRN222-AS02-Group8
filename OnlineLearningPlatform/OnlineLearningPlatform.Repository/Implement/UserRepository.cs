@@ -36,7 +36,6 @@ namespace OnlineLearningPlatform.Repository.Implement
             return await _userManager.FindByEmailAsync(email);
         }
 
-        // FIX: thêm async/await cho nhất quán, dễ debug stack trace
         public async Task<ApplicationUser?> GetUserByIdAsync(string userId)
         {
             return await _userManager.FindByIdAsync(userId);
@@ -57,10 +56,54 @@ namespace OnlineLearningPlatform.Repository.Implement
             await _userManager.UpdateAsync(user);
         }
 
-        // Lấy danh sách role của user (VD: "Admin", "Student")
+        // Lấy role của 1 user (VD: "Admin", "Student")
         public async Task<IList<string>> GetUserRolesAsync(ApplicationUser user)
         {
             return await _userManager.GetRolesAsync(user);
+        }
+
+        // Search đa tiêu chí trên DB - query EF Core, ko lọc trên FE
+        public async Task<List<ApplicationUser>> SearchUsersAsync(string? keyword)
+        {
+            var query = _userManager.Users.AsQueryable();
+
+            // Lọc theo keyword: tìm trong FullName, Email, PhoneNumber
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                var term = keyword.Trim().ToLower();
+                query = query.Where(u =>
+                    u.FullName.ToLower().Contains(term) ||
+                    (u.Email != null && u.Email.ToLower().Contains(term)) ||
+                    (u.PhoneNumber != null && u.PhoneNumber.Contains(term))
+                );
+            }
+
+            // Sắp xếp theo tên cho dễ nhìn
+            return await query.OrderBy(u => u.FullName).ToListAsync();
+        }
+
+        // Xóa user khỏi DB
+        public async Task<IdentityResult> DeleteUserAsync(ApplicationUser user)
+        {
+            return await _userManager.DeleteAsync(user);
+        }
+
+        // Gỡ tất cả role cũ của user (dùng khi đổi role)
+        public async Task RemoveFromRolesAsync(ApplicationUser user, IEnumerable<string> roles)
+        {
+            await _userManager.RemoveFromRolesAsync(user, roles);
+        }
+
+        // Đếm tổng users (cho Dashboard)
+        public async Task<int> CountUsersAsync()
+        {
+            return await _userManager.Users.CountAsync();
+        }
+
+        // Lấy all users thuộc 1 role cụ thể
+        public async Task<IList<ApplicationUser>> GetUsersInRoleAsync(string role)
+        {
+            return await _userManager.GetUsersInRoleAsync(role);
         }
     }
 }

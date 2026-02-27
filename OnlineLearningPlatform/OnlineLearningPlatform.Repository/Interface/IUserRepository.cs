@@ -6,7 +6,7 @@ namespace OnlineLearningPlatform.Repository.Interface
     public interface IUserRepository
     {
         Task<IdentityResult> CreateUserAsync(ApplicationUser user, string password);
-        // FIX: đổi thành nullable vì email có thể ko tồn tại trong DB
+        // Nullable vì email có thể ko tồn tại trong DB
         Task<ApplicationUser?> GetUserByEmailAsync(string email);
         Task<SignInResult> PasswordSignInAsync(string email, string password);
         Task AddToRoleAsync(ApplicationUser user, string role);
@@ -14,7 +14,22 @@ namespace OnlineLearningPlatform.Repository.Interface
         Task<ApplicationUser?> GetUserByIdAsync(string userId);
         Task<List<ApplicationUser>> GetAllUsersAsync();
         Task UpdateUserAsync(ApplicationUser user);
-        // Lấy danh sách role của 1 user (để hiển thị trên UI)
+        // Lấy role của 1 user
         Task<IList<string>> GetUserRolesAsync(ApplicationUser user);
+
+        // Search user đa tiêu chí trên DB (keyword tìm theo tên/email/sđt)
+        Task<List<ApplicationUser>> SearchUsersAsync(string? keyword);
+
+        // Xóa user khỏi DB
+        Task<IdentityResult> DeleteUserAsync(ApplicationUser user);
+
+        // Xóa role cũ, gán role mới
+        Task RemoveFromRolesAsync(ApplicationUser user, IEnumerable<string> roles);
+
+        // Lấy tổng số users (cho Dashboard stats)
+        Task<int> CountUsersAsync();
+
+        // Lấy all users đang có role cụ thể
+        Task<IList<ApplicationUser>> GetUsersInRoleAsync(string role);
     }
 }

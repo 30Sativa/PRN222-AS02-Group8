@@ -17,14 +17,18 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Users
             _userService = userService;
         }
 
-        // Thông tin user đang sửa (dùng hiển thị email, role)
+        // Thông tin user đang sửa
         public UserInfoResponse? UserInfo { get; set; }
 
-        // Input binding form
+        // Form chỉnh sửa thông tin
         [BindProperty]
         public UpdateUserRequest Input { get; set; } = new();
 
-        // Thông báo thành công / lỗi
+        // Form đổi role
+        [BindProperty]
+        public string? NewRole { get; set; }
+
+        // Thông báo
         [TempData]
         public string? SuccessMessage { get; set; }
         [TempData]
@@ -46,28 +50,25 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Users
                 Bio = UserInfo.Bio,
                 PhoneNumber = UserInfo.PhoneNumber
             };
+            NewRole = UserInfo.Role;
 
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(string id)
+        // Xử lý cập nhật thông tin
+        public async Task<IActionResult> OnPostUpdateInfoAsync(string id)
         {
-            // Lấy lại thông tin user để hiển thị nếu form lỗi
             UserInfo = await _userService.GetUserInfoAsync(id);
-
             if (UserInfo == null)
             {
                 ErrorMessage = "Không tìm thấy người dùng.";
                 return Page();
             }
 
-            // Gọi service update
             var result = await _userService.UpdateUserInfoAsync(id, Input);
-
             if (result)
             {
                 SuccessMessage = "Cập nhật thông tin thành công!";
-                // Reload lại thông tin mới
                 UserInfo = await _userService.GetUserInfoAsync(id);
                 Input = new UpdateUserRequest
                 {
@@ -78,8 +79,54 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Users
             }
             else
             {
-                ErrorMessage = "Cập nhật thất bại, vui lòng thử lại.";
+                ErrorMessage = "Cập nhật thất bại.";
             }
+
+            NewRole = UserInfo?.Role;
+            return Page();
+        }
+
+        // Xử lý đổi role
+        public async Task<IActionResult> OnPostChangeRoleAsync(string id)
+        {
+            UserInfo = await _userService.GetUserInfoAsync(id);
+            if (UserInfo == null)
+            {
+                ErrorMessage = "Không tìm thấy người dùng.";
+                return Page();
+            }
+
+            if (string.IsNullOrWhiteSpace(NewRole))
+            {
+                ErrorMessage = "Vui lòng chọn role mới.";
+                Input = new UpdateUserRequest
+                {
+                    FullName = UserInfo.FullName,
+                    Bio = UserInfo.Bio,
+                    PhoneNumber = UserInfo.PhoneNumber
+                };
+                return Page();
+            }
+
+            var result = await _userService.ChangeUserRoleAsync(id, NewRole);
+            if (result)
+            {
+                SuccessMessage = $"Đổi role thành '{NewRole}' thành công!";
+            }
+            else
+            {
+                ErrorMessage = "Đổi role thất bại. Kiểm tra role có hợp lệ.";
+            }
+
+            // Reload
+            UserInfo = await _userService.GetUserInfoAsync(id);
+            Input = new UpdateUserRequest
+            {
+                FullName = UserInfo?.FullName,
+                Bio = UserInfo?.Bio,
+                PhoneNumber = UserInfo?.PhoneNumber
+            };
+            NewRole = UserInfo?.Role;
 
             return Page();
         }

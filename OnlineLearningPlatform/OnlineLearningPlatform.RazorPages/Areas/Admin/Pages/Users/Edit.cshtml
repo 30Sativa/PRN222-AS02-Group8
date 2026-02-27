@@ -20,18 +20,18 @@
 }
 else
 {
-    <!-- Thông báo cập nhật thành công -->
+    <!-- Thông báo -->
     @if (Model.SuccessMessage != null)
     {
         <div class="olp-alert olp-alert-success fade-in">✅ @Model.SuccessMessage</div>
     }
-
     @if (Model.ErrorMessage != null)
     {
         <div class="olp-alert olp-alert-danger fade-in">❌ @Model.ErrorMessage</div>
     }
 
-    <div class="olp-card fade-in">
+    <!-- FORM 1: Chỉnh sửa thông tin -->
+    <div class="olp-card fade-in mb-2">
         <div class="olp-card-header">
             <h2>📝 Thông tin người dùng</h2>
             <span class="badge @(Model.UserInfo.Role == "Admin" ? "badge-admin" : Model.UserInfo.Role == "Teacher" ? "badge-teacher" : "badge-student")">
@@ -39,7 +39,7 @@ else
             </span>
         </div>
         <div class="olp-card-body">
-            <form method="post">
+            <form method="post" asp-page-handler="UpdateInfo" asp-route-id="@Model.UserInfo.Id">
                 <!-- Email (chỉ đọc) -->
                 <div class="olp-form-group">
                     <label>📧 Email</label>
@@ -57,20 +57,42 @@ else
                 <!-- Bio -->
                 <div class="olp-form-group">
                     <label asp-for="Input.Bio">📝 Giới thiệu</label>
-                    <textarea asp-for="Input.Bio" class="olp-form-control" placeholder="Giới thiệu ngắn về bản thân..."></textarea>
+                    <textarea asp-for="Input.Bio" class="olp-form-control" placeholder="Giới thiệu ngắn..."></textarea>
                 </div>
 
                 <!-- SĐT -->
                 <div class="olp-form-group">
                     <label asp-for="Input.PhoneNumber">📱 Số điện thoại</label>
-                    <input asp-for="Input.PhoneNumber" class="olp-form-control" placeholder="Nhập số điện thoại" />
-                    <span asp-validation-for="Input.PhoneNumber" class="text-danger" style="font-size:.8rem;"></span>
+                    <input asp-for="Input.PhoneNumber" class="olp-form-control" placeholder="Nhập SĐT" />
                 </div>
 
-                <!-- Nút bấm -->
                 <div class="form-actions">
-                    <button type="submit" class="btn-success-olp">💾 Lưu thay đổi</button>
+                    <button type="submit" class="btn-success-olp">💾 Lưu thông tin</button>
                     <a asp-page="/Users/Detail" asp-route-id="@Model.UserInfo.Id" class="btn-secondary-olp">← Hủy</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- FORM 2: Đổi Role -->
+    <div class="olp-card fade-in">
+        <div class="olp-card-header">
+            <h2>🔑 Thay đổi Role</h2>
+        </div>
+        <div class="olp-card-body">
+            <form method="post" asp-page-handler="ChangeRole" asp-route-id="@Model.UserInfo.Id"
+                  onsubmit="return confirm('Bạn chắc chắn muốn đổi role của người dùng này?');">
+                <div class="olp-form-group">
+                    <label>Role hiện tại: <strong>@Model.UserInfo.Role</strong></label>
+                    <select asp-for="NewRole" class="olp-form-control" style="max-width:300px;">
+                        <option value="Admin" selected="@(Model.UserInfo.Role == "Admin")">Admin</option>
+                        <option value="Teacher" selected="@(Model.UserInfo.Role == "Teacher")">Teacher</option>
+                        <option value="Student" selected="@(Model.UserInfo.Role == "Student")">Student</option>
+                    </select>
+                    <span class="olp-form-hint">⚠️ Đổi role sẽ thay đổi quyền truy cập của người dùng ngay lập tức.</span>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary-olp">🔄 Đổi Role</button>
                 </div>
             </form>
         </div>

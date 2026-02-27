@@ -11,15 +11,48 @@
     </span>
 </div>
 
-<!-- Search + Toolbar -->
+<!-- Thông báo -->
+@if (Model.SuccessMessage != null)
+{
+    <div class="olp-alert olp-alert-success fade-in">✅ @Model.SuccessMessage</div>
+}
+@if (Model.ErrorMessage != null)
+{
+    <div class="olp-alert olp-alert-danger fade-in">❌ @Model.ErrorMessage</div>
+}
+
+<!-- Search đa tiêu chí -->
+<div class="olp-card fade-in mb-2">
+    <div class="olp-card-body" style="padding: 1rem 1.5rem;">
+        <form method="get" style="display:flex; gap:.75rem; align-items:flex-end; flex-wrap:wrap;">
+            <!-- Keyword -->
+            <div class="olp-form-group" style="margin-bottom:0; flex:1; min-width:200px;">
+                <label style="font-size:.75rem;">🔍 Tìm kiếm</label>
+                <input type="text" name="keyword" value="@Model.Keyword" class="olp-form-control" placeholder="Nhập tên, email, SĐT..." />
+            </div>
+            <!-- Filter Role -->
+            <div class="olp-form-group" style="margin-bottom:0; min-width:150px;">
+                <label style="font-size:.75rem;">🔑 Lọc Role</label>
+                <select name="role" class="olp-form-control">
+                    <option value="">Tất cả</option>
+                    <option value="Admin" selected="@(Model.Role == "Admin")">Admin</option>
+                    <option value="Teacher" selected="@(Model.Role == "Teacher")">Teacher</option>
+                    <option value="Student" selected="@(Model.Role == "Student")">Student</option>
+                </select>
+            </div>
+            <!-- Nút -->
+            <div style="display:flex; gap:.5rem;">
+                <button type="submit" class="btn-primary-olp">🔍 Tìm</button>
+                <a asp-page="/Users/Index" class="btn-secondary-olp">↺ Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Bảng kết quả -->
 <div class="olp-card fade-in">
     <div class="olp-card-header">
-        <h2>Danh sách (@Model.Users.Count người dùng)</h2>
-        <form method="get" class="search-bar">
-            <span>🔍</span>
-            <input type="text" name="search" value="@Model.SearchTerm" placeholder="Tìm theo tên, email..." />
-            <button type="submit">Tìm</button>
-        </form>
+        <h2>Kết quả (@Model.TotalCount người dùng)</h2>
     </div>
     <div class="olp-card-body" style="padding:0;">
         @if (Model.Users.Any())
@@ -37,7 +70,6 @@
                     <tbody>
                         @foreach (var user in Model.Users)
                         {
-                            // Chọn màu avatar theo role
                             var avatarClass = user.Role switch
                             {
                                 "Admin" => "avatar-admin",
@@ -63,7 +95,7 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td>@(user.PhoneNumber ?? "Chưa cập nhật")</td>
+                                <td>@(user.PhoneNumber ?? "—")</td>
                                 <td><span class="badge @badgeClass">@user.Role</span></td>
                                 <td>
                                     <div class="btn-group-actions">
@@ -71,6 +103,15 @@
                                            class="btn-secondary-olp btn-sm">👁️ Xem</a>
                                         <a asp-page="/Users/Edit" asp-route-id="@user.Id"
                                            class="btn-primary-olp btn-sm">✏️ Sửa</a>
+                                        <!-- Nút xóa (có confirm) -->
+                                        <form method="post" asp-page-handler="Delete" asp-route-id="@user.Id"
+                                              style="display:inline;"
+                                              onsubmit="return confirm('Bạn chắc chắn muốn xóa người dùng này?');">
+                                            <button type="submit" class="btn-sm"
+                                                    style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;border-radius:6px;padding:.35rem .75rem;font-size:.8rem;cursor:pointer;">
+                                                🗑️ Xóa
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>
@@ -78,13 +119,53 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Phân trang -->
+            @if (Model.TotalPages > 1)
+            {
+                <div style="display:flex; justify-content:center; align-items:center; gap:.5rem; padding:1.25rem;">
+                    @if (Model.PageNumber > 1)
+                    {
+                        <a asp-page="/Users/Index"
+                           asp-route-keyword="@Model.Keyword"
+                           asp-route-role="@Model.Role"
+                           asp-route-pageNumber="@(Model.PageNumber - 1)"
+                           class="btn-secondary-olp btn-sm">← Trước</a>
+                    }
+
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        if (i == Model.PageNumber)
+                        {
+                            <span class="btn-primary-olp btn-sm" style="pointer-events:none;">@i</span>
+                        }
+                        else
+                        {
+                            <a asp-page="/Users/Index"
+                               asp-route-keyword="@Model.Keyword"
+                               asp-route-role="@Model.Role"
+                               asp-route-pageNumber="@i"
+                               class="btn-secondary-olp btn-sm">@i</a>
+                        }
+                    }
+
+                    @if (Model.PageNumber < Model.TotalPages)
+                    {
+                        <a asp-page="/Users/Index"
+                           asp-route-keyword="@Model.Keyword"
+                           asp-route-role="@Model.Role"
+                           asp-route-pageNumber="@(Model.PageNumber + 1)"
+                           class="btn-secondary-olp btn-sm">Sau →</a>
+                    }
+                </div>
+            }
         }
         else
         {
             <div class="empty-state">
                 <div class="empty-icon">🔍</div>
                 <h3>Không tìm thấy người dùng</h3>
-                <p>Thử tìm kiếm với từ khóa khác.</p>
+                <p>Thử tìm kiếm với từ khóa hoặc bộ lọc khác.</p>
             </div>
         }
     </div>
