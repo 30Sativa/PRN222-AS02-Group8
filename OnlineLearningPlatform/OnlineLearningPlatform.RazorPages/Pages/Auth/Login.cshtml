@@ -5,35 +5,45 @@
     Layout = "_Layout";
 }
 
-<!-- Trang Login dùng layout Auth riêng, full screen gradient -->
-<div class="auth-wrapper">
-    <div class="auth-card fade-in">
-        <!-- Logo -->
+<div class="auth-screen">
+    <div class="auth-card fade-up">
+
         <div class="auth-logo">
-            <div class="logo-icon">📚</div>
-            <h1>Chào mừng trở lại</h1>
-            <p>Đăng nhập vào EduLearn để tiếp tục học tập</p>
+            <div class="logo-mark">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                </svg>
+            </div>
+            <h1>EduLearn</h1>
+            <p>Đăng nhập để tiếp tục học tập</p>
         </div>
 
-        <!-- Hiển thị lỗi nếu có -->
-        <div asp-validation-summary="All" class="olp-alert olp-alert-danger" style="display:@(ViewData.ModelState.IsValid ? "none" : "flex")"></div>
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger mb-5" asp-validation-summary="All"></div>
+        }
 
-        <!-- Form Login -->
         <form method="post">
             <div class="form-group">
-                <label asp-for="LoginRequest.Email">📧 Email</label>
-                <input asp-for="LoginRequest.Email" class="olp-form-control" placeholder="Nhập email của bạn" />
-                <span asp-validation-for="LoginRequest.Email" class="text-danger" style="font-size:.8rem;"></span>
+                <label asp-for="LoginRequest.Email">Email</label>
+                <input asp-for="LoginRequest.Email" class="form-control" type="email"
+                       placeholder="you@example.com" autocomplete="email" />
+                <span asp-validation-for="LoginRequest.Email" class="form-error"></span>
             </div>
+
             <div class="form-group">
-                <label asp-for="LoginRequest.Password">🔒 Mật khẩu</label>
-                <input asp-for="LoginRequest.Password" type="password" class="olp-form-control" placeholder="Nhập mật khẩu" />
-                <span asp-validation-for="LoginRequest.Password" class="text-danger" style="font-size:.8rem;"></span>
+                <label asp-for="LoginRequest.Password">Mật khẩu</label>
+                <input asp-for="LoginRequest.Password" class="form-control" type="password"
+                       placeholder="Tối thiểu 6 ký tự" autocomplete="current-password" />
+                <span asp-validation-for="LoginRequest.Password" class="form-error"></span>
             </div>
-            <button type="submit" class="btn-auth">Đăng nhập →</button>
+
+            <button type="submit" class="btn btn-primary" style="width:100%; padding: 12px; font-size: 15px; margin-top: 8px;">
+                Đăng nhập
+            </button>
         </form>
 
-        <!-- Link qua Register -->
         <div class="auth-footer">
             Chưa có tài khoản?
             <a asp-page="/Auth/Register">Đăng ký ngay</a>

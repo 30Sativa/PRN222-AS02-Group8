@@ -4,60 +4,55 @@
     ViewData["Title"] = "Chỉnh sửa hồ sơ";
 }
 
-<div class="page-header fade-in">
-    <h1>✏️ Chỉnh sửa hồ sơ</h1>
-    <span class="breadcrumb-text">
-        <a asp-area="Student" asp-page="/Dashboard" style="color:var(--primary);">Dashboard</a> →
-        <a asp-area="Student" asp-page="/Profile" style="color:var(--primary);">Hồ sơ</a> →
-        Chỉnh sửa
-    </span>
+<div class="page-head fade-up">
+    <h1>Chỉnh sửa hồ sơ</h1>
+    <div class="breadcrumb">
+        <a asp-area="Student" asp-page="/Dashboard">Dashboard</a>
+        <span class="breadcrumb-sep">/</span>
+        <a asp-area="Student" asp-page="/Profile">Hồ sơ</a>
+        <span class="breadcrumb-sep">/</span>
+        <span>Chỉnh sửa</span>
+    </div>
 </div>
 
-<!-- Thông báo -->
 @if (Model.SuccessMessage != null)
 {
-    <div class="olp-alert olp-alert-success fade-in">✅ @Model.SuccessMessage</div>
+    <div class="alert alert-success fade-up">@Model.SuccessMessage</div>
 }
 @if (Model.ErrorMessage != null)
 {
-    <div class="olp-alert olp-alert-danger fade-in">❌ @Model.ErrorMessage</div>
+    <div class="alert alert-danger fade-up">@Model.ErrorMessage</div>
 }
 
-<div class="olp-card fade-in">
-    <div class="olp-card-header">
-        <h2>📝 Cập nhật thông tin</h2>
-    </div>
-    <div class="olp-card-body">
+<div class="card fade-up" style="max-width: 640px;">
+    <div class="card-header"><h2>Thông tin cá nhân</h2></div>
+    <div class="card-body">
         <form method="post">
-            <!-- Email (chỉ đọc) -->
-            <div class="olp-form-group">
-                <label>📧 Email</label>
-                <input type="text" class="olp-form-control" value="@Model.CurrentEmail" disabled />
-                <span class="olp-form-hint">Email không thể thay đổi.</span>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="text" class="form-control" value="@Model.CurrentEmail" disabled />
+                <span class="form-hint">Email không thể thay đổi.</span>
             </div>
 
-            <!-- Họ tên -->
-            <div class="olp-form-group">
-                <label asp-for="Input.FullName">👤 Họ và tên</label>
-                <input asp-for="Input.FullName" class="olp-form-control" placeholder="Nhập họ tên" />
+            <div class="form-group">
+                <label asp-for="Input.FullName">Họ và tên</label>
+                <input asp-for="Input.FullName" class="form-control" placeholder="Nhập họ và tên" />
+                <span asp-validation-for="Input.FullName" class="form-error"></span>
             </div>
 
-            <!-- Bio -->
-            <div class="olp-form-group">
-                <label asp-for="Input.Bio">📝 Giới thiệu bản thân</label>
-                <textarea asp-for="Input.Bio" class="olp-form-control" placeholder="Viết vài dòng về bản thân bạn..."></textarea>
+            <div class="form-group">
+                <label asp-for="Input.PhoneNumber">Số điện thoại</label>
+                <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Nhập số điện thoại" />
             </div>
 
-            <!-- SĐT -->
-            <div class="olp-form-group">
-                <label asp-for="Input.PhoneNumber">📱 Số điện thoại</label>
-                <input asp-for="Input.PhoneNumber" class="olp-form-control" placeholder="Nhập số điện thoại" />
+            <div class="form-group">
+                <label asp-for="Input.Bio">Giới thiệu bản thân</label>
+                <textarea asp-for="Input.Bio" class="form-control" placeholder="Viết vài dòng về bản thân bạn..."></textarea>
             </div>
 
-            <!-- Nút bấm -->
             <div class="form-actions">
-                <button type="submit" class="btn-success-olp">💾 Lưu thay đổi</button>
-                <a asp-area="Student" asp-page="/Profile" class="btn-secondary-olp">← Hủy</a>
+                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                <a asp-area="Student" asp-page="/Profile" class="btn btn-secondary">Hủy</a>
             </div>
         </form>
     </div>

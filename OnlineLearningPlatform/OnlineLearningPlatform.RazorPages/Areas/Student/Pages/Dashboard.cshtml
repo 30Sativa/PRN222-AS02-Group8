@@ -1,84 +1,85 @@
 ﻿@page
 @model OnlineLearningPlatform.RazorPages.Areas.Student.Pages.DashboardModel
 @{
-    ViewData["Title"] = "Student Dashboard";
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="page-header fade-in">
-    <h1>🎓 Xin chào, @Model.UserInfo?.FullName!</h1>
-    <span class="breadcrumb-text">Chào mừng bạn đến với EduLearn. Bắt đầu hành trình học tập của mình!</span>
+<div class="page-head fade-up">
+    <h1>Xin chào, @(Model.UserInfo?.FullName ?? "Bạn")</h1>
+    <div class="breadcrumb"><span>Học viên</span></div>
 </div>
 
-<!-- Stat Cards -->
-<div class="stat-grid">
+<div class="stat-grid fade-up">
     <div class="stat-card">
-        <div class="stat-icon purple">📚</div>
-        <div class="stat-info">
-            <h3>Khóa học đã đăng ký</h3>
-            <!-- TODO: chức năng Enrollment chưa có -->
-            <div class="stat-value">—</div>
-        </div>
+        <div class="stat-label">Khóa học đã đăng ký</div>
+        <div class="stat-value">—</div>
+        <div class="stat-meta">Chức năng đang phát triển</div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon green">✅</div>
-        <div class="stat-info">
-            <h3>Đã hoàn thành</h3>
-            <!-- TODO: chức năng Progress chưa có -->
-            <div class="stat-value">—</div>
-        </div>
+        <div class="stat-label">Đã hoàn thành</div>
+        <div class="stat-value">—</div>
+        <div class="stat-meta">Chức năng đang phát triển</div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon blue">⏱️</div>
-        <div class="stat-info">
-            <h3>Đang học</h3>
-            <!-- TODO: chức năng Progress chưa có -->
-            <div class="stat-value">—</div>
-        </div>
+        <div class="stat-label">Đang học</div>
+        <div class="stat-value">—</div>
+        <div class="stat-meta">Chức năng đang phát triển</div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon orange">🏆</div>
-        <div class="stat-info">
-            <h3>Chứng chỉ</h3>
-            <!-- TODO: chức năng Certificate chưa có -->
-            <div class="stat-value">—</div>
-        </div>
+        <div class="stat-label">Chứng chỉ</div>
+        <div class="stat-value">—</div>
+        <div class="stat-meta">Chức năng đang phát triển</div>
     </div>
 </div>
 
-<!-- Quick Links -->
-<div class="olp-card fade-in">
-    <div class="olp-card-header">
-        <h2>⚡ Truy cập nhanh</h2>
-    </div>
-    <div class="olp-card-body">
-        <div class="quick-links">
-            <!-- Profile - đã có backend -->
-            <a asp-area="Student" asp-page="/Profile" class="quick-link-card">
-                <div class="link-icon" style="background: #ede9fe; color: #6d28d9;">👤</div>
-                <div class="link-title">Hồ sơ cá nhân</div>
-                <div class="link-desc">Xem và chỉnh sửa thông tin</div>
+<div class="card fade-up">
+    <div class="card-header"><h2>Truy cập nhanh</h2></div>
+    <div class="card-body">
+        <div class="quick-grid">
+            <a asp-area="Student" asp-page="/Profile" class="quick-item">
+                <div class="quick-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </div>
+                <div class="quick-item-title">Hồ sơ cá nhân</div>
+                <div class="quick-item-desc">Xem và chỉnh sửa thông tin của bạn</div>
             </a>
 
-            <!-- TODO: Chưa có backend -->
-            <div class="quick-link-card disabled-link">
-                <span class="coming-soon-badge">Sắp có</span>
-                <div class="link-icon" style="background: #cffafe; color: #0e7490;">📖</div>
-                <div class="link-title">Khóa học của tôi</div>
-                <div class="link-desc">Xem các khóa đã đăng ký</div>
+            <div class="quick-item quick-item-disabled">
+                <span class="badge-soon">Sắp có</span>
+                <div class="quick-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                    </svg>
+                </div>
+                <div class="quick-item-title">Khóa học của tôi</div>
+                <div class="quick-item-desc">Xem các khóa học đã đăng ký</div>
             </div>
 
-            <div class="quick-link-card disabled-link">
-                <span class="coming-soon-badge">Sắp có</span>
-                <div class="link-icon" style="background: #d1fae5; color: #047857;">🔍</div>
-                <div class="link-title">Khám phá khóa học</div>
-                <div class="link-desc">Tìm khóa học phù hợp</div>
+            <div class="quick-item quick-item-disabled">
+                <span class="badge-soon">Sắp có</span>
+                <div class="quick-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                </div>
+                <div class="quick-item-title">Khám phá khóa học</div>
+                <div class="quick-item-desc">Tìm khóa học phù hợp với bạn</div>
             </div>
 
-            <div class="quick-link-card disabled-link">
-                <span class="coming-soon-badge">Sắp có</span>
-                <div class="link-icon" style="background: #fef3c7; color: #92400e;">🏆</div>
-                <div class="link-title">Chứng chỉ</div>
-                <div class="link-desc">Xem chứng chỉ đã đạt</div>
+            <div class="quick-item quick-item-disabled">
+                <span class="badge-soon">Sắp có</span>
+                <div class="quick-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 11 12 14 22 4"/>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                    </svg>
+                </div>
+                <div class="quick-item-title">Chứng chỉ</div>
+                <div class="quick-item-desc">Xem chứng chỉ đã đạt được</div>
             </div>
         </div>
     </div>

@@ -1,172 +1,159 @@
 @page
 @model OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Users.IndexModel
 @{
-    ViewData["Title"] = "Quản lý Users";
+    ViewData["Title"] = "Người dùng";
 }
 
-<div class="page-header fade-in">
-    <h1>👥 Quản lý Người dùng</h1>
-    <span class="breadcrumb-text">
-        <a asp-area="Admin" asp-page="/Dashboard" style="color:var(--primary);">Dashboard</a> → Danh sách người dùng
-    </span>
+<div class="page-head fade-up">
+    <h1>Người dùng</h1>
+    <div class="breadcrumb">
+        <a asp-area="Admin" asp-page="/Dashboard">Dashboard</a>
+        <span class="breadcrumb-sep">/</span>
+        <span>Danh sách</span>
+    </div>
 </div>
 
-<!-- Thông báo -->
 @if (Model.SuccessMessage != null)
 {
-    <div class="olp-alert olp-alert-success fade-in">✅ @Model.SuccessMessage</div>
+    <div class="alert alert-success fade-up">@Model.SuccessMessage</div>
 }
 @if (Model.ErrorMessage != null)
 {
-    <div class="olp-alert olp-alert-danger fade-in">❌ @Model.ErrorMessage</div>
+    <div class="alert alert-danger fade-up">@Model.ErrorMessage</div>
 }
 
-<!-- Search đa tiêu chí -->
-<div class="olp-card fade-in mb-2">
-    <div class="olp-card-body" style="padding: 1rem 1.5rem;">
-        <form method="get" style="display:flex; gap:.75rem; align-items:flex-end; flex-wrap:wrap;">
-            <!-- Keyword -->
-            <div class="olp-form-group" style="margin-bottom:0; flex:1; min-width:200px;">
-                <label style="font-size:.75rem;">🔍 Tìm kiếm</label>
-                <input type="text" name="keyword" value="@Model.Keyword" class="olp-form-control" placeholder="Nhập tên, email, SĐT..." />
-            </div>
-            <!-- Filter Role -->
-            <div class="olp-form-group" style="margin-bottom:0; min-width:150px;">
-                <label style="font-size:.75rem;">🔑 Lọc Role</label>
-                <select name="role" class="olp-form-control">
-                    <option value="">Tất cả</option>
-                    <option value="Admin" selected="@(Model.Role == "Admin")">Admin</option>
-                    <option value="Teacher" selected="@(Model.Role == "Teacher")">Teacher</option>
-                    <option value="Student" selected="@(Model.Role == "Student")">Student</option>
-                </select>
-            </div>
-            <!-- Nút -->
-            <div style="display:flex; gap:.5rem;">
-                <button type="submit" class="btn-primary-olp">🔍 Tìm</button>
-                <a asp-page="/Users/Index" class="btn-secondary-olp">↺ Reset</a>
-            </div>
-        </form>
-    </div>
-</div>
+<div class="card fade-up">
 
-<!-- Bảng kết quả -->
-<div class="olp-card fade-in">
-    <div class="olp-card-header">
-        <h2>Kết quả (@Model.TotalCount người dùng)</h2>
-    </div>
-    <div class="olp-card-body" style="padding:0;">
-        @if (Model.Users.Any())
+    <!-- Filter bar -->
+    <form method="get" class="filter-bar">
+        <div class="search-input-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" name="keyword" value="@Model.Keyword" placeholder="Tìm tên, email, số điện thoại..." />
+        </div>
+
+        <select name="role" class="filter-select" onchange="this.form.submit()">
+            <option value="">Tất cả roles</option>
+            <option value="Admin"   selected="@(Model.Role == "Admin")">Admin</option>
+            <option value="Teacher" selected="@(Model.Role == "Teacher")">Giảng viên</option>
+            <option value="Student" selected="@(Model.Role == "Student")">Học viên</option>
+        </select>
+
+        <button type="submit" class="btn btn-primary btn-sm">Tìm kiếm</button>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Keyword) || !string.IsNullOrWhiteSpace(Model.Role))
         {
-            <div class="olp-table-wrapper">
-                <table class="olp-table">
-                    <thead>
+            <a asp-page="/Users/Index" class="btn btn-secondary btn-sm">Xóa bộ lọc</a>
+        }
+    </form>
+
+    <!-- Table -->
+    <div class="card-header" style="border-top: 1px solid var(--color-border-light);">
+        <h2>@Model.TotalCount kết quả</h2>
+    </div>
+
+    @if (Model.Users.Any())
+    {
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Người dùng</th>
+                        <th>Số điện thoại</th>
+                        <th>Role</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model.Users)
+                    {
+                        var avClass = user.Role switch { "Admin" => "u-avatar-admin", "Teacher" => "u-avatar-teacher", _ => "u-avatar-student" };
+                        var roleClass = user.Role switch { "Admin" => "role-admin", "Teacher" => "role-teacher", _ => "role-student" };
+                        var roleLabel = user.Role switch { "Teacher" => "Giảng viên", "Student" => "Học viên", _ => user.Role };
+
                         <tr>
-                            <th>Người dùng</th>
-                            <th>SĐT</th>
-                            <th>Role</th>
-                            <th>Hành động</th>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="u-avatar @avClass">
+                                        @(user.FullName?[0].ToString().ToUpper() ?? "U")
+                                    </div>
+                                    <div>
+                                        <div class="u-name">@user.FullName</div>
+                                        <div class="u-email">@user.Email</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-muted">@(user.PhoneNumber ?? "—")</td>
+                            <td><span class="role-pill @roleClass">@roleLabel</span></td>
+                            <td>
+                                <div class="btn-group">
+                                    <a asp-page="/Users/Detail" asp-area="Admin" asp-route-id="@user.Id"
+                                       class="btn btn-secondary btn-sm">Xem</a>
+                                    <a asp-page="/Users/Edit" asp-area="Admin" asp-route-id="@user.Id"
+                                       class="btn btn-secondary btn-sm">Sửa</a>
+                                    <form method="post" asp-page-handler="Delete" asp-route-id="@user.Id"
+                                          onsubmit="return confirm('Xóa người dùng này?');">
+                                        <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                                    </form>
+                                </div>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var user in Model.Users)
-                        {
-                            var avatarClass = user.Role switch
-                            {
-                                "Admin" => "avatar-admin",
-                                "Teacher" => "avatar-teacher",
-                                _ => "avatar-student"
-                            };
-                            var badgeClass = user.Role switch
-                            {
-                                "Admin" => "badge-admin",
-                                "Teacher" => "badge-teacher",
-                                _ => "badge-student"
-                            };
-
-                            <tr>
-                                <td>
-                                    <div class="user-cell">
-                                        <div class="avatar @avatarClass">
-                                            @(user.FullName?[0].ToString().ToUpper() ?? "U")
-                                        </div>
-                                        <div class="user-info">
-                                            <div class="name">@user.FullName</div>
-                                            <div class="email">@user.Email</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>@(user.PhoneNumber ?? "—")</td>
-                                <td><span class="badge @badgeClass">@user.Role</span></td>
-                                <td>
-                                    <div class="btn-group-actions">
-                                        <a asp-page="/Users/Detail" asp-route-id="@user.Id"
-                                           class="btn-secondary-olp btn-sm">👁️ Xem</a>
-                                        <a asp-page="/Users/Edit" asp-route-id="@user.Id"
-                                           class="btn-primary-olp btn-sm">✏️ Sửa</a>
-                                        <!-- Nút xóa (có confirm) -->
-                                        <form method="post" asp-page-handler="Delete" asp-route-id="@user.Id"
-                                              style="display:inline;"
-                                              onsubmit="return confirm('Bạn chắc chắn muốn xóa người dùng này?');">
-                                            <button type="submit" class="btn-sm"
-                                                    style="background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;border-radius:6px;padding:.35rem .75rem;font-size:.8rem;cursor:pointer;">
-                                                🗑️ Xóa
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Phân trang -->
-            @if (Model.TotalPages > 1)
-            {
-                <div style="display:flex; justify-content:center; align-items:center; gap:.5rem; padding:1.25rem;">
-                    @if (Model.PageNumber > 1)
-                    {
-                        <a asp-page="/Users/Index"
-                           asp-route-keyword="@Model.Keyword"
-                           asp-route-role="@Model.Role"
-                           asp-route-pageNumber="@(Model.PageNumber - 1)"
-                           class="btn-secondary-olp btn-sm">← Trước</a>
                     }
+                </tbody>
+            </table>
+        </div>
 
-                    @for (int i = 1; i <= Model.TotalPages; i++)
-                    {
-                        if (i == Model.PageNumber)
-                        {
-                            <span class="btn-primary-olp btn-sm" style="pointer-events:none;">@i</span>
-                        }
-                        else
-                        {
-                            <a asp-page="/Users/Index"
-                               asp-route-keyword="@Model.Keyword"
-                               asp-route-role="@Model.Role"
-                               asp-route-pageNumber="@i"
-                               class="btn-secondary-olp btn-sm">@i</a>
-                        }
-                    }
-
-                    @if (Model.PageNumber < Model.TotalPages)
-                    {
-                        <a asp-page="/Users/Index"
-                           asp-route-keyword="@Model.Keyword"
-                           asp-route-role="@Model.Role"
-                           asp-route-pageNumber="@(Model.PageNumber + 1)"
-                           class="btn-secondary-olp btn-sm">Sau →</a>
-                    }
-                </div>
-            }
-        }
-        else
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
         {
-            <div class="empty-state">
-                <div class="empty-icon">🔍</div>
-                <h3>Không tìm thấy người dùng</h3>
-                <p>Thử tìm kiếm với từ khóa hoặc bộ lọc khác.</p>
+            <div class="pagination">
+                @if (Model.PageNumber > 1)
+                {
+                    <a asp-page="/Users/Index" asp-area="Admin"
+                       asp-route-keyword="@Model.Keyword" asp-route-role="@Model.Role"
+                       asp-route-pageNumber="@(Model.PageNumber - 1)"
+                       class="page-btn">←</a>
+                }
+                else
+                {
+                    <span class="page-btn disabled">←</span>
+                }
+
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    if (i == Model.PageNumber)
+                    {
+                        <span class="page-btn active">@i</span>
+                    }
+                    else
+                    {
+                        <a asp-page="/Users/Index" asp-area="Admin"
+                           asp-route-keyword="@Model.Keyword" asp-route-role="@Model.Role"
+                           asp-route-pageNumber="@i"
+                           class="page-btn">@i</a>
+                    }
+                }
+
+                @if (Model.PageNumber < Model.TotalPages)
+                {
+                    <a asp-page="/Users/Index" asp-area="Admin"
+                       asp-route-keyword="@Model.Keyword" asp-route-role="@Model.Role"
+                       asp-route-pageNumber="@(Model.PageNumber + 1)"
+                       class="page-btn">→</a>
+                }
+                else
+                {
+                    <span class="page-btn disabled">→</span>
+                }
             </div>
         }
-    </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <h3>Không tìm thấy người dùng</h3>
+            <p>Thử tìm kiếm với từ khóa hoặc bộ lọc khác.</p>
+        </div>
+    }
 </div>

@@ -1,66 +1,63 @@
 @page
 @model OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.ProfileModel
 @{
-    ViewData["Title"] = "Hồ sơ giảng viên";
+    ViewData["Title"] = "Hồ sơ";
 }
 
-<div class="page-header fade-in">
-    <h1>👤 Hồ sơ giảng viên</h1>
-    <span class="breadcrumb-text">
-        <a asp-area="Teacher" asp-page="/Dashboard" style="color:var(--primary);">Dashboard</a> → Hồ sơ
-    </span>
+<div class="page-head fade-up">
+    <h1>Hồ sơ giảng viên</h1>
+    <div class="breadcrumb">
+        <a asp-area="Teacher" asp-page="/Dashboard">Dashboard</a>
+        <span class="breadcrumb-sep">/</span>
+        <span>Hồ sơ</span>
+    </div>
 </div>
 
 @if (Model.UserInfo == null)
 {
-    <div class="olp-alert olp-alert-danger">⚠️ Không thể tải thông tin hồ sơ.</div>
+    <div class="alert alert-warning fade-up">Không thể tải thông tin hồ sơ.</div>
 }
 else
 {
-    <!-- Profile Header -->
-    <div class="profile-header fade-in">
-        <div class="profile-avatar">
+    <div class="profile-banner fade-up">
+        <div class="profile-av-lg u-avatar-teacher">
             @(Model.UserInfo.FullName?[0].ToString().ToUpper() ?? "T")
         </div>
-        <h1>@Model.UserInfo.FullName</h1>
-        <div class="profile-role">📖 Giảng viên</div>
+        <div class="profile-meta">
+            <h2>@Model.UserInfo.FullName</h2>
+            <div class="profile-role-label">
+                <span class="role-pill role-teacher">Giảng viên</span>
+                &nbsp; Tham gia @Model.UserInfo.CreatedAt.ToString("MM/yyyy")
+            </div>
+        </div>
+        <div style="margin-left:auto;">
+            <a asp-area="Teacher" asp-page="/EditProfile" class="btn btn-primary">Chỉnh sửa</a>
+        </div>
     </div>
 
-    <!-- Thông tin chi tiết -->
-    <div class="olp-card fade-in">
-        <div class="olp-card-header">
-            <h2>📋 Thông tin cá nhân</h2>
-            <a asp-area="Teacher" asp-page="/EditProfile" class="btn-primary-olp btn-sm">✏️ Chỉnh sửa</a>
-        </div>
-        <div class="olp-card-body">
-            <div class="profile-info-grid">
-                <div class="profile-info-item">
-                    <div class="info-icon">📧</div>
-                    <div>
-                        <div class="info-label">Email</div>
-                        <div class="info-value">@Model.UserInfo.Email</div>
-                    </div>
+    <div class="card fade-up">
+        <div class="card-header"><h2>Thông tin cá nhân</h2></div>
+        <div class="card-body">
+            <div class="detail-list">
+                <div class="detail-row">
+                    <div class="dr-label">Email</div>
+                    <div class="dr-value">@Model.UserInfo.Email</div>
                 </div>
-                <div class="profile-info-item">
-                    <div class="info-icon">📱</div>
-                    <div>
-                        <div class="info-label">Số điện thoại</div>
-                        <div class="info-value">@(Model.UserInfo.PhoneNumber ?? "Chưa cập nhật")</div>
-                    </div>
+                <div class="detail-row">
+                    <div class="dr-label">Số điện thoại</div>
+                    <div class="dr-value">@(Model.UserInfo.PhoneNumber ?? "Chưa cập nhật")</div>
                 </div>
-                <div class="profile-info-item">
-                    <div class="info-icon">📝</div>
-                    <div>
-                        <div class="info-label">Giới thiệu</div>
-                        <div class="info-value">@(string.IsNullOrEmpty(Model.UserInfo.Bio) ? "Chưa có giới thiệu. Hãy thêm bio để học viên biết về bạn!" : Model.UserInfo.Bio)</div>
-                    </div>
+                <div class="detail-row">
+                    <div class="dr-label">Ngày tham gia</div>
+                    <div class="dr-value">@Model.UserInfo.CreatedAt.ToString("dd/MM/yyyy")</div>
                 </div>
-                <div class="profile-info-item">
-                    <div class="info-icon">📅</div>
-                    <div>
-                        <div class="info-label">Ngày tham gia</div>
-                        <div class="info-value">@Model.UserInfo.CreatedAt.ToString("dd/MM/yyyy")</div>
-                    </div>
+                <div class="detail-row">
+                    <div class="dr-label">Role</div>
+                    <div class="dr-value"><span class="role-pill role-teacher">Giảng viên</span></div>
+                </div>
+                <div class="detail-row" style="grid-column: 1 / -1;">
+                    <div class="dr-label">Giới thiệu</div>
+                    <div class="dr-value">@(string.IsNullOrEmpty(Model.UserInfo.Bio) ? "Chưa có thông tin giới thiệu. Học viên thường đọc phần này trước khi đăng ký khóa học." : Model.UserInfo.Bio)</div>
                 </div>
             </div>
         </div>
