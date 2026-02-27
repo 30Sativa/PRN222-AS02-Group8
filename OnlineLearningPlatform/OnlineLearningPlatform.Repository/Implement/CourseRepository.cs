@@ -28,6 +28,20 @@ namespace OnlineLearningPlatform.Repository.Implement
                 .FirstOrDefaultAsync(c => c.CourseId == courseId && c.TeacherId == teacherId && !c.IsDeleted);
         }
 
+        public async Task<List<Course>> GetAllForAdminAsync()
+        {
+            return await _context.Courses
+                .Where(c => !c.IsDeleted)
+                .OrderByDescending(c => c.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<Course?> GetByIdAsync(Guid courseId)
+        {
+            return await _context.Courses
+                .FirstOrDefaultAsync(c => c.CourseId == courseId && !c.IsDeleted);
+        }
+
         public async Task<bool> ExistsByCodeAsync(string courseCode, Guid? excludeCourseId = null)
         {
             var normalizedCode = courseCode.Trim().ToLower();
@@ -97,6 +111,40 @@ namespace OnlineLearningPlatform.Repository.Implement
                 existing.UpdatedAt = DateTime.UtcNow;
             }
 
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> ApproveAsync(Guid courseId)
+        {
+            var existing = await _context.Courses
+                .FirstOrDefaultAsync(c => c.CourseId == courseId && !c.IsDeleted);
+
+            if (existing == null)
+            {
+                return false;
+            }
+
+            existing.Status = CourseStatus.Published;
+            existing.RejectionReason = null;
+            existing.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> RejectAsync(Guid courseId, string reason)
+        {
+            var existing = await _context.Courses
+                .FirstOrDefaultAsync(c => c.CourseId == courseId && !c.IsDeleted);
+
+            if (existing == null)
+            {
+                return false;
+            }
+
+            existing.Status = CourseStatus.Rejected;
+            existing.RejectionReason = reason.Trim();
+            existing.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             return true;
         }

@@ -1,0 +1,80 @@
+@page "{id:guid}"
+@model OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Courses.DetailsModel
+@{
+    ViewData["Title"] = "Course Details";
+}
+
+@if (Model.Course is null)
+{
+    <div class="alert alert-warning">Course not found.</div>
+}
+else
+{
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">@Model.Course.Title</h2>
+            <p class="text-muted mb-0">Admin review course details</p>
+        </div>
+        <a class="btn btn-outline-secondary" asp-area="Admin" asp-page="/Courses/Index">Back to List</a>
+    </div>
+
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert alert-success">@successMessage</div>
+    }
+
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="alert alert-danger">@errorMessage</div>
+    }
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6"><strong>Course Code:</strong> @Model.Course.CourseCode</div>
+                <div class="col-md-6"><strong>Status:</strong> @Model.Course.Status</div>
+                <div class="col-md-6"><strong>Teacher ID:</strong> @Model.Course.TeacherId</div>
+                <div class="col-md-6"><strong>Category ID:</strong> @(Model.Course.CategoryId?.ToString() ?? "N/A")</div>
+                <div class="col-md-6"><strong>Price:</strong> @Model.Course.Price.ToString("N0")</div>
+                <div class="col-md-6"><strong>Discount Price:</strong> @(Model.Course.DiscountPrice?.ToString("N0") ?? "N/A")</div>
+                <div class="col-md-6"><strong>Level:</strong> @Model.Course.Level</div>
+                <div class="col-md-6"><strong>Language:</strong> @Model.Course.Language</div>
+                <div class="col-12"><strong>Slug:</strong> @Model.Course.Slug</div>
+                <div class="col-12"><strong>Thumbnail URL:</strong> @Model.Course.ThumbnailUrl</div>
+                <div class="col-12">
+                    <strong>Description:</strong>
+                    <div class="border rounded p-3 bg-light mt-1">@Model.Course.Description</div>
+                </div>
+                <div class="col-12">
+                    <strong>Rejection Reason:</strong>
+                    <div class="border rounded p-3 bg-light mt-1">@(string.IsNullOrWhiteSpace(Model.Course.RejectionReason) ? "N/A" : Model.Course.RejectionReason)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <h5 class="mb-3">Review Actions</h5>
+
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <form method="post" asp-page-handler="Approve" asp-route-id="@Model.Course.CourseId">
+                    <button type="submit" class="btn btn-success">Approve</button>
+                </form>
+            </div>
+
+            <form method="post" asp-page-handler="Reject" asp-route-id="@Model.Course.CourseId">
+                <div class="mb-3">
+                    <label asp-for="RejectionReason" class="form-label"></label>
+                    <textarea asp-for="RejectionReason" class="form-control" rows="3" placeholder="Enter rejection reason (required)"></textarea>
+                    <span asp-validation-for="RejectionReason" class="text-danger"></span>
+                </div>
+                <button type="submit" class="btn btn-danger">Reject</button>
+            </form>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

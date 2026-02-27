@@ -8,8 +8,15 @@ namespace OnlineLearningPlatform.Services.Interface
     {
         Task<List<Course>> GetMyCoursesAsync(string teacherId);
         Task<Course?> GetMyCourseByIdAsync(Guid courseId, string teacherId);
+
+        Task<List<Course>> GetAllForAdminAsync();
+        Task<Course?> GetByIdForAdminAsync(Guid courseId);
+
         Task<CourseCommandResult> CreateAsync(string teacherId, CourseUpsertRequest request);
         Task<CourseCommandResult> UpdateAsync(string teacherId, CourseUpsertRequest request);
         Task<CourseCommandResult> DeleteAsync(Guid courseId, string teacherId);
+
+        Task<CourseCommandResult> ApproveAsync(Guid courseId);
+        Task<CourseCommandResult> RejectAsync(Guid courseId, string reason);
     }
 }

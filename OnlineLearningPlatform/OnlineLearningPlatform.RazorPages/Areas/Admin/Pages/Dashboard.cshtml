@@ -7,11 +7,25 @@
     <h2 class="mb-3">Admin Dashboard</h2>
     <p class="text-muted">Welcome to the admin area. Choose a management module below.</p>
 
-    <div class="card shadow-sm border-0" style="max-width: 420px;">
-        <div class="card-body">
-            <h5 class="card-title mb-2">Category Management</h5>
-            <p class="card-text text-muted mb-3">Create, edit, and delete course categories.</p>
-            <a class="btn btn-primary" asp-area="Admin" asp-page="/Categories/Index">Go to Categories</a>
+    <div class="row g-3">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-2">Category Management</h5>
+                    <p class="card-text text-muted mb-3">Create, edit, and delete course categories.</p>
+                    <a class="btn btn-primary" asp-area="Admin" asp-page="/Categories/Index">Go to Categories</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-2">Course Review</h5>
+                    <p class="card-text text-muted mb-3">View details and approve/reject teacher courses.</p>
+                    <a class="btn btn-primary" asp-area="Admin" asp-page="/Courses/Index">Go to Course Review</a>
+                </div>
+            </div>
         </div>
     </div>
 </div>

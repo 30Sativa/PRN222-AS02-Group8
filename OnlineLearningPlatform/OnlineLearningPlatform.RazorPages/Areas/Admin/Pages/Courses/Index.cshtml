@@ -1,0 +1,64 @@
+@page
+@model OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Courses.IndexModel
+@{
+    ViewData["Title"] = "Course Review";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-1">Course Review</h2>
+        <p class="text-muted mb-0">Review submitted courses from teachers.</p>
+    </div>
+    <a class="btn btn-outline-secondary" asp-area="Admin" asp-page="/Dashboard">Back to Dashboard</a>
+</div>
+
+@if (TempData["SuccessMessage"] is string successMessage)
+{
+    <div class="alert alert-success">@successMessage</div>
+}
+
+@if (TempData["ErrorMessage"] is string errorMessage)
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Code</th>
+                        <th>Title</th>
+                        <th>Teacher ID</th>
+                        <th>Status</th>
+                        <th class="text-end" style="width: 160px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Courses.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">No courses found.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var course in Model.Courses)
+                        {
+                            <tr>
+                                <td>@course.CourseCode</td>
+                                <td>@course.Title</td>
+                                <td>@course.TeacherId</td>
+                                <td>@course.Status</td>
+                                <td class="text-end">
+                                    <a class="btn btn-sm btn-outline-primary" asp-area="Admin" asp-page="/Courses/Details" asp-route-id="@course.CourseId">Details</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
