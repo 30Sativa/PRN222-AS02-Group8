@@ -1,0 +1,106 @@
+@page "{id}"
+@model OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Users.EditModel
+@{
+    ViewData["Title"] = "Chỉnh sửa";
+    var roleClass = Model.UserInfo?.Role switch { "Admin" => "role-admin", "Teacher" => "role-teacher", _ => "role-student" } ?? "";
+    var roleLabel = Model.UserInfo?.Role switch { "Teacher" => "Giảng viên", "Student" => "Học viên", _ => "Admin" } ?? "";
+}
+
+<div class="page-head fade-up">
+    <h1>Chỉnh sửa người dùng</h1>
+    <div class="breadcrumb">
+        <a asp-area="Admin" asp-page="/Dashboard">Dashboard</a>
+        <span class="breadcrumb-sep">/</span>
+        <a asp-area="Admin" asp-page="/Users/Index">Người dùng</a>
+        <span class="breadcrumb-sep">/</span>
+        <span>Chỉnh sửa</span>
+    </div>
+</div>
+
+@if (Model.UserInfo == null)
+{
+    <div class="alert alert-warning fade-up">Không tìm thấy người dùng này.</div>
+    <a asp-area="Admin" asp-page="/Users/Index" class="btn btn-secondary">Quay lại</a>
+}
+else
+{
+    @if (Model.SuccessMessage != null)
+    {
+        <div class="alert alert-success fade-up">@Model.SuccessMessage</div>
+    }
+    @if (Model.ErrorMessage != null)
+    {
+        <div class="alert alert-danger fade-up">@Model.ErrorMessage</div>
+    }
+
+    <!-- Form 1: Edit info -->
+    <div class="card fade-up mb-5">
+        <div class="card-header">
+            <h2>Thông tin người dùng</h2>
+            <span class="role-pill @roleClass">@roleLabel</span>
+        </div>
+        <div class="card-body">
+            <form method="post" asp-page-handler="UpdateInfo" asp-route-id="@Model.UserInfo.Id">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="text" class="form-control" value="@Model.UserInfo.Email" disabled />
+                    <span class="form-hint">Email không thể thay đổi.</span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Input.FullName">Họ và tên</label>
+                    <input asp-for="Input.FullName" class="form-control" placeholder="Nhập họ và tên" />
+                    <span asp-validation-for="Input.FullName" class="form-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Input.PhoneNumber">Số điện thoại</label>
+                    <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Nhập số điện thoại" />
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Input.Bio">Giới thiệu</label>
+                    <textarea asp-for="Input.Bio" class="form-control" placeholder="Giới thiệu ngắn về người dùng..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                    <a asp-area="Admin" asp-page="/Users/Detail" asp-route-id="@Model.UserInfo.Id"
+                       class="btn btn-secondary">Hủy</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Form 2: Change role -->
+    <div class="card fade-up">
+        <div class="card-header">
+            <h2>Thay đổi role</h2>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-5">
+                Role hiện tại: <span class="role-pill @roleClass">@roleLabel</span>.
+                Thay đổi role sẽ ảnh hưởng đến quyền truy cập ngay lập tức.
+            </p>
+            <form method="post" asp-page-handler="ChangeRole" asp-route-id="@Model.UserInfo.Id"
+                  onsubmit="return confirm('Xác nhận đổi role của người dùng này?');">
+                <div class="form-group" style="max-width: 280px;">
+                    <label asp-for="NewRole">Role mới</label>
+                    <select asp-for="NewRole" class="form-control">
+                        <option value="Admin"   selected="@(Model.UserInfo.Role == "Admin")">Admin</option>
+                        <option value="Teacher" selected="@(Model.UserInfo.Role == "Teacher")">Giảng viên</option>
+                        <option value="Student" selected="@(Model.UserInfo.Role == "Student")">Học viên</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Áp dụng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

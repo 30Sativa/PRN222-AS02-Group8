@@ -1,58 +1,87 @@
 ﻿@page
 @model OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.DashboardModel
 @{
-    ViewData["Title"] = "Teacher Dashboard";
+    ViewData["Title"] = "Dashboard";
 }
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-<div class="container mt-4">
-    <h3><i class="bi bi-person-workspace text-primary"></i> Quản lý nội dung giảng dạy</h3>
-    <hr />
-    @foreach (var course in Model.Courses)
-    {
-        <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-dark text-white d-flex justify-content-between">
-                <span>Khóa học: @course.Title</span>
-                <small>ID: @course.CourseId.ToString().Substring(0, 8)</small>
-            </div>
-            <div class="card-body p-0">
-                <div class="accordion accordion-flush" id="acc_@course.CourseId">
-                    @foreach (var sec in course.Sections.OrderBy(s => s.OrderIndex))
-                    {
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#sec_@sec.SectionId">
-                                    <strong>Chương: @sec.Title</strong>
-                                </button>
-                            </h2>
-                            <div id="sec_@sec.SectionId" class="accordion-collapse collapse">
-                                <div class="accordion-body p-0">
-                                    <ul class="list-group list-group-flush">
-                                        @foreach (var lesson in sec.Lessons.OrderBy(l => l.OrderIndex))
-                                        {
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                <span>@lesson.Title</span>
-                                                <div class="btn-group">
-                                                    @{
-                                                        var q = lesson.Quizzes.FirstOrDefault();
-                                                    }
-                                                    @if (q != null)
-                                                    {
-                                                        <a asp-area="" asp-page="/Quiz/ManageQuestions" asp-route-id="@q.QuizId" class="btn btn-sm btn-outline-primary">Quản lý Quiz</a>
-                                                    }
-                                                    else
-                                                    {
-                                                        <a asp-area="" asp-page="/Quiz/Create" asp-route-lessonId="@lesson.LessonId" class="btn btn-sm btn-primary">+ Thêm Quiz</a>
-                                                    }
-                                                </div>
-                                            </li>
-                                        }
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    }
+
+<div class="page-head fade-up">
+    <h1>Xin chào, @(Model.UserInfo?.FullName ?? "Bạn")</h1>
+    <div class="breadcrumb"><span>Giảng viên</span></div>
+</div>
+
+<div class="stat-grid fade-up">
+    <div class="stat-card">
+        <div class="stat-label">Khóa học của tôi</div>
+        <div class="stat-value">—</div>
+        <div class="stat-meta">Chức năng đang phát triển</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Tổng học viên</div>
+        <div class="stat-value">—</div>
+        <div class="stat-meta">Chức năng đang phát triển</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Đánh giá trung bình</div>
+        <div class="stat-value">—</div>
+        <div class="stat-meta">Chức năng đang phát triển</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Thu nhập</div>
+        <div class="stat-value">—</div>
+        <div class="stat-meta">Chức năng đang phát triển</div>
+    </div>
+</div>
+
+<div class="card fade-up">
+    <div class="card-header"><h2>Truy cập nhanh</h2></div>
+    <div class="card-body">
+        <div class="quick-grid">
+            <a asp-area="Teacher" asp-page="/Profile" class="quick-item">
+                <div class="quick-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
                 </div>
+                <div class="quick-item-title">Hồ sơ giảng viên</div>
+                <div class="quick-item-desc">Xem và cập nhật thông tin của bạn</div>
+            </a>
+
+            <div class="quick-item quick-item-disabled">
+                <span class="badge-soon">Sắp có</span>
+                <div class="quick-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                    </svg>
+                </div>
+                <div class="quick-item-title">Khóa học của tôi</div>
+                <div class="quick-item-desc">Quản lý nội dung và bài học</div>
+            </div>
+
+            <div class="quick-item quick-item-disabled">
+                <span class="badge-soon">Sắp có</span>
+                <div class="quick-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                </div>
+                <div class="quick-item-title">Tạo khóa học</div>
+                <div class="quick-item-desc">Thiết kế và xuất bản khóa học mới</div>
+            </div>
+
+            <div class="quick-item quick-item-disabled">
+                <span class="badge-soon">Sắp có</span>
+                <div class="quick-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10"/>
+                        <line x1="12" y1="20" x2="12" y2="4"/>
+                        <line x1="6" y1="20" x2="6" y2="14"/>
+                    </svg>
+                </div>
+                <div class="quick-item-title">Thống kê</div>
+                <div class="quick-item-desc">Theo dõi hiệu suất giảng dạy</div>
             </div>
         </div>
-    }
+    </div>
 </div>

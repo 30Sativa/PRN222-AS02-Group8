@@ -52,15 +52,7 @@ namespace OnlineLearningPlatform.RazorPages
 
             //================== REPOSITORIES =================
             builder.Services.AddScoped<IUserRepository, UserRepository>();
-
-            builder.Services.AddScoped<IQuizRepository, QuizRepository>();
-            builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
-            builder.Services.AddScoped<IQuizAttemptRepository, QuizAttemptRepository>();
-            builder.Services.AddScoped<IQuizAnswerRepository, QuizAnswerRepository>();
-
-            builder.Services.AddScoped<IQuizService, QuizService>();
-            builder.Services.AddScoped<IStudentService, StudentService>();
-
+            builder.Services.AddScoped<IUserService, UserService>();
             // ================= AUTHORIZATION POLICIES =================
             builder.Services.AddAuthorization(options =>
             {

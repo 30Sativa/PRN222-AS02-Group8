@@ -4,23 +4,23 @@ using OnlineLearningPlatform.Services.DTOs.User.Response;
 using OnlineLearningPlatform.Services.Interface;
 using System.Security.Claims;
 
-namespace OnlineLearningPlatform.RazorPages.Areas.Student.Pages
+namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages
 {
-    public class DashboardModel : PageModel
+    [Authorize(Roles = "Teacher")]
+    public class ProfileModel : PageModel
     {
         private readonly IUserService _userService;
 
-        public DashboardModel(IUserService userService)
+        public ProfileModel(IUserService userService)
         {
             _userService = userService;
         }
 
-        // Thông tin user hiện tại (để hiển thị tên trên Dashboard)
+        // Thông tin giảng viên đang đăng nhập
         public UserInfoResponse? UserInfo { get; set; }
 
         public async Task OnGetAsync()
         {
-            // Lấy userId từ Claims (đã đăng nhập)
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId != null)
             {

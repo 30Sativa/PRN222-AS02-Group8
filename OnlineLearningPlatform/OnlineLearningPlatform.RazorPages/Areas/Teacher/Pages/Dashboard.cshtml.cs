@@ -1,24 +1,30 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using OnlineLearningPlatform.Models.Entities;
+using OnlineLearningPlatform.Services.DTOs.User.Response;
 using OnlineLearningPlatform.Services.Interface;
+using System.Security.Claims;
 
 namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages
 {
     public class DashboardModel : PageModel
     {
-        private readonly IQuizService _quizService;
+        private readonly IUserService _userService;
 
-        public DashboardModel(IQuizService quizService)
+        public DashboardModel(IUserService userService)
         {
-            _quizService = quizService;
+            _userService = userService;
         }
 
-        public IEnumerable<Course> Courses { get; set; } = new List<Course>();
+        // Thông tin giảng viên đang đăng nhập
+        public UserInfoResponse? UserInfo { get; set; }
 
         public async Task OnGetAsync()
         {
-            Courses = await _quizService.GetCoursesForInstructorAsync();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId != null)
+            {
+                UserInfo = await _userService.GetUserInfoAsync(userId);
+            }
         }
     }
 }

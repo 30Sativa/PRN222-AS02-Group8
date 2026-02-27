@@ -1,40 +1,86 @@
 ﻿@page
 @model OnlineLearningPlatform.RazorPages.Areas.Student.Pages.DashboardModel
-<div class="container mt-4">
-    <h2 class="mb-4 text-primary">Khám phá khóa học</h2>
-    <div class="row">
-        @foreach (var course in Model.Courses)
-        {
-            bool isEnrolled = course.Enrollments.Any(e => e.UserId == Model.CurrentUserId && e.IsActive);
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm border-0">
-                    <img src="https://via.placeholder.com/300x150?text=Course" class="card-img-top">
-                    <div class="card-body">
-                        <h5 class="card-title fw-bold">@course.Title</h5>
-                        <p class="text-muted small">@course.Description</p>
-                        @if (isEnrolled)
-                        {
-                            <div class="dropdown">
-                                <button class="btn btn-success dropdown-toggle w-100" data-bs-toggle="dropdown">Làm bài Quiz</button>
-                                <ul class="dropdown-menu w-100">
-                                    @foreach (var quiz in course.Sections.SelectMany(s => s.Lessons).SelectMany(l => l.Quizzes))
-                                    {
-                                        <li><a class="dropdown-item" asp-area="" asp-page="/Quiz/Take" asp-route-id="@quiz.QuizId">@quiz.Title</a></li>
-                                    }
-                                </ul>
-                            </div>
-                        }
-                        else
-                        {
-                            <form method="post" asp-page-handler="Enroll">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="courseId" value="@course.CourseId" />
-                                <button type="submit" class="btn btn-primary w-100">Đăng ký ngay</button>
-                            </form>
-                        }
-                    </div>
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="page-head fade-up">
+    <h1>Xin chào, @(Model.UserInfo?.FullName ?? "Bạn")</h1>
+    <div class="breadcrumb"><span>Học viên</span></div>
+</div>
+
+<div class="stat-grid fade-up">
+    <div class="stat-card">
+        <div class="stat-label">Khóa học đã đăng ký</div>
+        <div class="stat-value">—</div>
+        <div class="stat-meta">Chức năng đang phát triển</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Đã hoàn thành</div>
+        <div class="stat-value">—</div>
+        <div class="stat-meta">Chức năng đang phát triển</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Đang học</div>
+        <div class="stat-value">—</div>
+        <div class="stat-meta">Chức năng đang phát triển</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Chứng chỉ</div>
+        <div class="stat-value">—</div>
+        <div class="stat-meta">Chức năng đang phát triển</div>
+    </div>
+</div>
+
+<div class="card fade-up">
+    <div class="card-header"><h2>Truy cập nhanh</h2></div>
+    <div class="card-body">
+        <div class="quick-grid">
+            <a asp-area="Student" asp-page="/Profile" class="quick-item">
+                <div class="quick-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
                 </div>
+                <div class="quick-item-title">Hồ sơ cá nhân</div>
+                <div class="quick-item-desc">Xem và chỉnh sửa thông tin của bạn</div>
+            </a>
+
+            <div class="quick-item quick-item-disabled">
+                <span class="badge-soon">Sắp có</span>
+                <div class="quick-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                    </svg>
+                </div>
+                <div class="quick-item-title">Khóa học của tôi</div>
+                <div class="quick-item-desc">Xem các khóa học đã đăng ký</div>
             </div>
-        }
+
+            <div class="quick-item quick-item-disabled">
+                <span class="badge-soon">Sắp có</span>
+                <div class="quick-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                </div>
+                <div class="quick-item-title">Khám phá khóa học</div>
+                <div class="quick-item-desc">Tìm khóa học phù hợp với bạn</div>
+            </div>
+
+            <div class="quick-item quick-item-disabled">
+                <span class="badge-soon">Sắp có</span>
+                <div class="quick-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 11 12 14 22 4"/>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                    </svg>
+                </div>
+                <div class="quick-item-title">Chứng chỉ</div>
+                <div class="quick-item-desc">Xem chứng chỉ đã đạt được</div>
+            </div>
+        </div>
     </div>
 </div>

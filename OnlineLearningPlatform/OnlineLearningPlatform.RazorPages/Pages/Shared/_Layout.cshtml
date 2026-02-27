@@ -1,51 +1,78 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - OnlineLearningPlatform.RazorPages</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <title>@ViewData["Title"] — EduLearn</title>
+    <meta name="description" content="Nền tảng học trực tuyến EduLearn" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/OnlineLearningPlatform.RazorPages.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">OnlineLearningPlatform.RazorPages</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <!-- NAV BAR — glassmorphism, 48px height -->
+    <nav class="nav-bar">
         <div class="container">
-            &copy; 2026 - OnlineLearningPlatform.RazorPages - <a asp-area="" asp-page="/Privacy">Privacy</a>
+            <a asp-area="" asp-page="/Auth/Index" class="nav-brand">EduLearn</a>
+
+            <ul class="nav-links">
+                @if (User.IsInRole("Admin"))
+                {
+                    <li><a asp-area="Admin" asp-page="/Dashboard">Dashboard</a></li>
+                    <li><a asp-area="Admin" asp-page="/Users/Index">Người dùng</a></li>
+                }
+                @if (User.IsInRole("Teacher"))
+                {
+                    <li><a asp-area="Teacher" asp-page="/Dashboard">Dashboard</a></li>
+                    <li><a asp-area="Teacher" asp-page="/Profile">Hồ sơ</a></li>
+                }
+                @if (User.IsInRole("Student"))
+                {
+                    <li><a asp-area="Student" asp-page="/Dashboard">Dashboard</a></li>
+                    <li><a asp-area="Student" asp-page="/Profile">Hồ sơ</a></li>
+                }
+            </ul>
+
+            <div class="nav-user">
+                <div class="nav-avatar">
+                    @(User.Identity?.Name?[0].ToString().ToUpper() ?? "U")
+                </div>
+                <span class="nav-user-name">@User.Identity?.Name</span>
+                <form method="post" asp-page="/Auth/Logout">
+                    <button type="submit" class="btn-nav-logout">Đăng xuất</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+}
+
+<!-- CONTENT -->
+<div class="@(User.Identity?.IsAuthenticated == true ? "main-content" : "")">
+    <div class="@(User.Identity?.IsAuthenticated == true ? "container" : "")">
+        @RenderBody()
+    </div>
+</div>
+
+<!-- FOOTER -->
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <footer class="site-footer">
+        <div class="container">
+            <span class="footer-copy">Copyright &copy; 2026 EduLearn</span>
+            <div class="footer-links">
+                <a href="#">Trợ giúp</a>
+                <a href="#">Điều khoản</a>
+            </div>
         </div>
     </footer>
+}
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-
-    @await RenderSectionAsync("Scripts", required: false)
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
