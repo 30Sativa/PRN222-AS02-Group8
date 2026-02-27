@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.24" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\OnlineLearningPlatform.Repository\OnlineLearningPlatform.Repository.csproj" />
   </ItemGroup>
 

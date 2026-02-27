@@ -7,6 +7,7 @@ using OnlineLearningPlatform.Repository.Implement;
 using OnlineLearningPlatform.Repository.Interface;
 using OnlineLearningPlatform.Services.Implement;
 using OnlineLearningPlatform.Services.Interface;
+using OnlineLearningPlatform.Services.Settings;
 
 namespace OnlineLearningPlatform.RazorPages
 {
@@ -35,7 +36,11 @@ namespace OnlineLearningPlatform.RazorPages
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
+            builder.Services.Configure<EmailSettings>(
+                builder.Configuration.GetSection("EmailSettings"));
 
+            builder.Services.Configure<AppSettings>(
+                builder.Configuration.GetSection("AppSettings"));
             // ================= COOKIE CONFIG =================
             builder.Services.ConfigureApplicationCookie(options =>
             {
@@ -45,6 +50,14 @@ namespace OnlineLearningPlatform.RazorPages
             //================== SERVICES =================
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
+            // ================= EXTERNAL AUTHENTICATION =================
+            builder.Services.AddAuthentication()
+                                                .AddGoogle(options =>
+                                                {
+                                                    options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+                                                    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+                                                });
             // ================= AUTHORIZATION POLICIES =================
             builder.Services.AddAuthorization(options =>
             {

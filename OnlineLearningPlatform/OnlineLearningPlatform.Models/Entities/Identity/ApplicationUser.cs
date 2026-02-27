@@ -26,5 +26,8 @@ namespace OnlineLearningPlatform.Models.Entities.Identity
         /// </summary>
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public string? ResetOtp { get; set; }
+        public DateTime? RestOtpExpiry { get; set; }
     }
 }

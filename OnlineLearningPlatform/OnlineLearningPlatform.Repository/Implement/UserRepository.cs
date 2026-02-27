@@ -25,14 +25,29 @@ namespace OnlineLearningPlatform.Repository.Implement
             await _userManager.AddToRoleAsync(user, role);
         }
 
+        public async Task<IdentityResult> ConfirmEmailAsync(ApplicationUser user, string token)
+        {
+            return await _userManager.ConfirmEmailAsync(user, token);
+        }
+
         public async Task<IdentityResult> CreateUserAsync(ApplicationUser user, string password)
         {
             return await _userManager.CreateAsync(user, password);
         }
 
+        public async Task<string> GenerateEmailConfirmationTokenAsync(ApplicationUser user)
+        {
+            return await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        }
+
         public async Task<ApplicationUser?> GetUserByEmailAsync(string email)
         {
             return await  _userManager.FindByEmailAsync(email);
+        }
+
+        public async Task<ApplicationUser> GetUserByIdAsync(string userId)
+        {
+            return await _userManager.FindByIdAsync(userId);
         }
 
         public async Task<SignInResult> PasswordSignInAsync(string email, string password)

@@ -18,11 +18,23 @@
     <button type="submit">Login</button>
 </form>
 <div asp-validation-summary="All"></div>
+<form method="post" asp-page="/Auth/ExternalLogin">
+    <button type="submit" name="provider" value="Google">
+        Login with Google
+    </button>
+</form>
 <div>
     <p>
         Don't have an account? 
         <a asp-page="/Auth/Register">Register here</a>.
     </p>
+</div>
+<div>
+    <form>
+        <p> 
+            <a asp-page="/Auth/ForgotPassword">Forgot Password?</a>
+        </p>
+    </form>
 </div>
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

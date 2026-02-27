@@ -1,0 +1,23 @@
+﻿@page
+@model OnlineLearningPlatform.RazorPages.Pages.Auth.RegisterConfirmationModel
+
+<div class="container mt-5">
+    <div class="card shadow p-4 text-center">
+        <h2 class="text-success">🎉 Registration Successful!</h2>
+
+        <p class="mt-3">
+            Your account has been created successfully.
+        </p>
+        <p>
+            A confirmation email has been sent to <strong>@Model.Email</strong>.
+        </p>
+        <p>
+            Please check your email and click the confirmation link
+            to activate your account before logging in.
+        </p>
+
+        <a asp-page="/Auth/Login" class="btn btn-primary mt-3">
+            Go to Login
+        </a>
+    </div>
+</div>
