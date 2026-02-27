@@ -26,6 +26,7 @@ namespace OnlineLearningPlatform.Repository.Implement
         {
             return await _context.Courses
                 .Include(c => c.Category)
+                .Include(c => c.Teacher)
                 .FirstOrDefaultAsync(c => c.CourseId == courseId && c.TeacherId == teacherId && !c.IsDeleted);
         }
 
@@ -33,6 +34,7 @@ namespace OnlineLearningPlatform.Repository.Implement
         {
             return await _context.Courses
                 .Include(c => c.Category)
+                .Include(c => c.Teacher)
                 .Where(c => !c.IsDeleted)
                 .OrderByDescending(c => c.CreatedAt)
                 .ToListAsync();
@@ -42,6 +44,7 @@ namespace OnlineLearningPlatform.Repository.Implement
         {
             return await _context.Courses
                 .Include(c => c.Category)
+                .Include(c => c.Teacher)
                 .FirstOrDefaultAsync(c => c.CourseId == courseId && !c.IsDeleted);
         }
 
