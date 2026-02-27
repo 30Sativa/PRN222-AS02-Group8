@@ -1,3 +1,86 @@
 ﻿@page
+@model OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.DashboardModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
 
-<h2>Admin Dashboard</h2>
+<div class="page-header fade-in">
+    <h1>🎛️ Admin Dashboard</h1>
+    <span class="breadcrumb-text">Xin chào Admin! Quản lý nền tảng học trực tuyến của bạn tại đây.</span>
+</div>
+
+<!-- Stat Cards -->
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-icon purple">👥</div>
+        <div class="stat-info">
+            <h3>Tổng Users</h3>
+            <div class="stat-value">@Model.TotalUsers</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon green">🎓</div>
+        <div class="stat-info">
+            <h3>Học viên</h3>
+            <!-- TODO: đếm theo role khi có thêm logic -->
+            <div class="stat-value">—</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon blue">📖</div>
+        <div class="stat-info">
+            <h3>Khóa học</h3>
+            <!-- TODO: chức năng Course chưa có -->
+            <div class="stat-value">—</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon orange">💰</div>
+        <div class="stat-info">
+            <h3>Doanh thu</h3>
+            <!-- TODO: chức năng Payment chưa có -->
+            <div class="stat-value">—</div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Links tới các chức năng -->
+<div class="olp-card fade-in">
+    <div class="olp-card-header">
+        <h2>⚡ Truy cập nhanh</h2>
+    </div>
+    <div class="olp-card-body">
+        <div class="quick-links">
+            <!-- Link tới trang quản lý users (đã có backend) -->
+            <a asp-area="Admin" asp-page="/Users/Index" class="quick-link-card">
+                <div class="link-icon" style="background: #ede9fe; color: #6d28d9;">👥</div>
+                <div class="link-title">Quản lý Users</div>
+                <div class="link-desc">Xem, sửa thông tin người dùng</div>
+            </a>
+
+            <!-- TODO: Chức năng Course chưa có backend -->
+            <div class="quick-link-card disabled-link">
+                <span class="coming-soon-badge">Sắp có</span>
+                <div class="link-icon" style="background: #cffafe; color: #0e7490;">📚</div>
+                <div class="link-title">Quản lý Khóa học</div>
+                <div class="link-desc">Duyệt, quản lý các khóa học</div>
+            </div>
+
+            <!-- TODO: Chức năng Category chưa có backend -->
+            <div class="quick-link-card disabled-link">
+                <span class="coming-soon-badge">Sắp có</span>
+                <div class="link-icon" style="background: #d1fae5; color: #047857;">📂</div>
+                <div class="link-title">Danh mục</div>
+                <div class="link-desc">Quản lý danh mục khóa học</div>
+            </div>
+
+            <!-- TODO: Chức năng Reports chưa có backend -->
+            <div class="quick-link-card disabled-link">
+                <span class="coming-soon-badge">Sắp có</span>
+                <div class="link-icon" style="background: #fef3c7; color: #92400e;">📊</div>
+                <div class="link-title">Báo cáo</div>
+                <div class="link-desc">Thống kê doanh thu, người dùng</div>
+            </div>
+        </div>
+    </div>
+</div>

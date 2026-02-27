@@ -1,0 +1,83 @@
+@page "{id}"
+@model OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Users.DetailModel
+@{
+    ViewData["Title"] = "Chi tiết User";
+}
+
+<div class="page-header fade-in">
+    <h1>👤 Chi tiết Người dùng</h1>
+    <span class="breadcrumb-text">
+        <a asp-area="Admin" asp-page="/Dashboard" style="color:var(--primary);">Dashboard</a> →
+        <a asp-area="Admin" asp-page="/Users/Index" style="color:var(--primary);">Users</a> →
+        Chi tiết
+    </span>
+</div>
+
+@if (Model.UserInfo == null)
+{
+    <div class="olp-alert olp-alert-danger">⚠️ Không tìm thấy người dùng này.</div>
+    <a asp-page="/Users/Index" class="btn-secondary-olp">← Quay lại</a>
+}
+else
+{
+    // Chọn avatar class theo role
+    var avatarClass = Model.UserInfo.Role switch
+    {
+        "Admin" => "avatar-admin",
+        "Teacher" => "avatar-teacher",
+        _ => "avatar-student"
+    };
+
+    <!-- Profile Header -->
+    <div class="profile-header fade-in">
+        <div class="profile-avatar">
+            @(Model.UserInfo.FullName?[0].ToString().ToUpper() ?? "U")
+        </div>
+        <h1>@Model.UserInfo.FullName</h1>
+        <div class="profile-role">🔑 @Model.UserInfo.Role</div>
+    </div>
+
+    <!-- Thông tin chi tiết -->
+    <div class="olp-card fade-in">
+        <div class="olp-card-header">
+            <h2>📋 Thông tin chi tiết</h2>
+            <a asp-page="/Users/Edit" asp-route-id="@Model.UserInfo.Id" class="btn-primary-olp btn-sm">✏️ Chỉnh sửa</a>
+        </div>
+        <div class="olp-card-body">
+            <div class="profile-info-grid">
+                <div class="profile-info-item">
+                    <div class="info-icon">📧</div>
+                    <div>
+                        <div class="info-label">Email</div>
+                        <div class="info-value">@Model.UserInfo.Email</div>
+                    </div>
+                </div>
+                <div class="profile-info-item">
+                    <div class="info-icon">📱</div>
+                    <div>
+                        <div class="info-label">Số điện thoại</div>
+                        <div class="info-value">@(Model.UserInfo.PhoneNumber ?? "Chưa cập nhật")</div>
+                    </div>
+                </div>
+                <div class="profile-info-item">
+                    <div class="info-icon">📝</div>
+                    <div>
+                        <div class="info-label">Giới thiệu</div>
+                        <div class="info-value">@(string.IsNullOrEmpty(Model.UserInfo.Bio) ? "Chưa có" : Model.UserInfo.Bio)</div>
+                    </div>
+                </div>
+                <div class="profile-info-item">
+                    <div class="info-icon">📅</div>
+                    <div>
+                        <div class="info-label">Ngày tạo tài khoản</div>
+                        <div class="info-value">@Model.UserInfo.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-2">
+        <a asp-page="/Users/Index" class="btn-secondary-olp">← Quay lại danh sách</a>
+    </div>
+}

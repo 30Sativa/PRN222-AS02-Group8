@@ -1,0 +1,82 @@
+@page "{id}"
+@model OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Users.EditModel
+@{
+    ViewData["Title"] = "Chỉnh sửa User";
+}
+
+<div class="page-header fade-in">
+    <h1>✏️ Chỉnh sửa Người dùng</h1>
+    <span class="breadcrumb-text">
+        <a asp-area="Admin" asp-page="/Dashboard" style="color:var(--primary);">Dashboard</a> →
+        <a asp-area="Admin" asp-page="/Users/Index" style="color:var(--primary);">Users</a> →
+        Chỉnh sửa
+    </span>
+</div>
+
+@if (Model.UserInfo == null)
+{
+    <div class="olp-alert olp-alert-danger">⚠️ Không tìm thấy người dùng này.</div>
+    <a asp-page="/Users/Index" class="btn-secondary-olp">← Quay lại</a>
+}
+else
+{
+    <!-- Thông báo cập nhật thành công -->
+    @if (Model.SuccessMessage != null)
+    {
+        <div class="olp-alert olp-alert-success fade-in">✅ @Model.SuccessMessage</div>
+    }
+
+    @if (Model.ErrorMessage != null)
+    {
+        <div class="olp-alert olp-alert-danger fade-in">❌ @Model.ErrorMessage</div>
+    }
+
+    <div class="olp-card fade-in">
+        <div class="olp-card-header">
+            <h2>📝 Thông tin người dùng</h2>
+            <span class="badge @(Model.UserInfo.Role == "Admin" ? "badge-admin" : Model.UserInfo.Role == "Teacher" ? "badge-teacher" : "badge-student")">
+                @Model.UserInfo.Role
+            </span>
+        </div>
+        <div class="olp-card-body">
+            <form method="post">
+                <!-- Email (chỉ đọc) -->
+                <div class="olp-form-group">
+                    <label>📧 Email</label>
+                    <input type="text" class="olp-form-control" value="@Model.UserInfo.Email" disabled />
+                    <span class="olp-form-hint">Email không được phép thay đổi.</span>
+                </div>
+
+                <!-- Họ tên -->
+                <div class="olp-form-group">
+                    <label asp-for="Input.FullName">👤 Họ và tên</label>
+                    <input asp-for="Input.FullName" class="olp-form-control" placeholder="Nhập họ tên" />
+                    <span asp-validation-for="Input.FullName" class="text-danger" style="font-size:.8rem;"></span>
+                </div>
+
+                <!-- Bio -->
+                <div class="olp-form-group">
+                    <label asp-for="Input.Bio">📝 Giới thiệu</label>
+                    <textarea asp-for="Input.Bio" class="olp-form-control" placeholder="Giới thiệu ngắn về bản thân..."></textarea>
+                </div>
+
+                <!-- SĐT -->
+                <div class="olp-form-group">
+                    <label asp-for="Input.PhoneNumber">📱 Số điện thoại</label>
+                    <input asp-for="Input.PhoneNumber" class="olp-form-control" placeholder="Nhập số điện thoại" />
+                    <span asp-validation-for="Input.PhoneNumber" class="text-danger" style="font-size:.8rem;"></span>
+                </div>
+
+                <!-- Nút bấm -->
+                <div class="form-actions">
+                    <button type="submit" class="btn-success-olp">💾 Lưu thay đổi</button>
+                    <a asp-page="/Users/Detail" asp-route-id="@Model.UserInfo.Id" class="btn-secondary-olp">← Hủy</a>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

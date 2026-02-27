@@ -1,0 +1,68 @@
+@page
+@model OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.ProfileModel
+@{
+    ViewData["Title"] = "Hồ sơ giảng viên";
+}
+
+<div class="page-header fade-in">
+    <h1>👤 Hồ sơ giảng viên</h1>
+    <span class="breadcrumb-text">
+        <a asp-area="Teacher" asp-page="/Dashboard" style="color:var(--primary);">Dashboard</a> → Hồ sơ
+    </span>
+</div>
+
+@if (Model.UserInfo == null)
+{
+    <div class="olp-alert olp-alert-danger">⚠️ Không thể tải thông tin hồ sơ.</div>
+}
+else
+{
+    <!-- Profile Header -->
+    <div class="profile-header fade-in">
+        <div class="profile-avatar">
+            @(Model.UserInfo.FullName?[0].ToString().ToUpper() ?? "T")
+        </div>
+        <h1>@Model.UserInfo.FullName</h1>
+        <div class="profile-role">📖 Giảng viên</div>
+    </div>
+
+    <!-- Thông tin chi tiết -->
+    <div class="olp-card fade-in">
+        <div class="olp-card-header">
+            <h2>📋 Thông tin cá nhân</h2>
+            <a asp-area="Teacher" asp-page="/EditProfile" class="btn-primary-olp btn-sm">✏️ Chỉnh sửa</a>
+        </div>
+        <div class="olp-card-body">
+            <div class="profile-info-grid">
+                <div class="profile-info-item">
+                    <div class="info-icon">📧</div>
+                    <div>
+                        <div class="info-label">Email</div>
+                        <div class="info-value">@Model.UserInfo.Email</div>
+                    </div>
+                </div>
+                <div class="profile-info-item">
+                    <div class="info-icon">📱</div>
+                    <div>
+                        <div class="info-label">Số điện thoại</div>
+                        <div class="info-value">@(Model.UserInfo.PhoneNumber ?? "Chưa cập nhật")</div>
+                    </div>
+                </div>
+                <div class="profile-info-item">
+                    <div class="info-icon">📝</div>
+                    <div>
+                        <div class="info-label">Giới thiệu</div>
+                        <div class="info-value">@(string.IsNullOrEmpty(Model.UserInfo.Bio) ? "Chưa có giới thiệu. Hãy thêm bio để học viên biết về bạn!" : Model.UserInfo.Bio)</div>
+                    </div>
+                </div>
+                <div class="profile-info-item">
+                    <div class="info-icon">📅</div>
+                    <div>
+                        <div class="info-label">Ngày tham gia</div>
+                        <div class="info-value">@Model.UserInfo.CreatedAt.ToString("dd/MM/yyyy")</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

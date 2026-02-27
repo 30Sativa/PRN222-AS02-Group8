@@ -1,11 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using OnlineLearningPlatform.Models.Entities.Identity;
 using OnlineLearningPlatform.Repository.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OnlineLearningPlatform.Repository.Implement
 {
@@ -30,9 +26,20 @@ namespace OnlineLearningPlatform.Repository.Implement
             return await _userManager.CreateAsync(user, password);
         }
 
+        public async Task<List<ApplicationUser>> GetAllUsersAsync()
+        {
+            return await _userManager.Users.ToListAsync();
+        }
+
         public async Task<ApplicationUser?> GetUserByEmailAsync(string email)
         {
-            return await  _userManager.FindByEmailAsync(email);
+            return await _userManager.FindByEmailAsync(email);
+        }
+
+        // FIX: thêm async/await cho nhất quán, dễ debug stack trace
+        public async Task<ApplicationUser?> GetUserByIdAsync(string userId)
+        {
+            return await _userManager.FindByIdAsync(userId);
         }
 
         public async Task<SignInResult> PasswordSignInAsync(string email, string password)
@@ -42,7 +49,18 @@ namespace OnlineLearningPlatform.Repository.Implement
 
         public async Task SignOutAsync()
         {
-             await _signInManager.SignOutAsync();
+            await _signInManager.SignOutAsync();
+        }
+
+        public async Task UpdateUserAsync(ApplicationUser user)
+        {
+            await _userManager.UpdateAsync(user);
+        }
+
+        // Lấy danh sách role của user (VD: "Admin", "Student")
+        public async Task<IList<string>> GetUserRolesAsync(ApplicationUser user)
+        {
+            return await _userManager.GetRolesAsync(user);
         }
     }
 }

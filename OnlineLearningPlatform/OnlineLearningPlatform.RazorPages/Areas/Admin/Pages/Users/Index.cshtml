@@ -1,0 +1,91 @@
+@page
+@model OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Users.IndexModel
+@{
+    ViewData["Title"] = "Quản lý Users";
+}
+
+<div class="page-header fade-in">
+    <h1>👥 Quản lý Người dùng</h1>
+    <span class="breadcrumb-text">
+        <a asp-area="Admin" asp-page="/Dashboard" style="color:var(--primary);">Dashboard</a> → Danh sách người dùng
+    </span>
+</div>
+
+<!-- Search + Toolbar -->
+<div class="olp-card fade-in">
+    <div class="olp-card-header">
+        <h2>Danh sách (@Model.Users.Count người dùng)</h2>
+        <form method="get" class="search-bar">
+            <span>🔍</span>
+            <input type="text" name="search" value="@Model.SearchTerm" placeholder="Tìm theo tên, email..." />
+            <button type="submit">Tìm</button>
+        </form>
+    </div>
+    <div class="olp-card-body" style="padding:0;">
+        @if (Model.Users.Any())
+        {
+            <div class="olp-table-wrapper">
+                <table class="olp-table">
+                    <thead>
+                        <tr>
+                            <th>Người dùng</th>
+                            <th>SĐT</th>
+                            <th>Role</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model.Users)
+                        {
+                            // Chọn màu avatar theo role
+                            var avatarClass = user.Role switch
+                            {
+                                "Admin" => "avatar-admin",
+                                "Teacher" => "avatar-teacher",
+                                _ => "avatar-student"
+                            };
+                            var badgeClass = user.Role switch
+                            {
+                                "Admin" => "badge-admin",
+                                "Teacher" => "badge-teacher",
+                                _ => "badge-student"
+                            };
+
+                            <tr>
+                                <td>
+                                    <div class="user-cell">
+                                        <div class="avatar @avatarClass">
+                                            @(user.FullName?[0].ToString().ToUpper() ?? "U")
+                                        </div>
+                                        <div class="user-info">
+                                            <div class="name">@user.FullName</div>
+                                            <div class="email">@user.Email</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>@(user.PhoneNumber ?? "Chưa cập nhật")</td>
+                                <td><span class="badge @badgeClass">@user.Role</span></td>
+                                <td>
+                                    <div class="btn-group-actions">
+                                        <a asp-page="/Users/Detail" asp-route-id="@user.Id"
+                                           class="btn-secondary-olp btn-sm">👁️ Xem</a>
+                                        <a asp-page="/Users/Edit" asp-route-id="@user.Id"
+                                           class="btn-primary-olp btn-sm">✏️ Sửa</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-icon">🔍</div>
+                <h3>Không tìm thấy người dùng</h3>
+                <p>Thử tìm kiếm với từ khóa khác.</p>
+            </div>
+        }
+    </div>
+</div>

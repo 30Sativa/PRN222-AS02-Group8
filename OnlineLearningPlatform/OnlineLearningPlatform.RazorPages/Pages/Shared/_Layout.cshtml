@@ -1,46 +1,78 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - OnlineLearningPlatform.RazorPages</title>
+    <title>@ViewData["Title"] - EduLearn</title>
+    <meta name="description" content="Online Learning Platform - Nền tảng học trực tuyến" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/OnlineLearningPlatform.RazorPages.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+    <!-- NAVBAR - hiển thị khác nhau tùy đã login hay chưa -->
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <nav class="olp-navbar">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">OnlineLearningPlatform.RazorPages</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
-                        </li>
-                    </ul>
+                <!-- Logo -->
+                <a class="olp-navbar-brand" asp-area="" asp-page="/Auth/Index">
+                    <span class="brand-icon">📚</span>
+                    EduLearn
+                </a>
+
+                <!-- Links tùy từng role -->
+                <ul class="olp-navbar-links">
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li><a asp-area="Admin" asp-page="/Dashboard" class="olp-nav-link">🏠 Dashboard</a></li>
+                        <li><a asp-area="Admin" asp-page="/Users/Index" class="olp-nav-link">👥 Quản lý Users</a></li>
+                    }
+                    @if (User.IsInRole("Teacher"))
+                    {
+                        <li><a asp-area="Teacher" asp-page="/Dashboard" class="olp-nav-link">🏠 Dashboard</a></li>
+                        <li><a asp-area="Teacher" asp-page="/Profile" class="olp-nav-link">👤 Profile</a></li>
+                    }
+                    @if (User.IsInRole("Student"))
+                    {
+                        <li><a asp-area="Student" asp-page="/Dashboard" class="olp-nav-link">🏠 Dashboard</a></li>
+                        <li><a asp-area="Student" asp-page="/Profile" class="olp-nav-link">👤 Profile</a></li>
+                    }
+                </ul>
+
+                <!-- User info + Logout -->
+                <div class="olp-nav-user">
+                    <div class="user-avatar">
+                        @(User.Identity?.Name?[0].ToString().ToUpper() ?? "U")
+                    </div>
+                    <span class="user-name">@User.Identity?.Name</span>
+                    <form method="post" asp-page="/Auth/Logout" style="margin:0;">
+                        <button type="submit" class="btn-logout">Đăng xuất</button>
+                    </form>
                 </div>
             </div>
         </nav>
-    </header>
-    <div class="container">
+    }
+
+    <!-- MAIN CONTENT -->
+    <div class="container" style="flex:1;">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - OnlineLearningPlatform.RazorPages - <a asp-area="" asp-page="/Privacy">Privacy</a>
-        </div>
-    </footer>
+    <!-- FOOTER - chỉ hiện khi đã login -->
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <footer class="olp-footer">
+            <div class="container">
+                <span class="footer-text">&copy; 2026 EduLearn - Online Learning Platform</span>
+                <div class="footer-links">
+                    <a href="#">Trợ giúp</a>
+                    <a href="#">Điều khoản</a>
+                </div>
+            </div>
+        </footer>
+    }
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

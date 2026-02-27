@@ -7,11 +7,11 @@ using System.Security.Claims;
 namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages
 {
     [Authorize(Roles = "Teacher")]
-    public class DashboardModel : PageModel
+    public class ProfileModel : PageModel
     {
         private readonly IUserService _userService;
 
-        public DashboardModel(IUserService userService)
+        public ProfileModel(IUserService userService)
         {
             _userService = userService;
         }
