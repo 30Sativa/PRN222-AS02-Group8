@@ -25,12 +25,14 @@ namespace OnlineLearningPlatform.Repository.Implement
         public async Task<Course?> GetByIdAndTeacherAsync(Guid courseId, string teacherId)
         {
             return await _context.Courses
+                .Include(c => c.Category)
                 .FirstOrDefaultAsync(c => c.CourseId == courseId && c.TeacherId == teacherId && !c.IsDeleted);
         }
 
         public async Task<List<Course>> GetAllForAdminAsync()
         {
             return await _context.Courses
+                .Include(c => c.Category)
                 .Where(c => !c.IsDeleted)
                 .OrderByDescending(c => c.CreatedAt)
                 .ToListAsync();
@@ -39,6 +41,7 @@ namespace OnlineLearningPlatform.Repository.Implement
         public async Task<Course?> GetByIdAsync(Guid courseId)
         {
             return await _context.Courses
+                .Include(c => c.Category)
                 .FirstOrDefaultAsync(c => c.CourseId == courseId && !c.IsDeleted);
         }
 

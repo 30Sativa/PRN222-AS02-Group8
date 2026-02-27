@@ -40,7 +40,7 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Courses
         {
             var result = await _courseService.ApproveAsync(id);
             TempData[result.Success ? "SuccessMessage" : "ErrorMessage"] = result.Message;
-            return RedirectToPage("/Courses/Details", new { area = "Admin", id });
+            return RedirectToPage("/Courses/Index", new { area = "Admin" });
         }
 
         public async Task<IActionResult> OnPostRejectAsync(Guid id)
@@ -54,7 +54,7 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Courses
 
             var result = await _courseService.RejectAsync(id, RejectionReason);
             TempData[result.Success ? "SuccessMessage" : "ErrorMessage"] = result.Message;
-            return RedirectToPage("/Courses/Details", new { area = "Admin", id });
+            return RedirectToPage("/Courses/Index", new { area = "Admin" });
         }
     }
 }

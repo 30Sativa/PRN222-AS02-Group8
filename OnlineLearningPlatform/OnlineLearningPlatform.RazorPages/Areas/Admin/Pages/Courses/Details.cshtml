@@ -1,5 +1,6 @@
 @page "{id:guid}"
 @model OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Courses.DetailsModel
+@using OnlineLearningPlatform.Models.Entities
 @{
     ViewData["Title"] = "Course Details";
 }
@@ -34,7 +35,7 @@ else
                 <div class="col-md-6"><strong>Course Code:</strong> @Model.Course.CourseCode</div>
                 <div class="col-md-6"><strong>Status:</strong> @Model.Course.Status</div>
                 <div class="col-md-6"><strong>Teacher ID:</strong> @Model.Course.TeacherId</div>
-                <div class="col-md-6"><strong>Category ID:</strong> @(Model.Course.CategoryId?.ToString() ?? "N/A")</div>
+                <div class="col-md-6"><strong>Category:</strong> @(Model.Course.Category?.CategoryName ?? "N/A")</div>
                 <div class="col-md-6"><strong>Price:</strong> @Model.Course.Price.ToString("N0")</div>
                 <div class="col-md-6"><strong>Discount Price:</strong> @(Model.Course.DiscountPrice?.ToString("N0") ?? "N/A")</div>
                 <div class="col-md-6"><strong>Level:</strong> @Model.Course.Level</div>
@@ -53,26 +54,29 @@ else
         </div>
     </div>
 
-    <div class="card shadow-sm border-0">
-        <div class="card-body">
-            <h5 class="mb-3">Review Actions</h5>
+    @if (Model.Course.Status == CourseStatus.Pending)
+    {
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="mb-3">Review Actions</h5>
 
-            <div class="d-flex flex-wrap gap-2 mb-3">
-                <form method="post" asp-page-handler="Approve" asp-route-id="@Model.Course.CourseId">
-                    <button type="submit" class="btn btn-success">Approve</button>
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <form method="post" asp-page-handler="Approve" asp-route-id="@Model.Course.CourseId">
+                        <button type="submit" class="btn btn-success">Approve</button>
+                    </form>
+                </div>
+
+                <form method="post" asp-page-handler="Reject" asp-route-id="@Model.Course.CourseId">
+                    <div class="mb-3">
+                        <label asp-for="RejectionReason" class="form-label"></label>
+                        <textarea asp-for="RejectionReason" class="form-control" rows="3" placeholder="Enter rejection reason (required)"></textarea>
+                        <span asp-validation-for="RejectionReason" class="text-danger"></span>
+                    </div>
+                    <button type="submit" class="btn btn-danger">Reject</button>
                 </form>
             </div>
-
-            <form method="post" asp-page-handler="Reject" asp-route-id="@Model.Course.CourseId">
-                <div class="mb-3">
-                    <label asp-for="RejectionReason" class="form-label"></label>
-                    <textarea asp-for="RejectionReason" class="form-control" rows="3" placeholder="Enter rejection reason (required)"></textarea>
-                    <span asp-validation-for="RejectionReason" class="text-danger"></span>
-                </div>
-                <button type="submit" class="btn btn-danger">Reject</button>
-            </form>
         </div>
-    </div>
+    }
 }
 
 @section Scripts {

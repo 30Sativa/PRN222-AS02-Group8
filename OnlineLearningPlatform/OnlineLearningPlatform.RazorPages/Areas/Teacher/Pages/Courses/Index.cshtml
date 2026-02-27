@@ -35,7 +35,7 @@
                         <th class="text-end" style="width: 320px;">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="courseTableBody">
                     @if (Model.Courses.Count == 0)
                     {
                         <tr>
@@ -50,7 +50,7 @@
                                 <td>@course.CourseCode</td>
                                 <td>@course.Title</td>
                                 <td>@course.Price.ToString("N0")</td>
-                                <td>@course.Status</td>
+                                <td class="course-status" data-course-id="@course.CourseId">@course.Status</td>
                                 <td class="text-end">
                                     <button type="button"
                                             class="btn btn-sm btn-outline-info me-2 btn-course-details"
@@ -137,6 +137,22 @@
                 document.getElementById('mCreatedAt').textContent = this.dataset.createdat || 'N/A';
             });
         });
+
+        setInterval(function () {
+            fetch(window.location.pathname + '?handler=Statuses', { method: 'GET' })
+                .then(response => response.ok ? response.json() : null)
+                .then(data => {
+                    if (!data || !Array.isArray(data)) return;
+
+                    data.forEach(item => {
+                        const statusCell = document.querySelector('.course-status[data-course-id="' + item.courseId + '"]');
+                        if (statusCell) {
+                            statusCell.textContent = item.status;
+                        }
+                    });
+                })
+                .catch(() => { });
+        }, 5000);
     });
 </script>
 }
