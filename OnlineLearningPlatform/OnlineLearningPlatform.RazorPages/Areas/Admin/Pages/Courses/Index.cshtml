@@ -22,6 +22,25 @@
     <div class="alert alert-danger">@errorMessage</div>
 }
 
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label asp-for="SearchTitle" class="form-label">Search by Title</label>
+                <input asp-for="SearchTitle" class="form-control" placeholder="Enter course title" />
+            </div>
+            <div class="col-md-5">
+                <label asp-for="SearchTeacherName" class="form-label">Search by Teacher Name</label>
+                <input asp-for="SearchTeacherName" class="form-control" placeholder="Enter teacher name" />
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100">Search</button>
+                <a asp-page="/Courses/Index" asp-area="Admin" class="btn btn-outline-secondary w-100">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="card shadow-sm border-0">
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -49,7 +68,7 @@
                             <tr>
                                 <td>@course.CourseCode</td>
                                 <td>@course.Title</td>
-                                <td>@(course.Teacher?.FullName ?? course.TeacherId)</td>
+                                <td>@(course.Teacher?.FullName ?? "N/A")</td>
                                 <td>@course.Status</td>
                                 <td class="text-end">
                                     <a class="btn btn-sm btn-outline-primary" asp-area="Admin" asp-page="/Courses/Details" asp-route-id="@course.CourseId">Details</a>
