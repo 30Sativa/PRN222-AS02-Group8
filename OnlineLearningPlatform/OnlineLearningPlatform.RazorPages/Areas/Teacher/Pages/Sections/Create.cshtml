@@ -1,0 +1,33 @@
+@page
+@model OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Sections.CreateModel
+@{
+    ViewData["Title"] = "Add Section";
+}
+
+<h2 class="mb-3">Add Section</h2>
+
+<form method="post">
+    <input type="hidden" asp-for="CourseId" />
+
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="OrderIndex" class="form-label">Order</label>
+        <input asp-for="OrderIndex" class="form-control" type="number" min="1" />
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Create Section</button>
+        <a class="btn btn-outline-secondary" asp-area="Teacher" asp-page="/Courses/Details" asp-route-id="@Model.CourseId">Back to Course</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

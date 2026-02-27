@@ -46,11 +46,15 @@ namespace OnlineLearningPlatform.RazorPages
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<ICourseService, CourseService>();
+            builder.Services.AddScoped<ISectionService, SectionService>();
+            builder.Services.AddScoped<ILessonService, LessonService>();
 
             //================== REPOSITORIES =================
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
             builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+            builder.Services.AddScoped<ISectionRepository, SectionRepository>();
+            builder.Services.AddScoped<ILessonRepository, LessonRepository>();
 
             // ================= AUTHORIZATION POLICIES =================
             builder.Services.AddAuthorization(options =>

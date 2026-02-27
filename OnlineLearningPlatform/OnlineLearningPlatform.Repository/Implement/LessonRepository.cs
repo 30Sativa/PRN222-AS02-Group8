@@ -82,5 +82,34 @@ namespace OnlineLearningPlatform.Repository.Implement
                                && l.Section.Course.TeacherId == teacherId
                                && !l.Section.Course.IsDeleted);
         }
+
+        public async Task<bool> ReorderAsync(int sectionId, List<int> orderedLessonIds)
+        {
+            var lessons = await _context.Lessons
+                .Where(l => l.SectionId == sectionId && !l.IsDeleted)
+                .ToListAsync();
+
+            if (!lessons.Any())
+            {
+                return false;
+            }
+
+            var allMatch = lessons.Select(l => l.LessonId).OrderBy(x => x)
+                .SequenceEqual(orderedLessonIds.OrderBy(x => x));
+
+            if (!allMatch)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < orderedLessonIds.Count; i++)
+            {
+                var lesson = lessons.First(l => l.LessonId == orderedLessonIds[i]);
+                lesson.OrderIndex = i + 1;
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

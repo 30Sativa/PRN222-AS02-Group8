@@ -13,58 +13,81 @@ else
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h2 class="mb-1">@Model.Course.Title</h2>
-            <p class="text-muted mb-0">Course details overview</p>
+            <p class="text-muted mb-0">Manage course sections and lessons.</p>
         </div>
         <div class="d-flex gap-2">
             <a class="btn btn-outline-secondary" asp-area="Teacher" asp-page="/Courses/Index">Back to List</a>
-            <a class="btn btn-primary" asp-area="Teacher" asp-page="/Courses/Edit" asp-route-id="@Model.Course.CourseId">Edit</a>
+            <a class="btn btn-primary" asp-area="Teacher" asp-page="/Sections/Create" asp-route-courseId="@Model.Course.CourseId">Add Section</a>
         </div>
     </div>
 
-    <div class="card shadow-sm border-0">
+    <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
             <div class="row g-3">
-                <div class="col-md-6">
-                    <div><strong>Course Code:</strong> @Model.Course.CourseCode</div>
-                </div>
-                <div class="col-md-6">
-                    <div><strong>Status:</strong> @Model.Course.Status</div>
-                </div>
-
-                <div class="col-md-6">
-                    <div><strong>Category ID:</strong> @(Model.Course.CategoryId?.ToString() ?? "N/A")</div>
-                </div>
-                <div class="col-md-6">
-                    <div><strong>Level:</strong> @Model.Course.Level</div>
-                </div>
-
-                <div class="col-md-6">
-                    <div><strong>Price:</strong> @Model.Course.Price.ToString("N0")</div>
-                </div>
-                <div class="col-md-6">
-                    <div><strong>Discount Price:</strong> @(Model.Course.DiscountPrice?.ToString("N0") ?? "N/A")</div>
-                </div>
-
-                <div class="col-md-6">
-                    <div><strong>Language:</strong> @Model.Course.Language</div>
-                </div>
-                <div class="col-md-6">
-                    <div><strong>Created At:</strong> @Model.Course.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</div>
-                </div>
-
-                <div class="col-12">
-                    <div><strong>Slug:</strong> @Model.Course.Slug</div>
-                </div>
-
-                <div class="col-12">
-                    <div><strong>Thumbnail URL:</strong> @Model.Course.ThumbnailUrl</div>
-                </div>
-
-                <div class="col-12">
-                    <div><strong>Description:</strong></div>
-                    <div class="border rounded p-3 bg-light mt-1">@Model.Course.Description</div>
-                </div>
+                <div class="col-md-6"><strong>Course Code:</strong> @Model.Course.CourseCode</div>
+                <div class="col-md-6"><strong>Status:</strong> @Model.Course.Status</div>
+                <div class="col-md-6"><strong>Category:</strong> @(Model.Course.Category?.CategoryName ?? "N/A")</div>
+                <div class="col-md-6"><strong>Level:</strong> @Model.Course.Level</div>
+                <div class="col-12"><strong>Description:</strong> @Model.Course.Description</div>
             </div>
         </div>
     </div>
+
+    <h4 class="mb-3">Sections</h4>
+
+    @if (Model.Sections.Count == 0)
+    {
+        <div class="alert alert-info">No sections yet. Click "Add Section" to create the first one.</div>
+    }
+    else
+    {
+        foreach (var sec in Model.Sections)
+        {
+            var lessons = Model.LessonsBySection.ContainsKey(sec.SectionId)
+                ? Model.LessonsBySection[sec.SectionId]
+                : new List<OnlineLearningPlatform.Models.Entities.Lesson>();
+
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center bg-light">
+                    <div>
+                        <strong>@sec.Title</strong>
+                        <span class="text-muted ms-2">(Order: @sec.OrderIndex)</span>
+                    </div>
+                    <a class="btn btn-sm btn-primary" asp-area="Teacher" asp-page="/Lessons/Create" asp-route-sectionId="@sec.SectionId">Add Lesson</a>
+                </div>
+                <div class="card-body">
+                    @if (lessons.Count == 0)
+                    {
+                        <div class="text-muted">No lessons in this section yet.</div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 80px;">Order</th>
+                                        <th>Lesson Title</th>
+                                        <th style="width: 150px;">Type</th>
+                                        <th style="width: 100px;">Preview</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var lesson in lessons)
+                                    {
+                                        <tr>
+                                            <td>@lesson.OrderIndex</td>
+                                            <td>@lesson.Title</td>
+                                            <td>@lesson.LessonType</td>
+                                            <td>@(lesson.IsPreview ? "Yes" : "No")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
 }
