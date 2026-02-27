@@ -1,4 +1,4 @@
-using OnlineLearningPlatform.Models.Entities;
+using CourseEntity = OnlineLearningPlatform.Models.Entities.Course;
 
 namespace OnlineLearningPlatform.Services.DTOs.Course
 {
@@ -6,6 +6,6 @@ namespace OnlineLearningPlatform.Services.DTOs.Course
     {
         public bool Success { get; set; }
         public string Message { get; set; } = string.Empty;
-        public Course? Course { get; set; }
+        public CourseEntity? Course { get; set; }
     }
 }
