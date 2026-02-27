@@ -1,0 +1,31 @@
+@page "{id:guid}"
+@model OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses.DeleteModel
+@{
+    ViewData["Title"] = "Delete Course";
+}
+
+<h2 class="text-danger mb-3">Delete Course</h2>
+
+@if (Model.Course is null)
+{
+    <div class="alert alert-warning">Course not found.</div>
+}
+else
+{
+    <div class="alert alert-danger">
+        Are you sure you want to delete <strong>@Model.Course.Title</strong>?
+    </div>
+
+    <dl class="row">
+        <dt class="col-sm-2">Code</dt>
+        <dd class="col-sm-10">@Model.Course.CourseCode</dd>
+
+        <dt class="col-sm-2">Title</dt>
+        <dd class="col-sm-10">@Model.Course.Title</dd>
+    </dl>
+
+    <form method="post" class="d-flex gap-2">
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <a asp-area="Teacher" asp-page="/Courses/Index" class="btn btn-secondary">Back to List</a>
+    </form>
+}

@@ -6,7 +6,6 @@ using System.Security.Claims;
 
 namespace OnlineLearningPlatform.RazorPages.Areas.Student.Pages
 {
-    [Authorize(Roles = "Student")]
     public class DashboardModel : PageModel
     {
         private readonly IUserService _userService;

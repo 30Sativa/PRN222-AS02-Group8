@@ -1,0 +1,46 @@
+﻿@page "{lessonId:int}"
+@model OnlineLearningPlatform.RazorPages.Pages.Quiz.CreateModel
+@{
+    ViewData["Title"] = "Tạo bài kiểm tra mới";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0 text-center">Tạo bài kiểm tra mới</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+
+                        <input type="hidden" asp-for="Quiz.LessonId" />
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Tiêu đề bài kiểm tra</label>
+                            <input asp-for="Quiz.Title" class="form-control" placeholder="Nhập tên Quiz..." required />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label fw-bold">Điểm đạt (%)</label>
+                                <input asp-for="Quiz.PassingScore" class="form-control" type="number" value="70" min="0" max="100" />
+                            </div>
+                            <div class="col-6 mb-3">
+                                <label class="form-label fw-bold">Thời gian (phút)</label>
+                                <input asp-for="Quiz.TimeLimitMinutes" class="form-control" type="number" placeholder="Bỏ trống nếu không giới hạn" />
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-success py-2 fw-bold">
+                                <i class="bi bi-plus-circle me-1"></i> Tạo Quiz & Thêm câu hỏi
+                            </button>
+                            <a asp-area="Teacher" asp-page="/Dashboard" class="btn btn-outline-secondary">Quay lại Dashboard</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

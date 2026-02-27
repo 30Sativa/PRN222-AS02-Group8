@@ -1,0 +1,48 @@
+﻿@page "{id:int}"
+@model OnlineLearningPlatform.RazorPages.Pages.Quiz.TakeModel
+<div class="container mt-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 border-bottom">
+            <h4 class="mb-0 text-primary fw-bold">@Model.Quiz.Title</h4>
+            <div id="timer" class="badge bg-danger p-2 fs-6">Thời gian: --:--</div>
+        </div>
+        <div class="card-body p-4 bg-light">
+            <form id="quizForm" method="post">
+                @for (int i = 0; i < Model.Quiz.Questions.Count; i++)
+                {
+                    var q = Model.Quiz.Questions.ElementAt(i);
+                    var p = q.Content.Split('|');
+                    <div class="card mb-4 border-0 shadow-sm">
+                        <div class="card-body">
+                            <p class="fw-bold mb-3">Câu @(i + 1): @p[0]</p>
+                            <input type="hidden" name="UserAnswers[@i].QuestionId" value="@q.QuestionId" />
+                            <div class="ps-2">
+                                @foreach (var opt in new[] { ("A", 1), ("B", 2), ("C", 3), ("D", 4) })
+                                {
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="UserAnswers[@i].UserSelectedAnswer" value="@opt.Item1" required>
+                                        <label class="form-check-label"><strong>@opt.Item1.</strong> @p[opt.Item2]</label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+                <button type="submit" class="btn btn-primary btn-lg w-100 mt-3 shadow" onclick="isSubmitting = true;">Nộp bài ngay</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let timeLeft = @(Model.Quiz.TimeLimitMinutes ?? 30) * 60;
+        let isSubmitting = false;
+        const interval = setInterval(() => {
+            if (timeLeft <= 0) { clearInterval(interval); document.getElementById('quizForm').submit(); return; }
+            const min = Math.floor(timeLeft / 60); const sec = timeLeft % 60;
+            document.getElementById('timer').innerHTML = `Thời gian: ${min}:${sec < 10 ? '0' : ''}${sec}`;
+            timeLeft--;
+        }, 1000);
+    </script>
+}

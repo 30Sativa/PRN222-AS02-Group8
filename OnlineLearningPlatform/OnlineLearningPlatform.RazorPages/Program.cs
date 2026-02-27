@@ -6,7 +6,9 @@ using OnlineLearningPlatform.Models.Migrations.Data;
 using OnlineLearningPlatform.Repository.Implement;
 using OnlineLearningPlatform.Repository.Interface;
 using OnlineLearningPlatform.Services.Implement;
+using OnlineLearningPlatform.Services.Implementations;
 using OnlineLearningPlatform.Services.Interface;
+
 
 namespace OnlineLearningPlatform.RazorPages
 {
@@ -26,7 +28,6 @@ namespace OnlineLearningPlatform.RazorPages
             {
                 options.SignIn.RequireConfirmedAccount = false;
 
-                // Password rule (tuỳ chỉnh nếu muốn)
                 options.Password.RequireDigit = false;
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
@@ -42,36 +43,30 @@ namespace OnlineLearningPlatform.RazorPages
                 options.LoginPath = "/Auth/Login";
                 options.AccessDeniedPath = "/Auth/AccessDenied";
             });
+
             //================== SERVICES =================
+
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<ICourseService, CourseService>();
+
+            //================== REPOSITORIES =================
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IUserService, UserService>();
             // ================= AUTHORIZATION POLICIES =================
             builder.Services.AddAuthorization(options =>
             {
-                options.AddPolicy("Admin", policy =>
-                    policy.RequireRole("Admin"));
-
-                options.AddPolicy("Teacher", policy =>
-                    policy.RequireRole("Teacher"));
-
-                options.AddPolicy("Student", policy =>
-                    policy.RequireRole("Student"));
+                options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
+                options.AddPolicy("Teacher", policy => policy.RequireRole("Teacher"));
+                options.AddPolicy("Student", policy => policy.RequireRole("Student"));
             });
 
             // ================= RAZOR PAGES =================
             builder.Services.AddRazorPages(options =>
             {
-                // Admin Area
                 options.Conventions.AuthorizeAreaFolder("Admin", "/", "Admin");
-
-                // Teacher Area
                 options.Conventions.AuthorizeAreaFolder("Teacher", "/", "Teacher");
-
-                // Student Area
                 options.Conventions.AuthorizeAreaFolder("Student", "/", "Student");
-
-                // Cho phép Login/Register không cần đăng nhập
                 options.Conventions.AllowAnonymousToFolder("/Auth");
             });
 
@@ -93,11 +88,10 @@ namespace OnlineLearningPlatform.RazorPages
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
             app.UseRouting();
-
             app.UseAuthentication();
             app.UseAuthorization();
+
             app.MapGet("/", () => Results.Redirect("/Auth/Login"));
             app.MapRazorPages();
 
