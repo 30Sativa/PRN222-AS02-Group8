@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using OnlineLearningPlatform.Models.Entities;
 using OnlineLearningPlatform.Services.Interface;
@@ -16,6 +17,9 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses
             _courseService = courseService;
         }
 
+        [BindProperty(SupportsGet = true)]
+        public string? SearchTitle { get; set; }
+
         public List<Course> Courses { get; set; } = new();
 
         public async Task OnGetAsync()
@@ -27,7 +31,35 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses
                 return;
             }
 
-            Courses = await _courseService.GetMyCoursesAsync(teacherId);
+            var allCourses = await _courseService.GetMyCoursesAsync(teacherId);
+
+            if (!string.IsNullOrWhiteSpace(SearchTitle))
+            {
+                var keyword = SearchTitle.Trim().ToLower();
+                allCourses = allCourses
+                    .Where(c => !string.IsNullOrWhiteSpace(c.Title) && c.Title.ToLower().Contains(keyword))
+                    .ToList();
+            }
+
+            Courses = allCourses;
+        }
+
+        public async Task<JsonResult> OnGetStatusesAsync()
+        {
+            var teacherId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(teacherId))
+            {
+                return new JsonResult(Array.Empty<object>());
+            }
+
+            var courses = await _courseService.GetMyCoursesAsync(teacherId);
+            var result = courses.Select(c => new
+            {
+                courseId = c.CourseId,
+                status = c.Status.ToString()
+            });
+
+            return new JsonResult(result);
         }
     }
 }
