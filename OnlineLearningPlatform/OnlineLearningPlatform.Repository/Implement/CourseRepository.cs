@@ -33,7 +33,6 @@ namespace OnlineLearningPlatform.Repository.Implement
             var normalizedCode = courseCode.Trim().ToLower();
             return await _context.Courses
                 .AnyAsync(c => c.CourseCode.ToLower() == normalizedCode
-                               && !c.IsDeleted
                                && (!excludeCourseId.HasValue || c.CourseId != excludeCourseId.Value));
         }
 
@@ -42,7 +41,6 @@ namespace OnlineLearningPlatform.Repository.Implement
             var normalizedSlug = slug.Trim().ToLower();
             return await _context.Courses
                 .AnyAsync(c => c.Slug.ToLower() == normalizedSlug
-                               && !c.IsDeleted
                                && (!excludeCourseId.HasValue || c.CourseId != excludeCourseId.Value));
         }
 
@@ -79,7 +77,7 @@ namespace OnlineLearningPlatform.Repository.Implement
             return true;
         }
 
-        public async Task<bool> SoftDeleteAsync(Guid courseId, string teacherId)
+        public async Task<bool> DeleteAsync(Guid courseId, string teacherId)
         {
             var existing = await _context.Courses
                 .FirstOrDefaultAsync(c => c.CourseId == courseId && c.TeacherId == teacherId && !c.IsDeleted);
@@ -89,8 +87,16 @@ namespace OnlineLearningPlatform.Repository.Implement
                 return false;
             }
 
-            existing.IsDeleted = true;
-            existing.UpdatedAt = DateTime.UtcNow;
+            if (existing.Status == CourseStatus.Pending)
+            {
+                _context.Courses.Remove(existing);
+            }
+            else
+            {
+                existing.IsDeleted = true;
+                existing.UpdatedAt = DateTime.UtcNow;
+            }
+
             await _context.SaveChangesAsync();
             return true;
         }
