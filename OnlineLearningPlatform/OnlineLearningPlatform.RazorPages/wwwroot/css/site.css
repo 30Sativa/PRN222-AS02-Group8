@@ -20,3 +20,27 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+/* Admin Categories */
+.card.shadow-sm.border-0 {
+  border-radius: 12px;
+}
+
+.table thead.table-light th {
+  background: #f8fafc;
+  color: #334155;
+  font-size: 0.9rem;
+}
+
+.table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.btn {
+  border-radius: 8px;
+}
+
+.form-control,
+.form-control-lg {
+  border-radius: 10px;
+}

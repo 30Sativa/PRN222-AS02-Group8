@@ -1,4 +1,17 @@
-﻿@page
+@page
+@{
+    ViewData["Title"] = "Teacher Dashboard";
+}
 
+<div class="container py-4">
+    <h2 class="mb-3">Teacher Dashboard</h2>
+    <p class="text-muted">Welcome to the teacher area. Manage your courses from here.</p>
 
-<h2>Teacher Dashboard</h2>
+    <div class="card shadow-sm border-0" style="max-width: 420px;">
+        <div class="card-body">
+            <h5 class="card-title mb-2">Course Management</h5>
+            <p class="card-text text-muted mb-3">Create, edit, and manage your own courses.</p>
+            <a class="btn btn-primary" asp-area="Teacher" asp-page="/Courses/Index">Go to My Courses</a>
+        </div>
+    </div>
+</div>
