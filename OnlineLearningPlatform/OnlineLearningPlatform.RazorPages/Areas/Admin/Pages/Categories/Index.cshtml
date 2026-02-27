@@ -1,0 +1,81 @@
+@page
+@model OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Categories.IndexModel
+@{
+    ViewData["Title"] = "Category Management";
+}
+
+<div class="admin-category-page">
+    <div class="admin-category-header d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Category Management</h2>
+            <p class="text-muted mb-0">Manage course categories for the platform.</p>
+        </div>
+        <a class="btn btn-primary admin-category-btn" asp-area="Admin" asp-page="/Categories/Create">
+            Create Category
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @successMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @errorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card admin-category-card border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 admin-category-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 100px;">ID</th>
+                            <th>Category Name</th>
+                            <th class="text-end" style="width: 220px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Categories.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-4">No categories found.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var category in Model.Categories)
+                            {
+                                <tr>
+                                    <td>@category.CategoryId</td>
+                                    <td class="fw-medium">@category.CategoryName</td>
+                                    <td class="text-end">
+                                        <a class="btn btn-sm btn-outline-warning me-2"
+                                           asp-area="Admin"
+                                           asp-page="/Categories/Edit"
+                                           asp-route-id="@category.CategoryId">
+                                            Edit
+                                        </a>
+                                        <a class="btn btn-sm btn-outline-danger"
+                                           asp-area="Admin"
+                                           asp-page="/Categories/Delete"
+                                           asp-route-id="@category.CategoryId">
+                                            Delete
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
