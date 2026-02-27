@@ -6,7 +6,9 @@ using OnlineLearningPlatform.Models.Migrations.Data;
 using OnlineLearningPlatform.Repository.Implement;
 using OnlineLearningPlatform.Repository.Interface;
 using OnlineLearningPlatform.Services.Implement;
+using OnlineLearningPlatform.Services.Implementations;
 using OnlineLearningPlatform.Services.Interface;
+
 
 namespace OnlineLearningPlatform.RazorPages
 {
@@ -43,8 +45,18 @@ namespace OnlineLearningPlatform.RazorPages
                 options.AccessDeniedPath = "/Auth/AccessDenied";
             });
             //================== SERVICES =================
+
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+            builder.Services.AddScoped<IQuizRepository, QuizRepository>();
+            builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+            builder.Services.AddScoped<IQuizAttemptRepository, QuizAttemptRepository>();
+            builder.Services.AddScoped<IQuizAnswerRepository, QuizAnswerRepository>();
+
+            builder.Services.AddScoped<IQuizService, QuizService>();
+            builder.Services.AddScoped<IStudentService, StudentService>();
+
             // ================= AUTHORIZATION POLICIES =================
             builder.Services.AddAuthorization(options =>
             {

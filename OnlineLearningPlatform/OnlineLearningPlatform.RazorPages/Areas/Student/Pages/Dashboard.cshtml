@@ -1,4 +1,40 @@
 ﻿@page
-
-
-<h2>Student Dashboard</h2>
+@model OnlineLearningPlatform.RazorPages.Areas.Student.Pages.DashboardModel
+<div class="container mt-4">
+    <h2 class="mb-4 text-primary">Khám phá khóa học</h2>
+    <div class="row">
+        @foreach (var course in Model.Courses)
+        {
+            bool isEnrolled = course.Enrollments.Any(e => e.UserId == Model.CurrentUserId && e.IsActive);
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <img src="https://via.placeholder.com/300x150?text=Course" class="card-img-top">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">@course.Title</h5>
+                        <p class="text-muted small">@course.Description</p>
+                        @if (isEnrolled)
+                        {
+                            <div class="dropdown">
+                                <button class="btn btn-success dropdown-toggle w-100" data-bs-toggle="dropdown">Làm bài Quiz</button>
+                                <ul class="dropdown-menu w-100">
+                                    @foreach (var quiz in course.Sections.SelectMany(s => s.Lessons).SelectMany(l => l.Quizzes))
+                                    {
+                                        <li><a class="dropdown-item" asp-area="" asp-page="/Quiz/Take" asp-route-id="@quiz.QuizId">@quiz.Title</a></li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+                        else
+                        {
+                            <form method="post" asp-page-handler="Enroll">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="courseId" value="@course.CourseId" />
+                                <button type="submit" class="btn btn-primary w-100">Đăng ký ngay</button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
