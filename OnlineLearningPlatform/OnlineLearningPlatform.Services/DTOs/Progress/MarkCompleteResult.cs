@@ -15,13 +15,25 @@ namespace OnlineLearningPlatform.Services.DTOs.Progress
         /// </summary>
         public bool IsCourseCompleted { get; set; }
 
-        public static MarkCompleteResult Ok(double percent, bool isCourseCompleted)
+        /// <summary>
+        /// Số bài đã hoàn thành.
+        /// </summary>
+        public int CompletedLessons { get; set; }
+
+        /// <summary>
+        /// Tổng số bài.
+        /// </summary>
+        public int TotalLessons { get; set; }
+
+        public static MarkCompleteResult Ok(double percent, bool isCourseCompleted, int completedLessons, int totalLessons)
             => new()
             {
                 Success = true,
                 Message = "Đã đánh dấu hoàn thành.",
                 PercentComplete = percent,
-                IsCourseCompleted = isCourseCompleted
+                IsCourseCompleted = isCourseCompleted,
+                CompletedLessons = completedLessons,
+                TotalLessons = totalLessons
             };
 
         public static MarkCompleteResult Fail(string message)

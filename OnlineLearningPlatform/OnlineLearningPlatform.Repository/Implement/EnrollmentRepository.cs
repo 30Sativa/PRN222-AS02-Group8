@@ -24,12 +24,14 @@ namespace OnlineLearningPlatform.Repository.Implement
         public async Task<bool> IsEnrolledAsync(string userId, Guid courseId)
         {
             return await _context.Enrollments
+                .AsNoTracking()
                 .AnyAsync(e => e.UserId == userId && e.CourseId == courseId && e.IsActive);
         }
 
         public async Task<Enrollment?> GetByUserAndCourseAsync(string userId, Guid courseId)
         {
             return await _context.Enrollments
+                .AsNoTracking()
                 .Include(e => e.Course)
                     .ThenInclude(c => c.Sections.OrderBy(s => s.OrderIndex))
                         .ThenInclude(s => s.Lessons.OrderBy(l => l.OrderIndex))
@@ -39,6 +41,7 @@ namespace OnlineLearningPlatform.Repository.Implement
         public async Task<List<Enrollment>> GetByUserIdAsync(string userId)
         {
             return await _context.Enrollments
+                .AsNoTracking()
                 .Include(e => e.Course)
                     .ThenInclude(c => c.Sections.OrderBy(s => s.OrderIndex))
                         .ThenInclude(s => s.Lessons.OrderBy(l => l.OrderIndex))
@@ -52,6 +55,7 @@ namespace OnlineLearningPlatform.Repository.Implement
         public async Task<Enrollment?> GetByIdAsync(Guid enrollmentId)
         {
             return await _context.Enrollments
+                .AsNoTracking()
                 .Include(e => e.Course)
                 .FirstOrDefaultAsync(e => e.EnrollmentId == enrollmentId);
         }
@@ -71,6 +75,7 @@ namespace OnlineLearningPlatform.Repository.Implement
         public async Task<int> CountByCourseAsync(Guid courseId)
         {
             return await _context.Enrollments
+                .AsNoTracking()
                 .CountAsync(e => e.CourseId == courseId && e.IsActive);
         }
 

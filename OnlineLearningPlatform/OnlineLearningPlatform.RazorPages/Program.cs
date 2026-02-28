@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using OnlineLearningPlatform.Models;
 using OnlineLearningPlatform.Models.Entities.Identity;
 using OnlineLearningPlatform.Models.Migrations.Data;
+using OnlineLearningPlatform.RazorPages.Hubs;
 using OnlineLearningPlatform.Repository.Implement;
 using OnlineLearningPlatform.Repository.Interface;
 using OnlineLearningPlatform.Services.Implement;
@@ -81,6 +82,9 @@ namespace OnlineLearningPlatform.RazorPages
                 options.Conventions.AllowAnonymousToFolder("/Auth");
             });
 
+            // ================= SIGNALR =================
+            builder.Services.AddSignalR();
+
             var app = builder.Build();
 
             // ================= SEED DATA =================
@@ -105,6 +109,7 @@ namespace OnlineLearningPlatform.RazorPages
 
             app.MapGet("/", () => Results.Redirect("/Auth/Login"));
             app.MapRazorPages();
+            app.MapHub<ProgressHub>("/hubs/progress");
 
             app.Run();
         }
