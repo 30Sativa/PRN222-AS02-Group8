@@ -57,6 +57,8 @@ namespace OnlineLearningPlatform.Repository.Implement
             existing.VideoDurationSeconds = lesson.VideoDurationSeconds;
             existing.VideoStatus = lesson.VideoStatus;
             existing.Content = lesson.Content;
+            existing.ReadingPdfStoragePath = lesson.ReadingPdfStoragePath;
+            existing.ReadingPdfOriginalFileName = lesson.ReadingPdfOriginalFileName;
 
             await _context.SaveChangesAsync();
             return true;
@@ -141,6 +143,15 @@ namespace OnlineLearningPlatform.Repository.Implement
                                && !l.IsDeleted
                                && l.Section.Course.TeacherId == teacherId
                                && !l.Section.Course.IsDeleted);
+        }
+
+        public async Task<bool> ExistsOrderIndexAsync(int sectionId, int orderIndex, int? excludeLessonId = null)
+        {
+            return await _context.Lessons
+                .AnyAsync(l => l.SectionId == sectionId
+                               && !l.IsDeleted
+                               && l.OrderIndex == orderIndex
+                               && (!excludeLessonId.HasValue || l.LessonId != excludeLessonId.Value));
         }
 
         public async Task<bool> ReorderAsync(int sectionId, List<int> orderedLessonIds)

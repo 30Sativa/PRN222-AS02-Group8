@@ -10,6 +10,7 @@ namespace OnlineLearningPlatform.Repository.Interface
         Task<bool> UpdateAsync(Lesson lesson);
         Task<bool> DeleteAsync(int lessonId);
         Task<bool> IsLessonInTeacherCourseAsync(int lessonId, string teacherId);
+        Task<bool> ExistsOrderIndexAsync(int sectionId, int orderIndex, int? excludeLessonId = null);
         Task<bool> ReorderAsync(int sectionId, List<int> orderedLessonIds);
     }
 }

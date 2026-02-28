@@ -40,6 +40,12 @@ namespace OnlineLearningPlatform.Services.Implement
                 return Fail("You do not have permission to add lesson to this section.");
             }
 
+            var duplicatedOrder = await _lessonRepository.ExistsOrderIndexAsync(lesson.SectionId, lesson.OrderIndex);
+            if (duplicatedOrder)
+            {
+                return Fail($"Order {lesson.OrderIndex} already exists in this section. Please choose another order.");
+            }
+
             lesson.Title = lesson.Title.Trim();
             lesson.Content = lesson.Content?.Trim();
 
@@ -67,6 +73,12 @@ namespace OnlineLearningPlatform.Services.Implement
                 return Fail("Lesson not found.");
             }
 
+            var duplicatedOrder = await _lessonRepository.ExistsOrderIndexAsync(lesson.SectionId, lesson.OrderIndex, lesson.LessonId);
+            if (duplicatedOrder)
+            {
+                return Fail($"Order {lesson.OrderIndex} already exists in this section. Please choose another order.");
+            }
+
             existing.Title = lesson.Title.Trim();
             existing.LessonType = lesson.LessonType;
             existing.OrderIndex = lesson.OrderIndex;
@@ -76,6 +88,8 @@ namespace OnlineLearningPlatform.Services.Implement
             existing.VideoDurationSeconds = lesson.VideoDurationSeconds;
             existing.VideoStatus = lesson.VideoStatus;
             existing.Content = lesson.Content?.Trim();
+            existing.ReadingPdfStoragePath = lesson.ReadingPdfStoragePath;
+            existing.ReadingPdfOriginalFileName = lesson.ReadingPdfOriginalFileName;
 
             var updated = await _lessonRepository.UpdateAsync(existing);
             if (!updated)
@@ -121,9 +135,9 @@ namespace OnlineLearningPlatform.Services.Implement
                 return Fail("Lesson title is required.");
             }
 
-            if (lesson.OrderIndex < 0)
+            if (lesson.OrderIndex <= 0)
             {
-                return Fail("Order index must be greater than or equal to 0.");
+                return Fail("Order index must be greater than 0.");
             }
 
             return new LessonCommandResult { Success = true };
