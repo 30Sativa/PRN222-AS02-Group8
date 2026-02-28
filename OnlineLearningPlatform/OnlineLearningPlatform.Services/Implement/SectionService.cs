@@ -33,17 +33,25 @@ namespace OnlineLearningPlatform.Services.Implement
                 return Fail("Section title is required.");
             }
 
+            var normalizedOrder = orderIndex <= 0 ? 1 : orderIndex;
+
             var course = await _courseRepository.GetByIdAndTeacherAsync(courseId, teacherId);
             if (course == null)
             {
                 return Fail("Course not found or you do not have permission.");
             }
 
+            var duplicatedOrder = await _sectionRepository.ExistsOrderIndexAsync(courseId, normalizedOrder);
+            if (duplicatedOrder)
+            {
+                return Fail($"Order {normalizedOrder} already exists in this course. Please choose another order.");
+            }
+
             var section = new Section
             {
                 CourseId = courseId,
                 Title = title.Trim(),
-                OrderIndex = orderIndex <= 0 ? 1 : orderIndex
+                OrderIndex = normalizedOrder
             };
 
             var created = await _sectionRepository.CreateAsync(section);
@@ -69,8 +77,15 @@ namespace OnlineLearningPlatform.Services.Implement
                 return Fail("Section not found.");
             }
 
+            var normalizedOrder = orderIndex <= 0 ? 1 : orderIndex;
+            var duplicatedOrder = await _sectionRepository.ExistsOrderIndexAsync(existing.CourseId, normalizedOrder, sectionId);
+            if (duplicatedOrder)
+            {
+                return Fail($"Order {normalizedOrder} already exists in this course. Please choose another order.");
+            }
+
             existing.Title = title.Trim();
-            existing.OrderIndex = orderIndex <= 0 ? 1 : orderIndex;
+            existing.OrderIndex = normalizedOrder;
 
             var updated = await _sectionRepository.UpdateAsync(existing);
             if (!updated)

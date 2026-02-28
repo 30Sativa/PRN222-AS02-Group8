@@ -72,6 +72,14 @@ namespace OnlineLearningPlatform.Repository.Implement
                 .AnyAsync(s => s.SectionId == sectionId && s.Course.TeacherId == teacherId && !s.Course.IsDeleted);
         }
 
+        public async Task<bool> ExistsOrderIndexAsync(Guid courseId, int orderIndex, int? excludeSectionId = null)
+        {
+            return await _context.Sections
+                .AnyAsync(s => s.CourseId == courseId
+                               && s.OrderIndex == orderIndex
+                               && (!excludeSectionId.HasValue || s.SectionId != excludeSectionId.Value));
+        }
+
         public async Task<bool> ReorderAsync(Guid courseId, List<int> orderedSectionIds)
         {
             var sections = await _context.Sections
