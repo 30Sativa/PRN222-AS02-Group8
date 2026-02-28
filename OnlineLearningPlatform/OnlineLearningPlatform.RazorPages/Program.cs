@@ -23,16 +23,16 @@ namespace OnlineLearningPlatform.RazorPages
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-            {
-                options.SignIn.RequireConfirmedAccount = false;
-                options.Password.RequireDigit = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequireLowercase = false;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequiredLength = 6;
-            })
-            .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddDefaultTokenProviders();
+                {
+                    options.SignIn.RequireConfirmedAccount = false;
+                    options.Password.RequireDigit = false;
+                    options.Password.RequireUppercase = false;
+                    options.Password.RequireLowercase = false;
+                    options.Password.RequireNonAlphanumeric = false;
+                    options.Password.RequiredLength = 6;
+                })
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
 
             builder.Services.ConfigureApplicationCookie(options =>
             {
@@ -49,7 +49,6 @@ namespace OnlineLearningPlatform.RazorPages
             builder.Services.AddScoped<IStudentService, StudentService>();
             builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
             builder.Services.AddScoped<IProgressService, ProgressService>();
-            //================== REPOSITORIES =================
             builder.Services.AddScoped<ISectionService, SectionService>();
             builder.Services.AddScoped<ILessonService, LessonService>();
 
@@ -64,11 +63,7 @@ namespace OnlineLearningPlatform.RazorPages
             builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
             builder.Services.AddScoped<IProgressRepository, ProgressRepository>();
 
-            builder.Services.AddScoped<IQuizService, QuizService>();
-            builder.Services.AddScoped<IStudentService, StudentService>();
 
-            builder.Services.AddScoped<ICourseRepository, CourseRepository>();
-            builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
             builder.Services.AddScoped<ISectionRepository, SectionRepository>();
             builder.Services.AddScoped<ILessonRepository, LessonRepository>();
 
