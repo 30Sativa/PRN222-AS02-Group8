@@ -62,6 +62,14 @@ namespace OnlineLearningPlatform.Repository.Implement
         public async Task<bool> DeleteAsync(int lessonId)
         {
             var existing = await _context.Lessons
+                .Include(l => l.LessonProgresses)
+                .Include(l => l.Quizzes)
+                    .ThenInclude(q => q.Questions)
+                .Include(l => l.Quizzes)
+                    .ThenInclude(q => q.QuizAttempts)
+                        .ThenInclude(qa => qa.QuizAnswers)
+                .Include(l => l.Assignments)
+                    .ThenInclude(a => a.AssignmentSubmissions)
                 .FirstOrDefaultAsync(l => l.LessonId == lessonId && !l.IsDeleted);
 
             if (existing == null)
@@ -69,7 +77,56 @@ namespace OnlineLearningPlatform.Repository.Implement
                 return false;
             }
 
-            existing.IsDeleted = true;
+            var quizAnswers = existing.Quizzes
+                .SelectMany(q => q.QuizAttempts)
+                .SelectMany(qa => qa.QuizAnswers)
+                .ToList();
+            if (quizAnswers.Count > 0)
+            {
+                _context.QuizAnswers.RemoveRange(quizAnswers);
+            }
+
+            var quizAttempts = existing.Quizzes
+                .SelectMany(q => q.QuizAttempts)
+                .ToList();
+            if (quizAttempts.Count > 0)
+            {
+                _context.QuizAttempts.RemoveRange(quizAttempts);
+            }
+
+            var questions = existing.Quizzes
+                .SelectMany(q => q.Questions)
+                .ToList();
+            if (questions.Count > 0)
+            {
+                _context.Questions.RemoveRange(questions);
+            }
+
+            if (existing.Quizzes.Count > 0)
+            {
+                _context.Quizzes.RemoveRange(existing.Quizzes);
+            }
+
+            var assignmentSubmissions = existing.Assignments
+                .SelectMany(a => a.AssignmentSubmissions)
+                .ToList();
+            if (assignmentSubmissions.Count > 0)
+            {
+                _context.AssignmentSubmissions.RemoveRange(assignmentSubmissions);
+            }
+
+            if (existing.Assignments.Count > 0)
+            {
+                _context.Assignments.RemoveRange(existing.Assignments);
+            }
+
+            if (existing.LessonProgresses.Count > 0)
+            {
+                _context.LessonProgresses.RemoveRange(existing.LessonProgresses);
+            }
+
+            _context.Lessons.Remove(existing);
+
             await _context.SaveChangesAsync();
             return true;
         }
