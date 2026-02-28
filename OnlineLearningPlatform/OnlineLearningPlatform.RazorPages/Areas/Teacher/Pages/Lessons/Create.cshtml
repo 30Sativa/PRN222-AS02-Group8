@@ -42,6 +42,13 @@
         <div class="form-text">Bắt buộc khi LessonType = Video. Tối đa 200MB.</div>
     </div>
 
+    <div class="mt-3 mb-3" id="readingPdfUploadGroup">
+        <label asp-for="ReadingPdfFile" class="form-label">Reading PDF (optional)</label>
+        <input asp-for="ReadingPdfFile" type="file" class="form-control" accept="application/pdf,.pdf" />
+        <span asp-validation-for="ReadingPdfFile" class="text-danger"></span>
+        <div class="form-text">Không bắt buộc. Chỉ áp dụng khi LessonType = Reading. Tối đa 50MB.</div>
+    </div>
+
     <div class="mt-3 mb-3">
         <label asp-for="LessonContent" class="form-label">Content (for Reading/Text)</label>
         <textarea asp-for="LessonContent" class="form-control" rows="5"></textarea>
@@ -59,14 +66,16 @@
         (function () {
             const select = document.getElementById('lessonTypeSelect');
             const videoGroup = document.getElementById('videoUploadGroup');
+            const readingPdfGroup = document.getElementById('readingPdfUploadGroup');
 
-            function toggleVideoInput() {
+            function toggleUploadInputs() {
                 const selected = select.options[select.selectedIndex].text;
                 videoGroup.style.display = selected === 'Video' ? 'block' : 'none';
+                readingPdfGroup.style.display = selected === 'Reading' ? 'block' : 'none';
             }
 
-            select.addEventListener('change', toggleVideoInput);
-            toggleVideoInput();
+            select.addEventListener('change', toggleUploadInputs);
+            toggleUploadInputs();
         })();
     </script>
 }

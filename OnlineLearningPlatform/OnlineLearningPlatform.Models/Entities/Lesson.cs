@@ -69,6 +69,18 @@ namespace OnlineLearningPlatform.Models.Entities
         /// </summary>
         public string? Content { get; set; }
 
+        /// <summary>
+        /// Đường dẫn file PDF đính kèm cho bài Reading (không bắt buộc).
+        /// </summary>
+        [MaxLength(500)]
+        public string? ReadingPdfStoragePath { get; set; }
+
+        /// <summary>
+        /// Tên file PDF gốc giáo viên upload.
+        /// </summary>
+        [MaxLength(255)]
+        public string? ReadingPdfOriginalFileName { get; set; }
+
         // Navigation
         [ForeignKey(nameof(SectionId))]
         public Section Section { get; set; } = default!;

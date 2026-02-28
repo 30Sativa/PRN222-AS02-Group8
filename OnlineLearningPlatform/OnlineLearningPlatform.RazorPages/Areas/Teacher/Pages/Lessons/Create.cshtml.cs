@@ -18,6 +18,8 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Lessons
         private const long MaxVideoSizeBytes = 200L * 1024 * 1024;
         private static readonly string[] AllowedVideoExtensions = [".mp4", ".webm", ".ogg"];
 
+        private const long MaxPdfSizeBytes = 50L * 1024 * 1024;
+
         [BindProperty(SupportsGet = true)]
         public int SectionId { get; set; }
 
@@ -42,6 +44,9 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Lessons
 
         [BindProperty]
         public IFormFile? VideoFile { get; set; }
+
+        [BindProperty]
+        public IFormFile? ReadingPdfFile { get; set; }
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -114,13 +119,27 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Lessons
                 }
             }
 
+            if (LessonType == LessonType.Reading && ReadingPdfFile != null && ReadingPdfFile.Length > 0)
+            {
+                var extension = Path.GetExtension(ReadingPdfFile.FileName).ToLowerInvariant();
+                if (extension != ".pdf")
+                {
+                    ModelState.AddModelError(nameof(ReadingPdfFile), "Only PDF file is allowed for Reading attachment.");
+                }
+
+                if (ReadingPdfFile.Length > MaxPdfSizeBytes)
+                {
+                    ModelState.AddModelError(nameof(ReadingPdfFile), "PDF size must be less than or equal to 50MB.");
+                }
+            }
+
             if (!ModelState.IsValid)
             {
                 return Page();
             }
 
             string? videoStoragePath = null;
-            string? originalFileName = null;
+            string? videoOriginalFileName = null;
 
             if (LessonType == LessonType.Video && VideoFile != null)
             {
@@ -137,7 +156,27 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Lessons
                 }
 
                 videoStoragePath = $"/uploads/videos/{generatedFileName}";
-                originalFileName = VideoFile.FileName;
+                videoOriginalFileName = VideoFile.FileName;
+            }
+
+            string? readingPdfStoragePath = null;
+            string? readingPdfOriginalFileName = null;
+
+            if (LessonType == LessonType.Reading && ReadingPdfFile != null && ReadingPdfFile.Length > 0)
+            {
+                var uploadRoot = Path.Combine(environment.WebRootPath, "uploads", "readings");
+                Directory.CreateDirectory(uploadRoot);
+
+                var generatedFileName = $"{Guid.NewGuid():N}.pdf";
+                var absolutePath = Path.Combine(uploadRoot, generatedFileName);
+
+                await using (var stream = System.IO.File.Create(absolutePath))
+                {
+                    await ReadingPdfFile.CopyToAsync(stream);
+                }
+
+                readingPdfStoragePath = $"/uploads/readings/{generatedFileName}";
+                readingPdfOriginalFileName = ReadingPdfFile.FileName;
             }
 
             var lesson = new Lesson
@@ -149,8 +188,10 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Lessons
                 IsPreview = IsPreview,
                 Content = LessonContent,
                 VideoStoragePath = videoStoragePath,
-                VideoOriginalFileName = originalFileName,
-                VideoStatus = LessonType == LessonType.Video ? VideoStatus.Ready : null
+                VideoOriginalFileName = videoOriginalFileName,
+                VideoStatus = LessonType == LessonType.Video ? VideoStatus.Ready : null,
+                ReadingPdfStoragePath = readingPdfStoragePath,
+                ReadingPdfOriginalFileName = readingPdfOriginalFileName
             };
 
             var result = await lessonService.CreateAsync(lesson, teacherId);

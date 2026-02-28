@@ -41,7 +41,21 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses
                     .ToList();
             }
 
-            Courses = allCourses;
+            Courses = allCourses
+                .OrderBy(c => ParseCodeNumber(c.CourseCode))
+                .ThenBy(c => c.CourseCode)
+                .ToList();
+        }
+
+        private static int ParseCodeNumber(string? courseCode)
+        {
+            if (string.IsNullOrWhiteSpace(courseCode))
+            {
+                return int.MaxValue;
+            }
+
+            var digits = new string(courseCode.Where(char.IsDigit).ToArray());
+            return int.TryParse(digits, out var number) ? number : int.MaxValue;
         }
 
         public async Task<JsonResult> OnGetStatusesAsync()
