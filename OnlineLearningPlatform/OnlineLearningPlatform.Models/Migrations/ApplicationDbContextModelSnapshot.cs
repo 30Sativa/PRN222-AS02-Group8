@@ -765,6 +765,14 @@ namespace OnlineLearningPlatform.Models.Migrations
                     b.Property<int>("OrderIndex")
                         .HasColumnType("int");
 
+                    b.Property<string>("ReadingPdfOriginalFileName")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("ReadingPdfStoragePath")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<int>("SectionId")
                         .HasColumnType("int");
 
