@@ -11,6 +11,8 @@
 }
 else
 {
+    @Html.AntiForgeryToken()
+
     <div class="d-flex justify-content-between align-items-start mb-3">
         <div>
             <h2 class="mb-1">@Model.Lesson.Title</h2>
@@ -26,10 +28,17 @@ else
                 <div class="card-body">
                     @if (!string.IsNullOrWhiteSpace(Model.Lesson.VideoStoragePath))
                     {
-                        <video class="w-100" controls preload="metadata" style="max-height: 560px; background: #000;">
+                        <video id="lessonVideo"
+                               class="w-100"
+                               controls
+                               preload="metadata"
+                               style="max-height: 560px; background: #000;"
+                               data-lesson-id="@Model.Lesson.LessonId"
+                               data-initial-watched="@Model.WatchedSeconds">
                             <source src="@Model.Lesson.VideoStoragePath" type="video/mp4" />
                             Your browser does not support the video tag.
                         </video>
+                        <div class="small text-muted mt-2" id="progressStatus">Progress is being saved automatically.</div>
                     }
                     else
                     {
@@ -139,4 +148,77 @@ else
             <div class="alert alert-warning">Unsupported lesson type.</div>
             break;
     }
+}
+
+@section Scripts {
+    <script>
+        (function () {
+            const video = document.getElementById('lessonVideo');
+            if (!video) return;
+
+            const lessonId = video.dataset.lessonId;
+            const initialWatched = parseInt(video.dataset.initialWatched || '0', 10) || 0;
+            const progressStatus = document.getElementById('progressStatus');
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+
+            let lastSaved = Math.max(0, initialWatched);
+            let isSaving = false;
+
+            function setStatus(text) {
+                if (progressStatus) progressStatus.textContent = text;
+            }
+
+            async function saveProgress(seconds, force = false) {
+                const watched = Math.max(0, Math.floor(seconds));
+
+                if (!force && watched <= lastSaved) return;
+                if (isSaving) return;
+
+                isSaving = true;
+                try {
+                    const response = await fetch(`?handler=SaveProgress&id=${lessonId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': token
+                        },
+                        body: JSON.stringify({ watchedSeconds: watched })
+                    });
+
+                    if (response.ok) {
+                        lastSaved = watched;
+                        setStatus(`Saved progress: ${lastSaved}s`);
+                    }
+                } catch {
+                    setStatus('Cannot save progress right now.');
+                } finally {
+                    isSaving = false;
+                }
+            }
+
+            video.addEventListener('loadedmetadata', function () {
+                if (initialWatched > 0 && Number.isFinite(video.duration) && initialWatched < video.duration - 1) {
+                    video.currentTime = initialWatched;
+                }
+            });
+
+            setInterval(function () {
+                if (!video.paused && !video.ended) {
+                    saveProgress(video.currentTime);
+                }
+            }, 7000);
+
+            video.addEventListener('pause', function () {
+                saveProgress(video.currentTime, true);
+            });
+
+            video.addEventListener('ended', function () {
+                saveProgress(video.duration, true);
+            });
+
+            window.addEventListener('beforeunload', function () {
+                saveProgress(video.currentTime, true);
+            });
+        })();
+    </script>
 }
