@@ -16,16 +16,12 @@ namespace OnlineLearningPlatform.RazorPages
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // ================= DB CONTEXT =================
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(
-                    builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            // ================= IDENTITY =================
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = false;
-
                 options.Password.RequireDigit = false;
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
@@ -35,28 +31,26 @@ namespace OnlineLearningPlatform.RazorPages
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
-            // ================= COOKIE CONFIG =================
             builder.Services.ConfigureApplicationCookie(options =>
             {
                 options.LoginPath = "/Auth/Login";
                 options.AccessDeniedPath = "/Auth/AccessDenied";
             });
 
-            //================== SERVICES =================
+            // Services
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<ICourseService, CourseService>();
             builder.Services.AddScoped<ISectionService, SectionService>();
             builder.Services.AddScoped<ILessonService, LessonService>();
 
-            //================== REPOSITORIES =================
+            // Repositories
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
             builder.Services.AddScoped<ICourseRepository, CourseRepository>();
             builder.Services.AddScoped<ISectionRepository, SectionRepository>();
             builder.Services.AddScoped<ILessonRepository, LessonRepository>();
 
-            // ================= AUTHORIZATION POLICIES =================
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
@@ -64,7 +58,6 @@ namespace OnlineLearningPlatform.RazorPages
                 options.AddPolicy("Student", policy => policy.RequireRole("Student"));
             });
 
-            // ================= RAZOR PAGES =================
             builder.Services.AddRazorPages(options =>
             {
                 options.Conventions.AuthorizeAreaFolder("Admin", "/", "Admin");
@@ -75,14 +68,12 @@ namespace OnlineLearningPlatform.RazorPages
 
             var app = builder.Build();
 
-            // ================= SEED DATA =================
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
                 await SeedData.InitializeAsync(services);
             }
 
-            // ================= PIPELINE =================
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Error");
