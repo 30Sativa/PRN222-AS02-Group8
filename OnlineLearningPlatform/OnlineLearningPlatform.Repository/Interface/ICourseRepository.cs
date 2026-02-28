@@ -1,4 +1,9 @@
 using OnlineLearningPlatform.Models.Entities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace OnlineLearningPlatform.Repository.Interface
 {
@@ -19,5 +24,7 @@ namespace OnlineLearningPlatform.Repository.Interface
 
         Task<bool> ApproveAsync(Guid courseId);
         Task<bool> RejectAsync(Guid courseId, string reason);
+        Task<IEnumerable<Course>> GetCoursesWithSectionsAndQuizzesAsync();
+        Task<IEnumerable<Course>> GetPublishedCoursesWithEnrollmentsAsync();
     }
 }

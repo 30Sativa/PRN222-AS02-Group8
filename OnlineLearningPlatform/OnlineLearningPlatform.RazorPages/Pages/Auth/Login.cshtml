@@ -1,29 +1,56 @@
 ﻿@page
 @model OnlineLearningPlatform.RazorPages.Pages.Auth.LoginModel
 @{
+    ViewData["Title"] = "Đăng nhập";
+    Layout = "_Layout";
 }
 
-<h2>Login</h2>
-<form method="post">
-    <div>
-        <label>Email</label>
-        <input asp-for="LoginRequest.Email" />
-        <span asp-validation-for="LoginRequest.Email"></span>
+<div class="auth-screen">
+    <div class="auth-card fade-up">
+
+        <div class="auth-logo">
+            <div class="logo-mark">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                </svg>
+            </div>
+            <h1>EduLearn</h1>
+            <p>Đăng nhập để tiếp tục học tập</p>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger mb-5" asp-validation-summary="All"></div>
+        }
+
+        <form method="post">
+            <div class="form-group">
+                <label asp-for="LoginRequest.Email">Email</label>
+                <input asp-for="LoginRequest.Email" class="form-control" type="email"
+                       placeholder="you@example.com" autocomplete="email" />
+                <span asp-validation-for="LoginRequest.Email" class="form-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="LoginRequest.Password">Mật khẩu</label>
+                <input asp-for="LoginRequest.Password" class="form-control" type="password"
+                       placeholder="Tối thiểu 6 ký tự" autocomplete="current-password" />
+                <span asp-validation-for="LoginRequest.Password" class="form-error"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width:100%; padding: 12px; font-size: 15px; margin-top: 8px;">
+                Đăng nhập
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            Chưa có tài khoản?
+            <a asp-page="/Auth/Register">Đăng ký ngay</a>
+        </div>
     </div>
-    <div>
-        <label>Password</label>
-        <input asp-for="LoginRequest.Password" type="password" />
-        <span asp-validation-for="LoginRequest.Password"></span>
-    </div>
-    <button type="submit">Login</button>
-</form>
-<div asp-validation-summary="All"></div>
-<div>
-    <p>
-        Don't have an account? 
-        <a asp-page="/Auth/Register">Register here</a>.
-    </p>
 </div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }

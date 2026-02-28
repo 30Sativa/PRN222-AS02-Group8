@@ -1,31 +1,96 @@
-@page
+﻿@page
+@model OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.DashboardModel
 @{
-    ViewData["Title"] = "Admin Dashboard";
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="container py-4">
-    <h2 class="mb-3">Admin Dashboard</h2>
-    <p class="text-muted">Welcome to the admin area. Choose a management module below.</p>
+<div class="page-head fade-up">
+    <h1>Dashboard</h1>
+    <div class="breadcrumb">
+        <span>Admin</span>
+    </div>
+</div>
 
-    <div class="row g-3">
-        <div class="col-md-6 col-lg-5">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-body">
-                    <h5 class="card-title mb-2">Category Management</h5>
-                    <p class="card-text text-muted mb-3">Create, edit, and delete course categories.</p>
-                    <a class="btn btn-primary" asp-area="Admin" asp-page="/Categories/Index">Go to Categories</a>
-                </div>
-            </div>
-        </div>
+<!-- Stats -->
+<div class="stat-grid fade-up">
+    <div class="stat-card">
+        <div class="stat-label">Tổng người dùng</div>
+        <div class="stat-value">@Model.TotalUsers</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Học viên</div>
+        <div class="stat-value">@Model.TotalStudents</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Giảng viên</div>
+        <div class="stat-value">@Model.TotalTeachers</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Quản trị</div>
+        <div class="stat-value">@Model.TotalAdmins</div>
+    </div>
+</div>
 
-        <div class="col-md-6 col-lg-5">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-body">
-                    <h5 class="card-title mb-2">Course Review</h5>
-                    <p class="card-text text-muted mb-3">View details and approve/reject teacher courses.</p>
-                    <a class="btn btn-primary" asp-area="Admin" asp-page="/Courses/Index">Go to Course Review</a>
+<!-- Quick access -->
+<div class="card fade-up">
+    <div class="card-header">
+        <h2>Truy cập nhanh</h2>
+    </div>
+    <div class="card-body">
+        <div class="quick-grid">
+
+            <a asp-area="Admin" asp-page="/Users/Index" class="quick-item">
+                <div class="quick-item-icon">
+                    <!-- users icon -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
                 </div>
+                <div class="quick-item-title">Quản lý người dùng</div>
+                <div class="quick-item-desc">Xem, chỉnh sửa, xóa và đổi role người dùng</div>
+            </a>
+
+            <div class="quick-item quick-item-disabled">
+                <span class="badge-soon">Sắp có</span>
+                <div class="quick-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                        <line x1="8" y1="21" x2="16" y2="21"/>
+                        <line x1="12" y1="17" x2="12" y2="21"/>
+                    </svg>
+                </div>
+                <div class="quick-item-title">Quản lý khóa học</div>
+                <div class="quick-item-desc">Duyệt và quản lý nội dung khóa học</div>
             </div>
+
+            <div class="quick-item quick-item-disabled">
+                <span class="badge-soon">Sắp có</span>
+                <div class="quick-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10"/>
+                        <line x1="12" y1="20" x2="12" y2="4"/>
+                        <line x1="6" y1="20" x2="6" y2="14"/>
+                    </svg>
+                </div>
+                <div class="quick-item-title">Báo cáo & Thống kê</div>
+                <div class="quick-item-desc">Theo dõi doanh thu và hoạt động hệ thống</div>
+            </div>
+
+            <div class="quick-item quick-item-disabled">
+                <span class="badge-soon">Sắp có</span>
+                <div class="quick-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+                        <line x1="4" y1="22" x2="4" y2="15"/>
+                    </svg>
+                </div>
+                <div class="quick-item-title">Danh mục</div>
+                <div class="quick-item-desc">Quản lý danh mục và phân loại khóa học</div>
+            </div>
+
         </div>
     </div>
 </div>

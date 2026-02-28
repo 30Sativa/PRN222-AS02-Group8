@@ -3,10 +3,13 @@ using Microsoft.EntityFrameworkCore;
 using OnlineLearningPlatform.Models;
 using OnlineLearningPlatform.Models.Entities.Identity;
 using OnlineLearningPlatform.Models.Migrations.Data;
+using OnlineLearningPlatform.RazorPages.Hubs;
 using OnlineLearningPlatform.Repository.Implement;
 using OnlineLearningPlatform.Repository.Interface;
 using OnlineLearningPlatform.Services.Implement;
+using OnlineLearningPlatform.Services.Implementations;
 using OnlineLearningPlatform.Services.Interface;
+
 
 namespace OnlineLearningPlatform.RazorPages
 {
@@ -41,6 +44,12 @@ namespace OnlineLearningPlatform.RazorPages
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<ICourseService, CourseService>();
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IQuizService, QuizService>();
+            builder.Services.AddScoped<IStudentService, StudentService>();
+            builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
+            builder.Services.AddScoped<IProgressService, ProgressService>();
+            //================== REPOSITORIES =================
             builder.Services.AddScoped<ISectionService, SectionService>();
             builder.Services.AddScoped<ILessonService, LessonService>();
 
@@ -48,6 +57,18 @@ namespace OnlineLearningPlatform.RazorPages
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
             builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+            builder.Services.AddScoped<IQuizRepository, QuizRepository>();
+            builder.Services.AddScoped<IQuizAttemptRepository, QuizAttemptRepository>();
+            builder.Services.AddScoped<IQuizAnswerRepository, QuizAnswerRepository>();
+            builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+            builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
+            builder.Services.AddScoped<IProgressRepository, ProgressRepository>();
+
+            builder.Services.AddScoped<IQuizService, QuizService>();
+            builder.Services.AddScoped<IStudentService, StudentService>();
+
+            builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+            builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
             builder.Services.AddScoped<ISectionRepository, SectionRepository>();
             builder.Services.AddScoped<ILessonRepository, LessonRepository>();
 
@@ -65,6 +86,9 @@ namespace OnlineLearningPlatform.RazorPages
                 options.Conventions.AuthorizeAreaFolder("Student", "/", "Student");
                 options.Conventions.AllowAnonymousToFolder("/Auth");
             });
+
+            // ================= SIGNALR =================
+            builder.Services.AddSignalR();
 
             var app = builder.Build();
 
@@ -88,6 +112,7 @@ namespace OnlineLearningPlatform.RazorPages
 
             app.MapGet("/", () => Results.Redirect("/Auth/Login"));
             app.MapRazorPages();
+            app.MapHub<ProgressHub>("/hubs/progress");
 
             app.Run();
         }
