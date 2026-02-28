@@ -25,6 +25,9 @@ namespace OnlineLearningPlatform.Repository.Implement
         public async Task<Lesson?> GetByIdAsync(int lessonId)
         {
             return await _context.Lessons
+                .Include(l => l.Quizzes)
+                    .ThenInclude(q => q.Questions)
+                .Include(l => l.Assignments)
                 .FirstOrDefaultAsync(l => l.LessonId == lessonId && !l.IsDeleted);
         }
 
