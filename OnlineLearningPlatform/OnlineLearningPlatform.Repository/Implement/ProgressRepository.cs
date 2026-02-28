@@ -17,12 +17,14 @@ namespace OnlineLearningPlatform.Repository.Implement
         public async Task<LessonProgress?> GetAsync(string userId, int lessonId)
         {
             return await _context.LessonProgresses
+                .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.UserId == userId && p.LessonId == lessonId);
         }
 
         public async Task<List<LessonProgress>> GetByCourseAsync(string userId, Guid courseId)
         {
             return await _context.LessonProgresses
+                .AsNoTracking()
                 .Include(p => p.Lesson)
                     .ThenInclude(l => l.Section)
                 .Where(p => p.UserId == userId
@@ -105,6 +107,7 @@ namespace OnlineLearningPlatform.Repository.Implement
         public async Task<int> CountCompletedAsync(string userId, Guid courseId)
         {
             return await _context.LessonProgresses
+                .AsNoTracking()
                 .CountAsync(p => p.UserId == userId
                               && p.IsCompleted
                               && p.Lesson.Section.CourseId == courseId
@@ -114,6 +117,7 @@ namespace OnlineLearningPlatform.Repository.Implement
         public async Task<int> CountTotalLessonsAsync(Guid courseId)
         {
             return await _context.Lessons
+                .AsNoTracking()
                 .CountAsync(l => l.Section.CourseId == courseId && !l.IsDeleted);
         }
 
@@ -121,12 +125,14 @@ namespace OnlineLearningPlatform.Repository.Implement
         {
             // Lấy tất cả lesson id đã hoàn thành
             var completedLessonIds = await _context.LessonProgresses
+                .AsNoTracking()
                 .Where(p => p.UserId == userId && p.IsCompleted)
                 .Select(p => p.LessonId)
                 .ToListAsync();
 
             // Lấy bài đầu tiên chưa hoàn thành (theo thứ tự Section.OrderIndex, Lesson.OrderIndex)
             var nextLesson = await _context.Lessons
+                .AsNoTracking()
                 .Include(l => l.Section)
                 .Where(l => l.Section.CourseId == courseId
                          && !l.IsDeleted

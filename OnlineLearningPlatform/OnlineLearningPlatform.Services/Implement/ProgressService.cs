@@ -20,9 +20,14 @@ namespace OnlineLearningPlatform.Services.Implement
             var completed = await _progressRepo.CountCompletedAsync(userId, courseId);
             var total = await _progressRepo.CountTotalLessonsAsync(courseId);
 
+            // Lấy tên khóa học
+            var enrollment = await _enrollmentRepo.GetByUserAndCourseAsync(userId, courseId);
+            var courseTitle = enrollment?.Course?.Title ?? string.Empty;
+
             return new CourseProgressDto
             {
                 CourseId = courseId,
+                CourseTitle = courseTitle,
                 TotalLessons = total,
                 CompletedLessons = completed
             };
@@ -44,11 +49,14 @@ namespace OnlineLearningPlatform.Services.Implement
             var percent = total == 0 ? 0 : Math.Round((double)completed / total * 100, 1);
             var isCourseCompleted = total > 0 && completed >= total;
 
-            return MarkCompleteResult.Ok(percent, isCourseCompleted);
+            return MarkCompleteResult.Ok(percent, isCourseCompleted, completed, total);
         }
 
         public async Task UpdateWatchedSecondsAsync(string userId, int lessonId, int watchedSeconds)
         {
+            // Validate: chỉ cho phép nếu watchedSeconds hợp lệ
+            if (watchedSeconds < 0) return;
+
             await _progressRepo.UpdateWatchedSecondsAsync(userId, lessonId, watchedSeconds);
         }
 
