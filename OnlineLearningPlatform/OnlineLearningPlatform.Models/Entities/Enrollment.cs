@@ -27,6 +27,11 @@ namespace OnlineLearningPlatform.Models.Entities
         public DateTime EnrolledAt { get; set; } = DateTime.UtcNow;
 
         /// <summary>
+        /// Lần cuối học viên truy cập khóa học (dùng cho last accessed tracking).
+        /// </summary>
+        public DateTime? LastAccessedAt { get; set; }
+
+        /// <summary>
         /// Khi refund và thu hồi quyền học, IsActive sẽ là false.
         /// </summary>
         public bool IsActive { get; set; } = true;

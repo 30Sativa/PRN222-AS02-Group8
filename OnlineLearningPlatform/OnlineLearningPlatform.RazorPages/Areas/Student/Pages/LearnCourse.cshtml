@@ -1,0 +1,728 @@
+@page
+@model OnlineLearningPlatform.RazorPages.Areas.Student.Pages.LearnCourseModel
+@{
+    ViewData["Title"] = Model.Course?.Title ?? "Học bài";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* ===== LearnCourse — 2-column layout ===== */
+    .learn-wrapper {
+        display: flex;
+        gap: 0;
+        min-height: calc(100vh - 140px);
+        margin: -24px -32px;
+    }
+
+    /* --- Sidebar: danh sách bài học --- */
+    .learn-sidebar {
+        width: 340px;
+        min-width: 300px;
+        background: var(--color-surface);
+        border-right: 1px solid var(--color-border-light);
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .learn-sidebar-header {
+        padding: 20px 20px 16px;
+        border-bottom: 1px solid var(--color-border-light);
+    }
+
+    .learn-sidebar-header h2 {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--color-label-1);
+        margin: 0 0 12px;
+        line-height: 1.3;
+    }
+
+    /* --- Progress bar (4.8) --- */
+    .progress-bar-container {
+        background: var(--color-surface-2);
+        border-radius: var(--radius-full);
+        height: 8px;
+        overflow: hidden;
+        margin-bottom: 6px;
+    }
+
+    .progress-bar-fill {
+        background: var(--color-blue);
+        height: 100%;
+        border-radius: var(--radius-full);
+        transition: width 0.5s ease;
+    }
+
+    .progress-text {
+        font-size: 12px;
+        color: var(--color-label-2);
+        font-weight: 500;
+    }
+
+    /* --- Section & Lesson list --- */
+    .learn-sections {
+        flex: 1;
+        overflow-y: auto;
+        padding: 8px 0;
+    }
+
+    .learn-section {
+        margin-bottom: 4px;
+    }
+
+    .learn-section-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--color-label-2);
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .learn-section-title:hover {
+        color: var(--color-label-1);
+    }
+
+    .learn-section-title .chevron {
+        transition: transform 0.2s;
+        font-size: 10px;
+    }
+
+    .learn-section.collapsed .chevron {
+        transform: rotate(-90deg);
+    }
+
+    .learn-section.collapsed .learn-lesson-list {
+        display: none;
+    }
+
+    .learn-lesson-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .learn-lesson-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 20px 10px 32px;
+        font-size: 14px;
+        color: var(--color-label-1);
+        cursor: pointer;
+        text-decoration: none;
+        transition: background 0.15s;
+        border-left: 3px solid transparent;
+    }
+
+    .learn-lesson-item:hover {
+        background: var(--color-surface-2);
+    }
+
+    .learn-lesson-item.active {
+        background: var(--color-blue-tint);
+        border-left-color: var(--color-blue);
+        font-weight: 600;
+    }
+
+    .learn-lesson-item .lesson-icon {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        flex-shrink: 0;
+    }
+
+    .lesson-icon.completed {
+        background: var(--color-green);
+        color: #fff;
+    }
+
+    .lesson-icon.incomplete {
+        border: 2px solid var(--color-border);
+        background: transparent;
+        color: var(--color-label-3);
+    }
+
+    .learn-lesson-item .lesson-title {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .lesson-type-badge {
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: var(--radius-full);
+        background: var(--color-surface-2);
+        color: var(--color-label-2);
+        font-weight: 500;
+        flex-shrink: 0;
+    }
+
+    /* --- Main content area --- */
+    .learn-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: var(--color-bg);
+        overflow-y: auto;
+    }
+
+    .learn-content-inner {
+        max-width: 900px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 32px 40px;
+    }
+
+    .lesson-header {
+        margin-bottom: 24px;
+    }
+
+    .lesson-header h1 {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--color-label-1);
+        margin: 0 0 8px;
+    }
+
+    .lesson-meta {
+        font-size: 13px;
+        color: var(--color-label-2);
+        display: flex;
+        gap: 16px;
+        align-items: center;
+    }
+
+    /* --- Video player --- */
+    .video-container {
+        position: relative;
+        padding-bottom: 56.25%;
+        height: 0;
+        overflow: hidden;
+        border-radius: var(--radius);
+        background: #000;
+        margin-bottom: 24px;
+        box-shadow: var(--shadow-md);
+    }
+
+    .video-container video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    /* --- Reading content --- */
+    .reading-content {
+        background: var(--color-surface);
+        border-radius: var(--radius);
+        padding: 32px;
+        box-shadow: var(--shadow-sm);
+        line-height: 1.8;
+        font-size: 15px;
+        color: var(--color-label-1);
+    }
+
+    .reading-content h1,
+    .reading-content h2,
+    .reading-content h3 {
+        margin-top: 24px;
+    }
+
+    .reading-content pre {
+        background: var(--color-surface-2);
+        padding: 16px;
+        border-radius: var(--radius-sm);
+        overflow-x: auto;
+    }
+
+    /* --- Mark complete button --- */
+    .lesson-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 24px;
+        padding-top: 20px;
+        border-top: 1px solid var(--color-border-light);
+    }
+
+    .btn-mark-complete {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 24px;
+        border-radius: var(--radius-full);
+        font-size: 14px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-mark-complete.incomplete {
+        background: var(--color-blue);
+        color: #fff;
+    }
+
+    .btn-mark-complete.incomplete:hover {
+        background: var(--color-blue-hover);
+        transform: scale(1.02);
+    }
+
+    .btn-mark-complete.completed {
+        background: var(--color-green-tint);
+        color: var(--color-green);
+        cursor: default;
+    }
+
+    .btn-next-lesson {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 20px;
+        border-radius: var(--radius-full);
+        font-size: 14px;
+        font-weight: 500;
+        border: 1px solid var(--color-border);
+        background: var(--color-surface);
+        color: var(--color-label-1);
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-next-lesson:hover {
+        background: var(--color-surface-2);
+    }
+
+    /* --- Empty state --- */
+    .no-lesson {
+        text-align: center;
+        padding: 80px 20px;
+        color: var(--color-label-2);
+    }
+
+    .no-lesson h2 {
+        font-size: 20px;
+        margin-bottom: 8px;
+        color: var(--color-label-1);
+    }
+
+    /* --- Toast --- */
+    .toast-notification {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        padding: 14px 24px;
+        border-radius: var(--radius);
+        font-size: 14px;
+        font-weight: 500;
+        color: #fff;
+        z-index: 9999;
+        transform: translateY(100px);
+        opacity: 0;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .toast-notification.show {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    .toast-notification.success {
+        background: var(--color-green);
+    }
+
+    .toast-notification.error {
+        background: var(--color-red);
+    }
+
+    /* --- Responsive --- */
+    @@media (max-width: 768px) {
+        .learn-wrapper {
+            flex-direction: column;
+        }
+
+        .learn-sidebar {
+            width: 100%;
+            min-width: unset;
+            max-height: 300px;
+            border-right: none;
+            border-bottom: 1px solid var(--color-border-light);
+        }
+
+        .learn-content-inner {
+            padding: 20px 16px;
+        }
+    }
+</style>
+
+<div class="learn-wrapper">
+    <!-- ===== SIDEBAR: Curriculum + Progress ===== -->
+    <aside class="learn-sidebar">
+        <div class="learn-sidebar-header">
+            <h2>@(Model.Course?.Title ?? "")</h2>
+
+            <!-- Progress bar (4.8) -->
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progressBar"
+                     style="width: @Model.Progress.PercentComplete%"></div>
+            </div>
+            <span class="progress-text" id="progressText">
+                @Model.Progress.CompletedLessons / @Model.Progress.TotalLessons bài hoàn thành
+                (@Model.Progress.PercentComplete%)
+            </span>
+        </div>
+
+        <div class="learn-sections">
+            @foreach (var section in (Model.Course?.Sections ?? new List<Section>()).OrderBy(s => s.OrderIndex))
+            {
+                var sectionLessons = section.Lessons
+                    .Where(l => !l.IsDeleted)
+                    .OrderBy(l => l.OrderIndex)
+                    .ToList();
+
+                if (!sectionLessons.Any()) continue;
+
+                <div class="learn-section">
+                    <div class="learn-section-title" onclick="toggleSection(this)">
+                        <span class="chevron">▼</span>
+                        @(section.Title)
+                    </div>
+                    <ul class="learn-lesson-list">
+                        @foreach (var lesson in sectionLessons)
+                        {
+                            var isActive = Model.CurrentLesson?.LessonId == lesson.LessonId;
+                            var isCompleted = Model.CompletedLessonIds.Contains(lesson.LessonId);
+                            var typeLabel = lesson.LessonType switch
+                            {
+                                LessonType.Video => "Video",
+                                LessonType.Reading => "Đọc",
+                                LessonType.Quiz => "Quiz",
+                                LessonType.Assignment => "Bài tập",
+                                _ => ""
+                            };
+
+                            <li>
+                                <a class="learn-lesson-item @(isActive ? "active" : "")"
+                                   href="/Student/LearnCourse?courseId=@Model.Course.CourseId&lessonId=@lesson.LessonId">
+                                    <span class="lesson-icon @(isCompleted ? "completed" : "incomplete")">
+                                        @(isCompleted ? "✓" : "")
+                                    </span>
+                                    <span class="lesson-title">@lesson.Title</span>
+                                    <span class="lesson-type-badge">@typeLabel</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+    </aside>
+
+    <!-- ===== MAIN CONTENT: Video / Reading ===== -->
+    <main class="learn-content">
+        @if (Model.CurrentLesson != null)
+        {
+            var lesson = Model.CurrentLesson;
+            var isCompleted = Model.CompletedLessonIds.Contains(lesson.LessonId);
+
+            <div class="learn-content-inner">
+                <div class="lesson-header">
+                    <h1>@lesson.Title</h1>
+                    <div class="lesson-meta">
+                        <span>@(lesson.LessonType switch
+                        {
+                            LessonType.Video => "📹 Video",
+                            LessonType.Reading => "📖 Bài đọc",
+                            LessonType.Quiz => "📝 Quiz",
+                            LessonType.Assignment => "📋 Bài tập",
+                            _ => ""
+                        })</span>
+                        @if (lesson.VideoDurationSeconds.HasValue)
+                        {
+                            var mins = lesson.VideoDurationSeconds.Value / 60;
+                            var secs = lesson.VideoDurationSeconds.Value % 60;
+                            <span>⏱ @(mins):@(secs.ToString("D2"))</span>
+                        }
+                    </div>
+                </div>
+
+                <!-- Video player -->
+                @if (lesson.LessonType == LessonType.Video && !string.IsNullOrEmpty(lesson.VideoStoragePath))
+                {
+                    <div class="video-container">
+                        <video id="videoPlayer" controls preload="metadata">
+                            <source src="@lesson.VideoStoragePath" type="video/mp4" />
+                            Trình duyệt không hỗ trợ video.
+                        </video>
+                    </div>
+                }
+
+                <!-- Reading content -->
+                @if (lesson.LessonType == LessonType.Reading && !string.IsNullOrEmpty(lesson.Content))
+                {
+                    <div class="reading-content">
+                        @Html.Raw(lesson.Content)
+                    </div>
+                }
+
+                <!-- Quiz / Assignment placeholder -->
+                @if (lesson.LessonType == LessonType.Quiz)
+                {
+                    <div class="reading-content">
+                        <p>Bài quiz này sẽ được làm trong phần Quiz.</p>
+                    </div>
+                }
+                @if (lesson.LessonType == LessonType.Assignment)
+                {
+                    <div class="reading-content">
+                        <p>Bài tập sẽ được nộp trong phần Assignment.</p>
+                    </div>
+                }
+
+                <!-- Actions: mark complete + next lesson -->
+                <div class="lesson-actions">
+                    @if (isCompleted)
+                    {
+                        <button class="btn-mark-complete completed" disabled id="btnMarkComplete">
+                            ✓ Đã hoàn thành
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="btn-mark-complete incomplete" id="btnMarkComplete"
+                                onclick="markComplete(@lesson.LessonId, '@Model.Course.CourseId')">
+                            ✓ Đánh dấu hoàn thành
+                        </button>
+                    }
+
+                    @{
+                        // Tìm bài tiếp theo
+                        var allLessons = Model.Course.Sections
+                            .OrderBy(s => s.OrderIndex)
+                            .SelectMany(s => s.Lessons.Where(l => !l.IsDeleted).OrderBy(l => l.OrderIndex))
+                            .ToList();
+                        var currentIdx = allLessons.FindIndex(l => l.LessonId == lesson.LessonId);
+                        var nextLesson = currentIdx >= 0 && currentIdx < allLessons.Count - 1
+                            ? allLessons[currentIdx + 1]
+                            : null;
+                    }
+
+                    @if (nextLesson != null)
+                    {
+                        <a class="btn-next-lesson"
+                           href="/Student/LearnCourse?courseId=@Model.Course.CourseId&lessonId=@nextLesson.LessonId">
+                            Bài tiếp theo →
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="no-lesson">
+                <h2>Chưa có bài học</h2>
+                <p>Khóa học này chưa có nội dung bài học nào.</p>
+            </div>
+        }
+    </main>
+</div>
+
+<!-- Toast notification -->
+<div id="toast" class="toast-notification"></div>
+
+@Html.AntiForgeryToken()
+
+@section Scripts {
+    <!-- SignalR client -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script>
+        // ===== SignalR: Real-time progress =====
+        const progressConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/hubs/progress")
+            .withAutomaticReconnect()
+            .build();
+
+        // Join course group khi connect thành công
+        const currentCourseId = '@Model.Course?.CourseId';
+        progressConnection.start().then(() => {
+            if (currentCourseId) {
+                progressConnection.invoke("JoinCourseGroup", currentCourseId);
+            }
+        }).catch(err => console.error('SignalR error:', err));
+
+        // Nhận event khi có ai đó (hoặc chính mình) hoàn thành bài học
+        progressConnection.on("LessonCompleted", function (data) {
+            // Cập nhật progress bar real-time
+            document.getElementById('progressBar').style.width = data.percentComplete + '%';
+            const progressText = document.getElementById('progressText');
+            if (progressText) {
+                progressText.textContent = data.completedLessons + ' / ' + data.totalLessons + ' bài hoàn thành (' + data.percentComplete + '%)';
+            }
+
+            // Cập nhật icon bài học trong sidebar
+            const lessonLinks = document.querySelectorAll('.learn-lesson-item');
+            lessonLinks.forEach(link => {
+                if (link.href && link.href.includes('lessonId=' + data.lessonId)) {
+                    const icon = link.querySelector('.lesson-icon');
+                    if (icon) {
+                        icon.className = 'lesson-icon completed';
+                        icon.textContent = '✓';
+                    }
+                }
+            });
+        });
+
+        // Rời group khi đóng trang
+        window.addEventListener('beforeunload', function () {
+            if (currentCourseId && progressConnection.state === signalR.HubConnectionState.Connected) {
+                progressConnection.invoke("LeaveCourseGroup", currentCourseId);
+            }
+        });
+
+        // ===== Toggle section collapse =====
+        function toggleSection(el) {
+            el.closest('.learn-section').classList.toggle('collapsed');
+        }
+
+        // ===== Show toast =====
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast-notification ' + type + ' show';
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // ===== AJAX: Mark lesson complete (4.7) =====
+        function markComplete(lessonId, courseId) {
+            const btn = document.getElementById('btnMarkComplete');
+            btn.disabled = true;
+            btn.textContent = 'Đang xử lý...';
+
+            fetch('/Student/LearnCourse?handler=MarkComplete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: JSON.stringify({ lessonId: lessonId, courseId: courseId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Cập nhật button
+                    btn.className = 'btn-mark-complete completed';
+                    btn.textContent = '✓ Đã hoàn thành';
+                    btn.disabled = true;
+
+                    // Cập nhật progress bar (4.8 real-time)
+                    document.getElementById('progressBar').style.width = data.percentComplete + '%';
+
+                    // Cập nhật sidebar icon
+                    const activeItem = document.querySelector('.learn-lesson-item.active .lesson-icon');
+                    if (activeItem) {
+                        activeItem.className = 'lesson-icon completed';
+                        activeItem.textContent = '✓';
+                    }
+
+                    // Cập nhật text — dùng completedLessons và totalLessons từ server (chính xác)
+                    const progressText = document.getElementById('progressText');
+                    if (progressText) {
+                        progressText.textContent = data.completedLessons + ' / ' + data.totalLessons + ' bài hoàn thành (' + data.percentComplete + '%)';
+                    }
+
+                    if (data.isCourseCompleted) {
+                        showToast('🎉 Chúc mừng! Bạn đã hoàn thành khóa học!', 'success');
+                    } else {
+                        showToast('Đã hoàn thành bài học!', 'success');
+                    }
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = '✓ Đánh dấu hoàn thành';
+                    showToast(data.message, 'error');
+                }
+            })
+            .catch(err => {
+                btn.disabled = false;
+                btn.textContent = '✓ Đánh dấu hoàn thành';
+                showToast('Có lỗi xảy ra.', 'error');
+            });
+        }
+
+        // ===== Video progress tracking =====
+        (function () {
+            const video = document.getElementById('videoPlayer');
+            if (!video) return;
+
+            let lastSaved = 0;
+
+            video.addEventListener('timeupdate', function () {
+                const current = Math.floor(video.currentTime);
+                // Lưu mỗi 10 giây
+                if (current - lastSaved >= 10) {
+                    lastSaved = current;
+                    saveWatchedSeconds(current);
+                }
+            });
+
+            // Lưu khi pause video
+            video.addEventListener('pause', function () {
+                const current = Math.floor(video.currentTime);
+                if (current > 0) {
+                    saveWatchedSeconds(current);
+                }
+            });
+
+            // Lưu khi video kết thúc
+            video.addEventListener('ended', function () {
+                const current = Math.floor(video.duration);
+                if (current > 0) {
+                    saveWatchedSeconds(current);
+                }
+            });
+
+            // Lưu khi rời trang
+            window.addEventListener('beforeunload', function () {
+                if (video && !video.paused && video.currentTime > 0) {
+                    const current = Math.floor(video.currentTime);
+                    // Dùng sendBeacon để gửi non-blocking khi rời trang
+                    const lessonId = @(Model.CurrentLesson?.LessonId ?? 0);
+                    if (lessonId === 0) return;
+                    const data = JSON.stringify({ lessonId: lessonId, watchedSeconds: current });
+                    const blob = new Blob([data], { type: 'application/json' });
+                    navigator.sendBeacon('/Student/LearnCourse?handler=UpdateWatched', blob);
+                }
+            });
+
+            function saveWatchedSeconds(seconds) {
+                const lessonId = @(Model.CurrentLesson?.LessonId ?? 0);
+                if (lessonId === 0) return;
+
+                fetch('/Student/LearnCourse?handler=UpdateWatched', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                    },
+                    body: JSON.stringify({ lessonId: lessonId, watchedSeconds: seconds })
+                }).catch(() => { });
+            }
+        })();
+    </script>
+}
