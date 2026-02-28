@@ -148,16 +148,19 @@ namespace OnlineLearningPlatform.Repository.Implement
             var existing = await _context.Courses
                 .FirstOrDefaultAsync(c => c.CourseId == courseId && !c.IsDeleted);
 
-            if (existing == null)
-            {
-                return false;
-            }
-
             existing.Status = CourseStatus.Rejected;
             existing.RejectionReason = reason.Trim();
             existing.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             return true;
         }
+        public async Task<IEnumerable<Course>> GetCoursesWithSectionsAndQuizzesAsync() =>
+            await _context.Courses.Include(c => c.Sections).ThenInclude(s => s.Lessons).ThenInclude(l => l.Quizzes)
+                .Where(c => !c.IsDeleted).ToListAsync();
+
+        public async Task<IEnumerable<Course>> GetPublishedCoursesWithEnrollmentsAsync() =>
+            await _context.Courses.Include(c => c.Enrollments).Include(c => c.Sections).ThenInclude(s => s.Lessons).ThenInclude(l => l.Quizzes)
+                .Where(c => !c.IsDeleted && c.Status == CourseStatus.Published).ToListAsync();
     }
-}
+    }
+

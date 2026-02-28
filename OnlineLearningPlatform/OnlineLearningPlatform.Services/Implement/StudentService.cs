@@ -34,8 +34,7 @@ namespace OnlineLearningPlatform.Services.Implement
                 IsActive = true
             };
 
-            await _enrollmentRepo.AddAsync(enrollment);
-            await _enrollmentRepo.SaveChangesAsync();
+            await _enrollmentRepo.CreateAsync(enrollment);
         }
 
         public async Task<bool> IsEnrolledAsync(string userId, Guid courseId)
