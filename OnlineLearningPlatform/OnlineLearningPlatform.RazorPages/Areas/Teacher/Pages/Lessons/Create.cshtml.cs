@@ -9,18 +9,14 @@ using System.Security.Claims;
 namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Lessons
 {
     [Authorize(Roles = "Teacher")]
-    public class CreateModel : PageModel
+    public class CreateModel(
+        ISectionService sectionService,
+        ICourseService courseService,
+        ILessonService lessonService,
+        IWebHostEnvironment environment) : PageModel
     {
-        private readonly ISectionService _sectionService;
-        private readonly ICourseService _courseService;
-        private readonly ILessonService _lessonService;
-
-        public CreateModel(ISectionService sectionService, ICourseService courseService, ILessonService lessonService)
-        {
-            _sectionService = sectionService;
-            _courseService = courseService;
-            _lessonService = lessonService;
-        }
+        private const long MaxVideoSizeBytes = 200L * 1024 * 1024;
+        private static readonly string[] AllowedVideoExtensions = [".mp4", ".webm", ".ogg"];
 
         [BindProperty(SupportsGet = true)]
         public int SectionId { get; set; }
@@ -42,7 +38,10 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Lessons
         public bool IsPreview { get; set; }
 
         [BindProperty]
-        public string? Content { get; set; }
+        public string? LessonContent { get; set; }
+
+        [BindProperty]
+        public IFormFile? VideoFile { get; set; }
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -52,14 +51,14 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Lessons
                 return Challenge();
             }
 
-            var section = await _sectionService.GetByIdAsync(SectionId);
+            var section = await sectionService.GetByIdAsync(SectionId);
             if (section == null)
             {
                 TempData["ErrorMessage"] = "Section not found. You must create/select a valid section first.";
                 return RedirectToPage("/Courses/Index", new { area = "Teacher" });
             }
 
-            var course = await _courseService.GetMyCourseByIdAsync(section.CourseId, teacherId);
+            var course = await courseService.GetMyCourseByIdAsync(section.CourseId, teacherId);
             if (course == null)
             {
                 TempData["ErrorMessage"] = "You do not have permission for this section.";
@@ -78,14 +77,14 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Lessons
                 return Challenge();
             }
 
-            var section = await _sectionService.GetByIdAsync(SectionId);
+            var section = await sectionService.GetByIdAsync(SectionId);
             if (section == null)
             {
                 TempData["ErrorMessage"] = "Section not found. You must create/select a valid section first.";
                 return RedirectToPage("/Courses/Index", new { area = "Teacher" });
             }
 
-            var course = await _courseService.GetMyCourseByIdAsync(section.CourseId, teacherId);
+            var course = await courseService.GetMyCourseByIdAsync(section.CourseId, teacherId);
             if (course == null)
             {
                 TempData["ErrorMessage"] = "You do not have permission for this section.";
@@ -94,9 +93,51 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Lessons
 
             CourseId = section.CourseId;
 
+            if (LessonType == LessonType.Video)
+            {
+                if (VideoFile == null || VideoFile.Length == 0)
+                {
+                    ModelState.AddModelError(nameof(VideoFile), "Video file is required when LessonType is Video.");
+                }
+                else
+                {
+                    if (VideoFile.Length > MaxVideoSizeBytes)
+                    {
+                        ModelState.AddModelError(nameof(VideoFile), "Video file size must be less than or equal to 200MB.");
+                    }
+
+                    var extension = Path.GetExtension(VideoFile.FileName).ToLowerInvariant();
+                    if (!AllowedVideoExtensions.Contains(extension))
+                    {
+                        ModelState.AddModelError(nameof(VideoFile), "Invalid video format. Allowed: .mp4, .webm, .ogg.");
+                    }
+                }
+            }
+
             if (!ModelState.IsValid)
             {
                 return Page();
+            }
+
+            string? videoStoragePath = null;
+            string? originalFileName = null;
+
+            if (LessonType == LessonType.Video && VideoFile != null)
+            {
+                var uploadRoot = Path.Combine(environment.WebRootPath, "uploads", "videos");
+                Directory.CreateDirectory(uploadRoot);
+
+                var extension = Path.GetExtension(VideoFile.FileName).ToLowerInvariant();
+                var generatedFileName = $"{Guid.NewGuid():N}{extension}";
+                var absolutePath = Path.Combine(uploadRoot, generatedFileName);
+
+                await using (var stream = System.IO.File.Create(absolutePath))
+                {
+                    await VideoFile.CopyToAsync(stream);
+                }
+
+                videoStoragePath = $"/uploads/videos/{generatedFileName}";
+                originalFileName = VideoFile.FileName;
             }
 
             var lesson = new Lesson
@@ -106,10 +147,13 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Lessons
                 LessonType = LessonType,
                 OrderIndex = OrderIndex <= 0 ? 1 : OrderIndex,
                 IsPreview = IsPreview,
-                Content = Content
+                Content = LessonContent,
+                VideoStoragePath = videoStoragePath,
+                VideoOriginalFileName = originalFileName,
+                VideoStatus = LessonType == LessonType.Video ? VideoStatus.Ready : null
             };
 
-            var result = await _lessonService.CreateAsync(lesson, teacherId);
+            var result = await lessonService.CreateAsync(lesson, teacherId);
             if (!result.Success)
             {
                 ModelState.AddModelError(string.Empty, result.Message);

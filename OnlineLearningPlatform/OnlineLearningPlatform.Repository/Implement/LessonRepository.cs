@@ -70,7 +70,7 @@ namespace OnlineLearningPlatform.Repository.Implement
                         .ThenInclude(qa => qa.QuizAnswers)
                 .Include(l => l.Assignments)
                     .ThenInclude(a => a.AssignmentSubmissions)
-                .FirstOrDefaultAsync(l => l.LessonId == lessonId && !l.IsDeleted);
+                .FirstOrDefaultAsync(l => l.LessonId == lessonId);
 
             if (existing == null)
             {
