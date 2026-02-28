@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using OnlineLearningPlatform.Models;
 using OnlineLearningPlatform.Models.Entities;
 using OnlineLearningPlatform.Services.DTOs.Course.Request;
 using OnlineLearningPlatform.Services.Interface;
@@ -17,6 +19,7 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses
         private readonly ISectionService _sectionService;
         private readonly ILessonService _lessonService;
         private readonly IWebHostEnvironment _environment;
+        private readonly ApplicationDbContext _dbContext;
 
         private const long MaxVideoSizeBytes = 200L * 1024 * 1024;
         private static readonly string[] AllowedVideoExtensions = [".mp4", ".webm", ".ogg"];
@@ -27,13 +30,15 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses
             ICategoryService categoryService,
             ISectionService sectionService,
             ILessonService lessonService,
-            IWebHostEnvironment environment)
+            IWebHostEnvironment environment,
+            ApplicationDbContext dbContext)
         {
             _courseService = courseService;
             _categoryService = categoryService;
             _sectionService = sectionService;
             _lessonService = lessonService;
             _environment = environment;
+            _dbContext = dbContext;
         }
 
         [BindProperty]
@@ -47,32 +52,16 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses
         public async Task OnGetAsync()
         {
             Categories = await _categoryService.GetAllAsync();
-            if (Sections.Count == 0)
-            {
-                Sections.Add(new SectionInputModel
-                {
-                    Title = "Section 1",
-                    OrderIndex = 1,
-                    Lessons = new List<LessonInputModel>
-                    {
-                        new LessonInputModel
-                        {
-                            Title = "Lesson 1",
-                            OrderIndex = 1,
-                            LessonType = LessonType.Reading
-                        }
-                    }
-                });
-            }
+            EnsureAtLeastOneSection();
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
             Categories = await _categoryService.GetAllAsync();
+            EnsureAtLeastOneSection();
 
             if (!ModelState.IsValid)
             {
-                EnsureAtLeastOneSection();
                 return Page();
             }
 
@@ -82,106 +71,119 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses
                 return Challenge();
             }
 
-            ValidateDynamicStructure();
+            ValidateDynamicStructureAndFiles();
             if (!ModelState.IsValid)
             {
-                EnsureAtLeastOneSection();
                 return Page();
             }
 
-            var result = await _courseService.CreateAsync(teacherId, Input);
-            if (!result.Success || result.Course == null)
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
             {
-                ModelState.AddModelError(string.Empty, result.Message);
-                EnsureAtLeastOneSection();
-                return Page();
-            }
-
-            foreach (var sectionInput in Sections.OrderBy(s => s.OrderIndex))
-            {
-                var sectionResult = await _sectionService.CreateAsync(
-                    result.Course.CourseId,
-                    sectionInput.Title,
-                    sectionInput.OrderIndex <= 0 ? 1 : sectionInput.OrderIndex,
-                    teacherId);
-
-                if (!sectionResult.Success || sectionResult.Section == null)
+                var result = await _courseService.CreateAsync(teacherId, Input);
+                if (!result.Success || result.Course == null)
                 {
-                    ModelState.AddModelError(string.Empty, $"Course created, but failed to create section '{sectionInput.Title}': {sectionResult.Message}");
+                    ModelState.AddModelError(string.Empty, result.Message);
                     return Page();
                 }
 
-                foreach (var lessonInput in sectionInput.Lessons.OrderBy(l => l.OrderIndex))
+                foreach (var sectionInput in Sections.OrderBy(s => NormalizeOrder(s.OrderIndex)))
                 {
-                    string? videoStoragePath = null;
-                    string? videoOriginalFileName = null;
-                    string? readingPdfStoragePath = null;
-                    string? readingPdfOriginalFileName = null;
+                    var sectionResult = await _sectionService.CreateAsync(
+                        result.Course.CourseId,
+                        sectionInput.Title,
+                        NormalizeOrder(sectionInput.OrderIndex),
+                        teacherId);
 
-                    if (lessonInput.LessonType == LessonType.Video && lessonInput.VideoFile != null && lessonInput.VideoFile.Length > 0)
+                    if (!sectionResult.Success || sectionResult.Section == null)
                     {
-                        var uploadRoot = Path.Combine(_environment.WebRootPath, "uploads", "videos");
-                        Directory.CreateDirectory(uploadRoot);
-
-                        var extension = Path.GetExtension(lessonInput.VideoFile.FileName).ToLowerInvariant();
-                        var generatedFileName = $"{Guid.NewGuid():N}{extension}";
-                        var absolutePath = Path.Combine(uploadRoot, generatedFileName);
-
-                        await using (var stream = System.IO.File.Create(absolutePath))
-                        {
-                            await lessonInput.VideoFile.CopyToAsync(stream);
-                        }
-
-                        videoStoragePath = $"/uploads/videos/{generatedFileName}";
-                        videoOriginalFileName = lessonInput.VideoFile.FileName;
-                    }
-
-                    if (lessonInput.LessonType == LessonType.Reading && lessonInput.ReadingPdfFile != null && lessonInput.ReadingPdfFile.Length > 0)
-                    {
-                        var uploadRoot = Path.Combine(_environment.WebRootPath, "uploads", "readings");
-                        Directory.CreateDirectory(uploadRoot);
-
-                        var generatedFileName = $"{Guid.NewGuid():N}.pdf";
-                        var absolutePath = Path.Combine(uploadRoot, generatedFileName);
-
-                        await using (var stream = System.IO.File.Create(absolutePath))
-                        {
-                            await lessonInput.ReadingPdfFile.CopyToAsync(stream);
-                        }
-
-                        readingPdfStoragePath = $"/uploads/readings/{generatedFileName}";
-                        readingPdfOriginalFileName = lessonInput.ReadingPdfFile.FileName;
-                    }
-
-                    var lesson = new Lesson
-                    {
-                        SectionId = sectionResult.Section.SectionId,
-                        Title = lessonInput.Title,
-                        LessonType = lessonInput.LessonType,
-                        OrderIndex = lessonInput.OrderIndex <= 0 ? 1 : lessonInput.OrderIndex,
-                        IsPreview = lessonInput.IsPreview,
-                        Content = lessonInput.LessonType == LessonType.Reading ? lessonInput.Content : null,
-                        VideoStoragePath = videoStoragePath,
-                        VideoOriginalFileName = videoOriginalFileName,
-                        VideoStatus = lessonInput.LessonType == LessonType.Video ? VideoStatus.Ready : null,
-                        ReadingPdfStoragePath = readingPdfStoragePath,
-                        ReadingPdfOriginalFileName = readingPdfOriginalFileName
-                    };
-
-                    var lessonResult = await _lessonService.CreateAsync(lesson, teacherId);
-                    if (!lessonResult.Success)
-                    {
-                        ModelState.AddModelError(string.Empty, $"Course created, but failed to create lesson '{lessonInput.Title}': {lessonResult.Message}");
+                        ModelState.AddModelError(string.Empty, $"Create section '{sectionInput.Title}' failed: {sectionResult.Message}");
                         return Page();
                     }
-                }
-            }
 
-            TempData["SuccessMessage"] = "Course, sections, and lessons created successfully.";
-            return RedirectToPage("/Courses/Index", new { area = "Teacher" });
+                    foreach (var lessonInput in sectionInput.Lessons.OrderBy(l => NormalizeOrder(l.OrderIndex)))
+                    {
+                        var lesson = await BuildLessonEntityAsync(sectionResult.Section.SectionId, lessonInput);
+                        var lessonResult = await _lessonService.CreateAsync(lesson, teacherId);
+                        if (!lessonResult.Success)
+                        {
+                            ModelState.AddModelError(string.Empty, $"Create lesson '{lessonInput.Title}' failed: {lessonResult.Message}");
+                            return Page();
+                        }
+                    }
+                }
+
+                await transaction.CommitAsync();
+                TempData["SuccessMessage"] = "Course, sections, and lessons created successfully.";
+                return RedirectToPage("/Courses/Index", new { area = "Teacher" });
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                ModelState.AddModelError(string.Empty, $"Unexpected error: {ex.Message}");
+                return Page();
+            }
         }
 
-        private void ValidateDynamicStructure()
+        private async Task<Lesson> BuildLessonEntityAsync(int sectionId, LessonInputModel lessonInput)
+        {
+            string? videoStoragePath = null;
+            string? videoOriginalFileName = null;
+            string? readingPdfStoragePath = null;
+            string? readingPdfOriginalFileName = null;
+
+            if (lessonInput.LessonType == LessonType.Video && lessonInput.VideoFile != null && lessonInput.VideoFile.Length > 0)
+            {
+                var uploadRoot = Path.Combine(_environment.WebRootPath, "uploads", "videos");
+                Directory.CreateDirectory(uploadRoot);
+
+                var extension = Path.GetExtension(lessonInput.VideoFile.FileName).ToLowerInvariant();
+                var generatedFileName = $"{Guid.NewGuid():N}{extension}";
+                var absolutePath = Path.Combine(uploadRoot, generatedFileName);
+
+                await using (var stream = System.IO.File.Create(absolutePath))
+                {
+                    await lessonInput.VideoFile.CopyToAsync(stream);
+                }
+
+                videoStoragePath = $"/uploads/videos/{generatedFileName}";
+                videoOriginalFileName = lessonInput.VideoFile.FileName;
+            }
+
+            if (lessonInput.LessonType == LessonType.Reading && lessonInput.ReadingPdfFile != null && lessonInput.ReadingPdfFile.Length > 0)
+            {
+                var uploadRoot = Path.Combine(_environment.WebRootPath, "uploads", "readings");
+                Directory.CreateDirectory(uploadRoot);
+
+                var generatedFileName = $"{Guid.NewGuid():N}.pdf";
+                var absolutePath = Path.Combine(uploadRoot, generatedFileName);
+
+                await using (var stream = System.IO.File.Create(absolutePath))
+                {
+                    await lessonInput.ReadingPdfFile.CopyToAsync(stream);
+                }
+
+                readingPdfStoragePath = $"/uploads/readings/{generatedFileName}";
+                readingPdfOriginalFileName = lessonInput.ReadingPdfFile.FileName;
+            }
+
+            return new Lesson
+            {
+                SectionId = sectionId,
+                Title = lessonInput.Title,
+                LessonType = lessonInput.LessonType,
+                OrderIndex = NormalizeOrder(lessonInput.OrderIndex),
+                IsPreview = lessonInput.IsPreview,
+                Content = lessonInput.LessonType == LessonType.Reading ? lessonInput.Content : null,
+                VideoStoragePath = videoStoragePath,
+                VideoOriginalFileName = videoOriginalFileName,
+                VideoStatus = lessonInput.LessonType == LessonType.Video ? VideoStatus.Ready : null,
+                ReadingPdfStoragePath = readingPdfStoragePath,
+                ReadingPdfOriginalFileName = readingPdfOriginalFileName
+            };
+        }
+
+        private void ValidateDynamicStructureAndFiles()
         {
             if (Sections == null || Sections.Count == 0)
             {
@@ -190,7 +192,7 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses
             }
 
             var duplicatedSectionOrder = Sections
-                .GroupBy(s => s.OrderIndex <= 0 ? 1 : s.OrderIndex)
+                .GroupBy(s => NormalizeOrder(s.OrderIndex))
                 .FirstOrDefault(g => g.Count() > 1);
 
             if (duplicatedSectionOrder != null)
@@ -201,6 +203,7 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses
             for (var i = 0; i < Sections.Count; i++)
             {
                 var section = Sections[i];
+
                 if (string.IsNullOrWhiteSpace(section.Title))
                 {
                     ModelState.AddModelError($"Sections[{i}].Title", "Section title is required.");
@@ -213,7 +216,7 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses
                 }
 
                 var duplicatedLessonOrder = section.Lessons
-                    .GroupBy(l => l.OrderIndex <= 0 ? 1 : l.OrderIndex)
+                    .GroupBy(l => NormalizeOrder(l.OrderIndex))
                     .FirstOrDefault(g => g.Count() > 1);
 
                 if (duplicatedLessonOrder != null)
@@ -224,48 +227,56 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses
                 for (var j = 0; j < section.Lessons.Count; j++)
                 {
                     var lesson = section.Lessons[j];
+
                     if (string.IsNullOrWhiteSpace(lesson.Title))
                     {
                         ModelState.AddModelError($"Sections[{i}].Lessons[{j}].Title", "Lesson title is required.");
                     }
 
-                    if (lesson.LessonType == LessonType.Video)
-                    {
-                        if (lesson.VideoFile == null || lesson.VideoFile.Length == 0)
-                        {
-                            ModelState.AddModelError($"Sections[{i}].Lessons[{j}].VideoFile", "Video file is required when lesson type is Video.");
-                        }
-                        else
-                        {
-                            if (lesson.VideoFile.Length > MaxVideoSizeBytes)
-                            {
-                                ModelState.AddModelError($"Sections[{i}].Lessons[{j}].VideoFile", "Video file size must be less than or equal to 200MB.");
-                            }
-
-                            var ext = Path.GetExtension(lesson.VideoFile.FileName).ToLowerInvariant();
-                            if (!AllowedVideoExtensions.Contains(ext))
-                            {
-                                ModelState.AddModelError($"Sections[{i}].Lessons[{j}].VideoFile", "Invalid video format. Allowed: .mp4, .webm, .ogg.");
-                            }
-                        }
-                    }
-
-                    if (lesson.LessonType == LessonType.Reading && lesson.ReadingPdfFile != null && lesson.ReadingPdfFile.Length > 0)
-                    {
-                        var ext = Path.GetExtension(lesson.ReadingPdfFile.FileName).ToLowerInvariant();
-                        if (ext != ".pdf")
-                        {
-                            ModelState.AddModelError($"Sections[{i}].Lessons[{j}].ReadingPdfFile", "Only PDF file is allowed for Reading attachment.");
-                        }
-
-                        if (lesson.ReadingPdfFile.Length > MaxPdfSizeBytes)
-                        {
-                            ModelState.AddModelError($"Sections[{i}].Lessons[{j}].ReadingPdfFile", "PDF size must be less than or equal to 50MB.");
-                        }
-                    }
+                    ValidateLessonFileRule(i, j, lesson);
                 }
             }
         }
+
+        private void ValidateLessonFileRule(int sectionIndex, int lessonIndex, LessonInputModel lesson)
+        {
+            var keyPrefix = $"Sections[{sectionIndex}].Lessons[{lessonIndex}]";
+
+            if (lesson.LessonType == LessonType.Video)
+            {
+                if (lesson.VideoFile == null || lesson.VideoFile.Length == 0)
+                {
+                    ModelState.AddModelError($"{keyPrefix}.VideoFile", "Video file is required when LessonType is Video.");
+                    return;
+                }
+
+                if (lesson.VideoFile.Length > MaxVideoSizeBytes)
+                {
+                    ModelState.AddModelError($"{keyPrefix}.VideoFile", "Video file size must be less than or equal to 200MB.");
+                }
+
+                var extension = Path.GetExtension(lesson.VideoFile.FileName).ToLowerInvariant();
+                if (!AllowedVideoExtensions.Contains(extension))
+                {
+                    ModelState.AddModelError($"{keyPrefix}.VideoFile", "Invalid video format. Allowed: .mp4, .webm, .ogg.");
+                }
+            }
+            else if (lesson.LessonType == LessonType.Reading && lesson.ReadingPdfFile != null && lesson.ReadingPdfFile.Length > 0)
+            {
+                var extension = Path.GetExtension(lesson.ReadingPdfFile.FileName).ToLowerInvariant();
+                if (extension != ".pdf")
+                {
+                    ModelState.AddModelError($"{keyPrefix}.ReadingPdfFile", "Only PDF file is allowed for Reading attachment.");
+                }
+
+                if (lesson.ReadingPdfFile.Length > MaxPdfSizeBytes)
+                {
+                    ModelState.AddModelError($"{keyPrefix}.ReadingPdfFile", "PDF size must be less than or equal to 50MB.");
+                }
+            }
+        }
+
+        private static int NormalizeOrder(int order) => order <= 0 ? 1 : order;
 
         private void EnsureAtLeastOneSection()
         {
