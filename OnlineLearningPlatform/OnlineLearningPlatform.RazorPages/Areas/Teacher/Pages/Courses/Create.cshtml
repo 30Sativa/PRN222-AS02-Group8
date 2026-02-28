@@ -7,7 +7,7 @@
 
 <h2 class="mb-3">Create Course</h2>
 
-<form method="post">
+<form method="post" enctype="multipart/form-data">
     <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
     <div class="row g-3">
@@ -67,12 +67,258 @@
         </div>
     </div>
 
+    <hr class="my-4" />
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Sections & Lessons</h4>
+        <button type="button" class="btn btn-outline-primary" id="btnAddSection">+ Add Section</button>
+    </div>
+
+    <div id="sectionsContainer"></div>
+
     <div class="mt-4 d-flex gap-2">
-        <button type="submit" class="btn btn-primary">Create</button>
+        <button type="submit" class="btn btn-primary">Create Course</button>
         <a asp-area="Teacher" asp-page="/Courses/Index" class="btn btn-secondary">Back to List</a>
     </div>
 </form>
 
+<template id="sectionTemplate">
+    <div class="card shadow-sm border-0 mb-3 section-item">
+        <div class="card-header d-flex justify-content-between align-items-center bg-light">
+            <strong class="section-title">Section</strong>
+            <button type="button" class="btn btn-sm btn-outline-danger btn-remove-section">Remove Section</button>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label class="form-label">Section Title</label>
+                    <input class="form-control section-title-input" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Order</label>
+                    <input class="form-control section-order-input" type="number" min="1" value="1" />
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-3 mb-2">
+                <h6 class="mb-0">Lessons</h6>
+                <button type="button" class="btn btn-sm btn-outline-primary btn-add-lesson">+ Add Lesson</button>
+            </div>
+
+            <div class="lessons-container"></div>
+        </div>
+    </div>
+</template>
+
+<template id="lessonTemplate">
+    <div class="border rounded p-3 mb-2 lesson-item bg-white">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <strong class="lesson-title">Lesson</strong>
+            <button type="button" class="btn btn-sm btn-outline-danger btn-remove-lesson">Remove</button>
+        </div>
+        <div class="row g-2">
+            <div class="col-md-5">
+                <label class="form-label">Lesson Title</label>
+                <input class="form-control lesson-title-input" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Type</label>
+                <select class="form-select lesson-type-input">
+                    @foreach (LessonType type in Enum.GetValues(typeof(LessonType)))
+                    {
+                        <option value="@type">@type</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Order</label>
+                <input class="form-control lesson-order-input" type="number" min="1" value="1" />
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <div class="form-check">
+                    <input class="form-check-input lesson-preview-input" type="checkbox" />
+                    <label class="form-check-label">Preview</label>
+                </div>
+            </div>
+
+            <div class="col-12 reading-content-group">
+                <label class="form-label">Reading Content (optional)</label>
+                <textarea class="form-control lesson-content-input" rows="2"></textarea>
+            </div>
+
+            <div class="col-12 video-upload-group" style="display:none;">
+                <label class="form-label">Video File</label>
+                <input class="form-control lesson-video-file-input" type="file" accept="video/mp4,video/webm,video/ogg" />
+                <div class="form-text">Required for Video. Max 200MB.</div>
+            </div>
+
+            <div class="col-12 reading-pdf-group">
+                <label class="form-label">Reading PDF (optional)</label>
+                <input class="form-control lesson-reading-pdf-file-input" type="file" accept="application/pdf,.pdf" />
+                <div class="form-text">Optional for Reading. PDF only, max 50MB.</div>
+            </div>
+        </div>
+    </div>
+</template>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const sectionsContainer = document.getElementById('sectionsContainer');
+            const sectionTemplate = document.getElementById('sectionTemplate');
+            const lessonTemplate = document.getElementById('lessonTemplate');
+            const btnAddSection = document.getElementById('btnAddSection');
+
+            const initialSections = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Sections));
+
+            function createHidden(name, value) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = name;
+                input.value = value ?? '';
+                input.dataset.dynamic = '1';
+                return input;
+            }
+
+            function toggleLessonFields(lessonNode) {
+                const type = lessonNode.querySelector('.lesson-type-input').value;
+                const videoGroup = lessonNode.querySelector('.video-upload-group');
+                const readingPdfGroup = lessonNode.querySelector('.reading-pdf-group');
+                const readingContentGroup = lessonNode.querySelector('.reading-content-group');
+
+                if (type === 'Video') {
+                    videoGroup.style.display = 'block';
+                    readingPdfGroup.style.display = 'none';
+                    readingContentGroup.style.display = 'none';
+                } else if (type === 'Reading') {
+                    videoGroup.style.display = 'none';
+                    readingPdfGroup.style.display = 'block';
+                    readingContentGroup.style.display = 'block';
+                } else {
+                    videoGroup.style.display = 'none';
+                    readingPdfGroup.style.display = 'none';
+                    readingContentGroup.style.display = 'none';
+                }
+            }
+
+            function renderSection(sectionData) {
+                const node = sectionTemplate.content.firstElementChild.cloneNode(true);
+                const lessonsContainer = node.querySelector('.lessons-container');
+
+                const sectionTitleInput = node.querySelector('.section-title-input');
+                const sectionOrderInput = node.querySelector('.section-order-input');
+                const btnRemoveSection = node.querySelector('.btn-remove-section');
+                const btnAddLesson = node.querySelector('.btn-add-lesson');
+
+                sectionTitleInput.value = sectionData?.title || '';
+                sectionOrderInput.value = sectionData?.orderIndex || 1;
+
+                btnRemoveSection.addEventListener('click', () => {
+                    node.remove();
+                    refreshLabels();
+                });
+
+                btnAddLesson.addEventListener('click', () => {
+                    lessonsContainer.appendChild(renderLesson());
+                    refreshLabels();
+                });
+
+                const initialLessons = sectionData?.lessons?.length ? sectionData.lessons : [null];
+                initialLessons.forEach(l => lessonsContainer.appendChild(renderLesson(l)));
+
+                return node;
+            }
+
+            function renderLesson(lessonData) {
+                const node = lessonTemplate.content.firstElementChild.cloneNode(true);
+                node.querySelector('.lesson-title-input').value = lessonData?.title || '';
+                node.querySelector('.lesson-type-input').value = lessonData?.lessonType || 'Reading';
+                node.querySelector('.lesson-order-input').value = lessonData?.orderIndex || 1;
+                node.querySelector('.lesson-preview-input').checked = !!lessonData?.isPreview;
+                node.querySelector('.lesson-content-input').value = lessonData?.content || '';
+
+                node.querySelector('.lesson-type-input').addEventListener('change', () => toggleLessonFields(node));
+                toggleLessonFields(node);
+
+                node.querySelector('.btn-remove-lesson').addEventListener('click', () => {
+                    const parent = node.parentElement;
+                    node.remove();
+                    if (parent && parent.children.length === 0) {
+                        parent.appendChild(renderLesson());
+                    }
+                    refreshLabels();
+                });
+
+                return node;
+            }
+
+            function refreshLabels() {
+                const sectionItems = sectionsContainer.querySelectorAll('.section-item');
+                sectionItems.forEach((sectionNode, sIndex) => {
+                    sectionNode.querySelector('.section-title').textContent = `Section ${sIndex + 1}`;
+
+                    const lessonItems = sectionNode.querySelectorAll('.lesson-item');
+                    lessonItems.forEach((lessonNode, lIndex) => {
+                        lessonNode.querySelector('.lesson-title').textContent = `Lesson ${lIndex + 1}`;
+                    });
+                });
+            }
+
+            function beforeSubmitBuildInputs(form) {
+                form.querySelectorAll('input[type="hidden"][data-dynamic="1"]').forEach(x => x.remove());
+
+                const sectionItems = sectionsContainer.querySelectorAll('.section-item');
+                sectionItems.forEach((sectionNode, sIndex) => {
+                    const sectionTitle = sectionNode.querySelector('.section-title-input').value;
+                    const sectionOrder = sectionNode.querySelector('.section-order-input').value || '1';
+
+                    const sPrefix = `Sections[${sIndex}]`;
+                    form.appendChild(createHidden(`${sPrefix}.Title`, sectionTitle));
+                    form.appendChild(createHidden(`${sPrefix}.OrderIndex`, sectionOrder));
+
+                    const lessonItems = sectionNode.querySelectorAll('.lesson-item');
+                    lessonItems.forEach((lessonNode, lIndex) => {
+                        const lPrefix = `${sPrefix}.Lessons[${lIndex}]`;
+
+                        const title = lessonNode.querySelector('.lesson-title-input').value;
+                        const type = lessonNode.querySelector('.lesson-type-input').value;
+                        const order = lessonNode.querySelector('.lesson-order-input').value || '1';
+                        const isPreview = lessonNode.querySelector('.lesson-preview-input').checked;
+                        const content = lessonNode.querySelector('.lesson-content-input').value;
+
+                        form.appendChild(createHidden(`${lPrefix}.Title`, title));
+                        form.appendChild(createHidden(`${lPrefix}.LessonType`, type));
+                        form.appendChild(createHidden(`${lPrefix}.OrderIndex`, order));
+                        form.appendChild(createHidden(`${lPrefix}.IsPreview`, isPreview ? 'true' : 'false'));
+                        form.appendChild(createHidden(`${lPrefix}.Content`, content));
+
+                        const videoInput = lessonNode.querySelector('.lesson-video-file-input');
+                        const pdfInput = lessonNode.querySelector('.lesson-reading-pdf-file-input');
+
+                        videoInput.name = `${lPrefix}.VideoFile`;
+                        pdfInput.name = `${lPrefix}.ReadingPdfFile`;
+                    });
+                });
+            }
+
+            btnAddSection.addEventListener('click', () => {
+                sectionsContainer.appendChild(renderSection());
+                refreshLabels();
+            });
+
+            if (initialSections && initialSections.length > 0) {
+                initialSections.forEach(s => sectionsContainer.appendChild(renderSection(s)));
+            } else {
+                sectionsContainer.appendChild(renderSection());
+            }
+
+            refreshLabels();
+
+            const form = document.querySelector('form[method="post"]');
+            form.addEventListener('submit', function () {
+                beforeSubmitBuildInputs(form);
+            });
+        })();
+    </script>
 }
