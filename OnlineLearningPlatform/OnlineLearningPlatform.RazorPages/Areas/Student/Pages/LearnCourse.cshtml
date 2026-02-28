@@ -376,7 +376,7 @@
     <!-- ===== SIDEBAR: Curriculum + Progress ===== -->
     <aside class="learn-sidebar">
         <div class="learn-sidebar-header">
-            <h2>@Model.Course.Title</h2>
+            <h2>@(Model.Course?.Title ?? "")</h2>
 
             <!-- Progress bar (4.8) -->
             <div class="progress-bar-container">
@@ -390,7 +390,7 @@
         </div>
 
         <div class="learn-sections">
-            @foreach (var section in Model.Course.Sections.OrderBy(s => s.OrderIndex))
+            @foreach (var section in (Model.Course?.Sections ?? new List<Section>()).OrderBy(s => s.OrderIndex))
             {
                 var sectionLessons = section.Lessons
                     .Where(l => !l.IsDeleted)
@@ -458,7 +458,7 @@
                         {
                             var mins = lesson.VideoDurationSeconds.Value / 60;
                             var secs = lesson.VideoDurationSeconds.Value % 60;
-                            <span>⏱ @mins:@secs.ToString("D2")</span>
+                            <span>⏱ @(mins):@(secs.ToString("D2"))</span>
                         }
                     </div>
                 </div>
@@ -547,8 +547,55 @@
 <!-- Toast notification -->
 <div id="toast" class="toast-notification"></div>
 
+@Html.AntiForgeryToken()
+
 @section Scripts {
+    <!-- SignalR client -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
     <script>
+        // ===== SignalR: Real-time progress =====
+        const progressConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/hubs/progress")
+            .withAutomaticReconnect()
+            .build();
+
+        // Join course group khi connect thành công
+        const currentCourseId = '@Model.Course?.CourseId';
+        progressConnection.start().then(() => {
+            if (currentCourseId) {
+                progressConnection.invoke("JoinCourseGroup", currentCourseId);
+            }
+        }).catch(err => console.error('SignalR error:', err));
+
+        // Nhận event khi có ai đó (hoặc chính mình) hoàn thành bài học
+        progressConnection.on("LessonCompleted", function (data) {
+            // Cập nhật progress bar real-time
+            document.getElementById('progressBar').style.width = data.percentComplete + '%';
+            const progressText = document.getElementById('progressText');
+            if (progressText) {
+                progressText.textContent = data.completedLessons + ' / ' + data.totalLessons + ' bài hoàn thành (' + data.percentComplete + '%)';
+            }
+
+            // Cập nhật icon bài học trong sidebar
+            const lessonLinks = document.querySelectorAll('.learn-lesson-item');
+            lessonLinks.forEach(link => {
+                if (link.href && link.href.includes('lessonId=' + data.lessonId)) {
+                    const icon = link.querySelector('.lesson-icon');
+                    if (icon) {
+                        icon.className = 'lesson-icon completed';
+                        icon.textContent = '✓';
+                    }
+                }
+            });
+        });
+
+        // Rời group khi đóng trang
+        window.addEventListener('beforeunload', function () {
+            if (currentCourseId && progressConnection.state === signalR.HubConnectionState.Connected) {
+                progressConnection.invoke("LeaveCourseGroup", currentCourseId);
+            }
+        });
+
         // ===== Toggle section collapse =====
         function toggleSection(el) {
             el.closest('.learn-section').classList.toggle('collapsed');
@@ -594,13 +641,10 @@
                         activeItem.textContent = '✓';
                     }
 
-                    // Cập nhật text
+                    // Cập nhật text — dùng completedLessons và totalLessons từ server (chính xác)
                     const progressText = document.getElementById('progressText');
                     if (progressText) {
-                        const totalMatch = progressText.textContent.match(/\/\s*(\d+)/);
-                        const total = totalMatch ? totalMatch[1] : '?';
-                        const completed = Math.round(data.percentComplete / 100 * parseInt(total));
-                        progressText.textContent = completed + ' / ' + total + ' bài hoàn thành (' + data.percentComplete + '%)';
+                        progressText.textContent = data.completedLessons + ' / ' + data.totalLessons + ' bài hoàn thành (' + data.percentComplete + '%)';
                     }
 
                     if (data.isCourseCompleted) {
@@ -637,6 +681,35 @@
                 }
             });
 
+            // Lưu khi pause video
+            video.addEventListener('pause', function () {
+                const current = Math.floor(video.currentTime);
+                if (current > 0) {
+                    saveWatchedSeconds(current);
+                }
+            });
+
+            // Lưu khi video kết thúc
+            video.addEventListener('ended', function () {
+                const current = Math.floor(video.duration);
+                if (current > 0) {
+                    saveWatchedSeconds(current);
+                }
+            });
+
+            // Lưu khi rời trang
+            window.addEventListener('beforeunload', function () {
+                if (video && !video.paused && video.currentTime > 0) {
+                    const current = Math.floor(video.currentTime);
+                    // Dùng sendBeacon để gửi non-blocking khi rời trang
+                    const lessonId = @(Model.CurrentLesson?.LessonId ?? 0);
+                    if (lessonId === 0) return;
+                    const data = JSON.stringify({ lessonId: lessonId, watchedSeconds: current });
+                    const blob = new Blob([data], { type: 'application/json' });
+                    navigator.sendBeacon('/Student/LearnCourse?handler=UpdateWatched', blob);
+                }
+            });
+
             function saveWatchedSeconds(seconds) {
                 const lessonId = @(Model.CurrentLesson?.LessonId ?? 0);
                 if (lessonId === 0) return;
@@ -652,6 +725,4 @@
             }
         })();
     </script>
-
-    @Html.AntiForgeryToken()
 }

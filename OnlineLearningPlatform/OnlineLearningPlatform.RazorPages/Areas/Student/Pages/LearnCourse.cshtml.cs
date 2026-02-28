@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.SignalR;
 using OnlineLearningPlatform.Models.Entities;
+using OnlineLearningPlatform.RazorPages.Hubs;
 using OnlineLearningPlatform.Services.DTOs.Progress;
 using OnlineLearningPlatform.Services.Interface;
 using System.Security.Claims;
@@ -11,11 +13,16 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Student.Pages
     {
         private readonly IEnrollmentService _enrollmentService;
         private readonly IProgressService _progressService;
+        private readonly IHubContext<ProgressHub> _progressHub;
 
-        public LearnCourseModel(IEnrollmentService enrollmentService, IProgressService progressService)
+        public LearnCourseModel(
+            IEnrollmentService enrollmentService,
+            IProgressService progressService,
+            IHubContext<ProgressHub> progressHub)
         {
             _enrollmentService = enrollmentService;
             _progressService = progressService;
+            _progressHub = progressHub;
         }
 
         // ===== Bind properties =====
@@ -84,12 +91,30 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Student.Pages
 
             var result = await _progressService.MarkLessonCompleteAsync(userId, request.LessonId, request.CourseId);
 
+            // SignalR: broadcast real-time progress update cho tất cả student đang xem cùng course
+            if (result.Success)
+            {
+                await _progressHub.Clients.Group($"course_{request.CourseId}")
+                    .SendAsync("LessonCompleted", new
+                    {
+                        lessonId = request.LessonId,
+                        courseId = request.CourseId,
+                        userId = userId,
+                        userName = User.Identity?.Name ?? "",
+                        percentComplete = result.PercentComplete,
+                        completedLessons = result.CompletedLessons,
+                        totalLessons = result.TotalLessons
+                    });
+            }
+
             return new JsonResult(new
             {
                 success = result.Success,
                 message = result.Message,
                 percentComplete = result.PercentComplete,
-                isCourseCompleted = result.IsCourseCompleted
+                isCourseCompleted = result.IsCourseCompleted,
+                completedLessons = result.CompletedLessons,
+                totalLessons = result.TotalLessons
             });
         }
 
