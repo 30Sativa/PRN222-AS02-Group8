@@ -8,19 +8,8 @@ using System.Security.Claims;
 namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses
 {
     [Authorize(Roles = "Teacher")]
-    public class DetailsModel : PageModel
+    public class DetailsModel(ICourseService courseService, ISectionService sectionService, ILessonService lessonService) : PageModel
     {
-        private readonly ICourseService _courseService;
-        private readonly ISectionService _sectionService;
-        private readonly ILessonService _lessonService;
-
-        public DetailsModel(ICourseService courseService, ISectionService sectionService, ILessonService lessonService)
-        {
-            _courseService = courseService;
-            _sectionService = sectionService;
-            _lessonService = lessonService;
-        }
-
         public Course? Course { get; set; }
 
         public List<Section> Sections { get; set; } = new();
@@ -35,22 +24,50 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses
                 return Challenge();
             }
 
-            Course = await _courseService.GetMyCourseByIdAsync(id, teacherId);
+            Course = await courseService.GetMyCourseByIdAsync(id, teacherId);
             if (Course == null)
             {
                 TempData["ErrorMessage"] = "Course not found.";
                 return RedirectToPage("/Courses/Index", new { area = "Teacher" });
             }
 
-            Sections = await _sectionService.GetByCourseAsync(Course.CourseId);
+            Sections = await sectionService.GetByCourseAsync(Course.CourseId);
 
             foreach (var section in Sections)
             {
-                var lessons = await _lessonService.GetBySectionAsync(section.SectionId);
+                var lessons = await lessonService.GetBySectionAsync(section.SectionId);
                 LessonsBySection[section.SectionId] = lessons;
             }
 
             return Page();
+        }
+
+        public async Task<IActionResult> OnPostDeleteSectionAsync(Guid id, int sectionId)
+        {
+            var teacherId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(teacherId))
+            {
+                return Challenge();
+            }
+
+            var result = await sectionService.DeleteAsync(sectionId, teacherId);
+            TempData[result.Success ? "SuccessMessage" : "ErrorMessage"] = result.Message;
+
+            return RedirectToPage(new { area = "Teacher", id });
+        }
+
+        public async Task<IActionResult> OnPostDeleteLessonAsync(Guid id, int lessonId)
+        {
+            var teacherId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(teacherId))
+            {
+                return Challenge();
+            }
+
+            var result = await lessonService.DeleteAsync(lessonId, teacherId);
+            TempData[result.Success ? "SuccessMessage" : "ErrorMessage"] = result.Message;
+
+            return RedirectToPage(new { area = "Teacher", id });
         }
     }
 }
