@@ -1,0 +1,233 @@
+@page "{orderId:int}"
+@model OnlineLearningPlatform.RazorPages.Pages.Payment.PaymentResultModel
+@{
+    ViewData["Title"] = "Kết quả thanh toán";
+}
+
+<style>
+    :root {
+        --apple-bg: #fbfbfd;
+        --apple-bg-end: #e5e5ea;
+        --apple-text: #1d1d1f;
+        --apple-text-muted: #86868b;
+        --apple-blue: #0071e3;
+        --apple-radius: 28px;
+    }
+    body {
+        background: linear-gradient(135deg, var(--apple-bg) 0%, var(--apple-bg-end) 100%);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: var(--apple-text);
+        -webkit-font-smoothing: antialiased;
+        min-height: 100vh;
+    }
+    .result-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 1rem;
+    }
+    .result-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: var(--apple-radius);
+        padding: 3rem;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+        max-width: 640px;
+        width: 100%;
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+    .result-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+    }
+    .icon-wrapper {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 2rem;
+        font-size: 3.5rem;
+    }
+    .icon-success {
+        background-color: rgba(52, 199, 89, 0.1);
+        color: #34c759;
+    }
+    .icon-danger {
+        background-color: rgba(255, 59, 48, 0.1);
+        color: #ff3b30;
+    }
+    .result-title {
+        font-weight: 700;
+        font-size: 2rem;
+        letter-spacing: -0.02em;
+        margin-bottom: 1rem;
+    }
+    .result-desc {
+        color: var(--apple-text-muted);
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 2.5rem;
+    }
+    .detail-box {
+        background-color: rgba(242, 242, 247, 0.5);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2.5rem;
+        text-align: left;
+    }
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1.2rem;
+        padding-bottom: 1.2rem;
+        border-bottom: 1px dashed rgba(0,0,0,0.1);
+        align-items: center;
+    }
+    .detail-row:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+    .detail-label {
+        color: var(--apple-text-muted);
+        font-size: 1.05rem;
+    }
+    .detail-value {
+        font-weight: 600;
+        color: var(--apple-text);
+        font-size: 1.05rem;
+        text-align: right;
+        max-width: 60%;
+    }
+    .course-title-value {
+        color: var(--apple-blue);
+        font-weight: 700;
+    }
+    .action-btn {
+        display: inline-block;
+        width: 100%;
+        padding: 1.2rem;
+        border-radius: 16px;
+        font-size: 1.15rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        border: none;
+    }
+    .btn-primary-apple {
+        background-color: var(--apple-blue);
+        color: #fff;
+        box-shadow: 0 4px 14px rgba(0, 113, 227, 0.3);
+    }
+    .btn-primary-apple:hover {
+        background-color: #005bb5;
+        transform: translateY(-2px);
+        color: #fff;
+        box-shadow: 0 8px 24px rgba(0, 113, 227, 0.4);
+    }
+    .btn-outline-apple {
+        background-color: transparent;
+        color: var(--apple-text);
+        border: 2px solid rgba(0,0,0,0.1);
+    }
+    .btn-outline-apple:hover {
+        background-color: rgba(0,0,0,0.05);
+        color: var(--apple-text);
+    }
+</style>
+
+<div class="result-container">
+    <div class="result-card">
+        @if (Model.Order.Status == OnlineLearningPlatform.Models.Entities.OrderStatus.Completed)
+        {
+            <div class="icon-wrapper icon-success">
+                <i class="bi bi-check-lg"></i>
+            </div>
+            <h2 class="result-title text-success">Thanh toán thành công</h2>
+            <p class="result-desc">Cảm ơn bạn! Giao dịch của bạn đã được xác nhận. Khóa học đã được thêm vào tài khoản của bạn.</p>
+        }
+        else
+        {
+            <div class="icon-wrapper icon-danger">
+                <i class="bi bi-x-lg"></i>
+            </div>
+            <h2 class="result-title text-danger">Thanh toán thất bại</h2>
+            <p class="result-desc">Rất tiếc. Giao dịch của bạn đã bị hủy hoặc không thể hoàn tất do lỗi trong quá trình xử lý.</p>
+        }
+
+        <div class="detail-box">
+            <div class="detail-row">
+                <span class="detail-label">Mã giao dịch</span>
+                <span class="detail-value">#@Model.Order.OrderId</span>
+            </div>
+            
+            @if (Model.Order.OrderDetails != null && Model.Order.OrderDetails.Any())
+            {
+                <div class="detail-row">
+                    <span class="detail-label">Sản phẩm</span>
+                    <span class="detail-value course-title-value">@Model.Order.OrderDetails.First().Course.Title</span>
+                </div>
+            }
+
+            <div class="detail-row">
+                <span class="detail-label">Tổng hóa đơn</span>
+                <span class="detail-value text-dark fw-bold">@Model.Order.TotalAmount.ToString("N0") VNĐ</span>
+            </div>
+
+            @if (Model.Order.WalletUsed > 0)
+            {
+                <div class="detail-row">
+                    <span class="detail-label">Thanh toán từ Ví cá nhân</span>
+                    <span class="detail-value text-primary">-@Model.Order.WalletUsed.ToString("N0") VNĐ</span>
+                </div>
+            }
+
+            @{
+                var remainingPay = Math.Max(0, Model.Order.TotalAmount - Model.Order.WalletUsed);
+            }
+            
+            @if (Model.Order.PaymentMethod != "WALLET" && remainingPay > 0)
+            {
+                <div class="detail-row">
+                    <span class="detail-label">Thanh toán qua @Model.Order.PaymentMethod</span>
+                    <span class="detail-value text-success fw-bold">@remainingPay.ToString("N0") VNĐ</span>
+                </div>
+            }
+
+            <div class="detail-row">
+                <span class="detail-label">Thời gian Mua hàng</span>
+                <span class="detail-value">@(Model.Order.CompletedAt?.ToString("dd/MM/yyyy HH:mm") ?? Model.Order.CreatedAt.ToString("dd/MM/yyyy HH:mm"))</span>
+            </div>
+            
+            @if (!string.IsNullOrEmpty(Model.Order.TransactionId))
+            {
+                <div class="detail-row">
+                    <span class="detail-label">Mã tra cứu VNPAY</span>
+                    <span class="detail-value text-muted" style="font-size: 0.95rem;">@Model.Order.TransactionId</span>
+                </div>
+            }
+        </div>
+
+        @if (Model.Order.Status == OnlineLearningPlatform.Models.Entities.OrderStatus.Completed)
+        {
+            @if (Model.Order.OrderDetails != null && Model.Order.OrderDetails.Any())
+            {
+                <a href="/Student/LearnCourse?courseId=@Model.Order.OrderDetails.First().CourseId" class="action-btn btn-primary-apple">Vào học ngay lập tức</a>
+            }
+            else
+            {
+                <a href="/Student/Dashboard" class="action-btn btn-primary-apple">Quay về Bảng điều khiển</a>
+            }
+        }
+        else
+        {
+            <a href="/Student/Dashboard" class="action-btn btn-outline-apple mt-2">Quay về Bảng điều khiển</a>
+        }
+    </div>
+</div>

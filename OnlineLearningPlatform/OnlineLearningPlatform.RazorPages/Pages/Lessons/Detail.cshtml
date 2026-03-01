@@ -1,0 +1,224 @@
+@page "{id:int}"
+@model OnlineLearningPlatform.RazorPages.Pages.Lessons.DetailModel
+@using OnlineLearningPlatform.Models.Entities
+@{
+    ViewData["Title"] = "Lesson Detail";
+}
+
+@if (Model.Lesson is null)
+{
+    <div class="alert alert-warning">Lesson not found.</div>
+}
+else
+{
+    @Html.AntiForgeryToken()
+
+    <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+            <h2 class="mb-1">@Model.Lesson.Title</h2>
+            <div class="text-muted">Type: @Model.Lesson.LessonType</div>
+        </div>
+        <a class="btn btn-outline-secondary" href="javascript:history.back()">Back</a>
+    </div>
+
+    @switch (Model.Lesson.LessonType)
+    {
+        case LessonType.Video:
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    @if (!string.IsNullOrWhiteSpace(Model.Lesson.VideoStoragePath))
+                    {
+                        <video id="lessonVideo"
+                               class="w-100"
+                               controls
+                               preload="metadata"
+                               style="max-height: 560px; background: #000;"
+                               data-lesson-id="@Model.Lesson.LessonId"
+                               data-initial-watched="@Model.WatchedSeconds">
+                            <source src="@Model.Lesson.VideoStoragePath" type="video/mp4" />
+                            Your browser does not support the video tag.
+                        </video>
+                        <div class="small text-muted mt-2" id="progressStatus">Progress is being saved automatically.</div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info mb-0">Video is not available for this lesson yet.</div>
+                    }
+                </div>
+            </div>
+            break;
+
+        case LessonType.Reading:
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    @if (!string.IsNullOrWhiteSpace(Model.Lesson.Content))
+                    {
+                        <div style="white-space: pre-wrap;">@Model.Lesson.Content</div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">No reading content available.</div>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Lesson.ReadingPdfStoragePath))
+                    {
+                        <div class="mt-3">
+                            <a class="btn btn-outline-primary"
+                               href="@Model.Lesson.ReadingPdfStoragePath"
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                Open attached PDF
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+            break;
+
+        case LessonType.Quiz:
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    @if (Model.Lesson.Quizzes.Any())
+                    {
+                        <h5 class="mb-3">Quizzes</h5>
+                        <div class="list-group">
+                            @foreach (var quiz in Model.Lesson.Quizzes)
+                            {
+                                <div class="list-group-item">
+                                    <div class="fw-semibold">@quiz.Title</div>
+                                    <div class="small text-muted">
+                                        Passing Score: @quiz.PassingScore%
+                                        @if (quiz.TimeLimitMinutes.HasValue)
+                                        {
+                                            <text> | Time limit: @quiz.TimeLimitMinutes min</text>
+                                        }
+                                        | Questions: @quiz.Questions.Count
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info mb-0">No quiz has been configured for this lesson yet.</div>
+                    }
+                </div>
+            </div>
+            break;
+
+        case LessonType.Assignment:
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    @if (Model.Lesson.Assignments.Any())
+                    {
+                        <h5 class="mb-3">Assignments</h5>
+                        <div class="list-group">
+                            @foreach (var assignment in Model.Lesson.Assignments)
+                            {
+                                <div class="list-group-item">
+                                    <div class="fw-semibold">@assignment.Title</div>
+                                    @if (!string.IsNullOrWhiteSpace(assignment.Description))
+                                    {
+                                        <div class="mt-1" style="white-space: pre-wrap;">@assignment.Description</div>
+                                    }
+                                    <div class="small text-muted mt-1">
+                                        Max file size: @assignment.MaxFileSizeMB MB
+                                        @if (!string.IsNullOrWhiteSpace(assignment.AllowedFileExtensions))
+                                        {
+                                            <text> | Allowed: @assignment.AllowedFileExtensions</text>
+                                        }
+                                        @if (assignment.DueDate.HasValue)
+                                        {
+                                            <text> | Due: @assignment.DueDate.Value.ToString("dd/MM/yyyy HH:mm")</text>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info mb-0">No assignment has been configured for this lesson yet.</div>
+                    }
+                </div>
+            </div>
+            break;
+
+        default:
+            <div class="alert alert-warning">Unsupported lesson type.</div>
+            break;
+    }
+}
+
+@section Scripts {
+    <script>
+        (function () {
+            const video = document.getElementById('lessonVideo');
+            if (!video) return;
+
+            const lessonId = video.dataset.lessonId;
+            const initialWatched = parseInt(video.dataset.initialWatched || '0', 10) || 0;
+            const progressStatus = document.getElementById('progressStatus');
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+
+            let lastSaved = Math.max(0, initialWatched);
+            let isSaving = false;
+
+            function setStatus(text) {
+                if (progressStatus) progressStatus.textContent = text;
+            }
+
+            async function saveProgress(seconds, force = false) {
+                const watched = Math.max(0, Math.floor(seconds));
+
+                if (!force && watched <= lastSaved) return;
+                if (isSaving) return;
+
+                isSaving = true;
+                try {
+                    const response = await fetch(`?handler=SaveProgress&id=${lessonId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': token
+                        },
+                        body: JSON.stringify({ watchedSeconds: watched })
+                    });
+
+                    if (response.ok) {
+                        lastSaved = watched;
+                        setStatus(`Saved progress: ${lastSaved}s`);
+                    }
+                } catch {
+                    setStatus('Cannot save progress right now.');
+                } finally {
+                    isSaving = false;
+                }
+            }
+
+            video.addEventListener('loadedmetadata', function () {
+                if (initialWatched > 0 && Number.isFinite(video.duration) && initialWatched < video.duration - 1) {
+                    video.currentTime = initialWatched;
+                }
+            });
+
+            setInterval(function () {
+                if (!video.paused && !video.ended) {
+                    saveProgress(video.currentTime);
+                }
+            }, 7000);
+
+            video.addEventListener('pause', function () {
+                saveProgress(video.currentTime, true);
+            });
+
+            video.addEventListener('ended', function () {
+                saveProgress(video.duration, true);
+            });
+
+            window.addEventListener('beforeunload', function () {
+                saveProgress(video.currentTime, true);
+            });
+        })();
+    </script>
+}

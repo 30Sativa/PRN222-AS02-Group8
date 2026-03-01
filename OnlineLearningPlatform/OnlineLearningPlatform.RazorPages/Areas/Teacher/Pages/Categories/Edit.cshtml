@@ -1,0 +1,69 @@
+@page "{id:int}"
+@model OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Categories.EditModel
+@{
+    ViewData["Title"] = "Chỉnh sửa danh mục";
+}
+
+<style>
+    .cat-form-wrap { max-width: 560px; margin: 0 auto; animation: fadeUp .35s ease forwards; }
+    .cat-form-icon {
+        width: 52px; height: 52px; border-radius: var(--radius-lg);
+        background: var(--color-amber-tint);
+        display: flex; align-items: center; justify-content: center;
+        margin-bottom: var(--space-5);
+    }
+    .cat-form-icon svg { width: 26px; height: 26px; color: var(--color-amber); }
+</style>
+
+<div class="cat-form-wrap">
+    <div class="page-head">
+        <h1>Chỉnh sửa danh mục</h1>
+        <div class="breadcrumb">
+            <a asp-area="Teacher" asp-page="/Dashboard">Dashboard</a>
+            <span class="breadcrumb-sep">›</span>
+            <a asp-area="Teacher" asp-page="/Categories/Index">Danh mục</a>
+            <span class="breadcrumb-sep">›</span>
+            <span>Chỉnh sửa</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="cat-form-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+            </div>
+
+            <h2 style="font-size:var(--text-md);font-weight:600;margin-bottom:var(--space-1);">Cập nhật thông tin</h2>
+            <p class="text-muted" style="margin-bottom:var(--space-6);">Thay đổi tên danh mục. Tất cả khóa học thuộc danh mục này sẽ được cập nhật.</p>
+
+            <form method="post">
+                <div asp-validation-summary="All" class="alert alert-danger"></div>
+                <input type="hidden" asp-for="CategoryId" />
+
+                <div class="form-group">
+                    <label for="CategoryName" class="form-group label">Tên danh mục <span style="color:var(--color-red)">*</span></label>
+                    <input id="CategoryName" name="CategoryName" class="form-control"
+                           placeholder="Tên danh mục..." value="@Model.CategoryName"
+                           maxlength="100" autocomplete="off" />
+                    <span class="form-hint">Tối đa 100 ký tự.</span>
+                    <span asp-validation-for="CategoryName" class="form-error"></span>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Lưu thay đổi
+                    </button>
+                    <a asp-area="Teacher" asp-page="/Categories/Index" class="btn btn-secondary">Hủy</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

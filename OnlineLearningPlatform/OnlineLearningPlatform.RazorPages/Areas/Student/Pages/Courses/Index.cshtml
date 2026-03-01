@@ -1,0 +1,367 @@
+@page
+@model OnlineLearningPlatform.RazorPages.Areas.Student.Pages.Courses.IndexModel
+@{
+    ViewData["Title"] = "Explore Courses";
+}
+
+<style>
+    /* Typography & Core Variables */
+    :root {
+        --apple-bg: #fbfbfd;
+        --apple-text: #1d1d1f;
+        --apple-text-muted: #86868b;
+        --apple-blue: #0071e3;
+        --apple-blue-hover: #0077ed;
+        --apple-card-bg: #ffffff;
+        --apple-radius: 20px;
+        --apple-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        --apple-shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    body {
+        background-color: var(--apple-bg);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: var(--apple-text);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* Hero Section */
+    .hero-section {
+        padding: 5rem 0 3rem;
+        text-align: center;
+    }
+
+    .hero-title {
+        font-weight: 700;
+        font-size: 3.5rem;
+        letter-spacing: -0.04em;
+        line-height: 1.1;
+        margin-bottom: 1rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.25rem;
+        color: var(--apple-text-muted);
+        font-weight: 400;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    /* Search Bar */
+    .search-container {
+        max-width: 680px;
+        margin: 0 auto 4rem;
+        position: relative;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 1.2rem 1.5rem 1.2rem 3.5rem;
+        font-size: 1.1rem;
+        border-radius: 30px;
+        border: 1px solid rgba(0,0,0,0.08);
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(20px);
+        box-shadow: 0 2px 12px rgba(0,0,0,0.02);
+        transition: all 0.3s ease;
+        outline: none;
+    }
+
+    .search-input:focus {
+        border-color: var(--apple-blue);
+        box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15);
+        background: #ffffff;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 1.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--apple-text-muted);
+        font-size: 1.2rem;
+        pointer-events: none;
+    }
+
+    .search-btn {
+        position: absolute;
+        right: 0.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: var(--apple-text);
+        color: white;
+        border: none;
+        border-radius: 24px;
+        padding: 0.6rem 1.5rem;
+        font-weight: 500;
+        transition: transform 0.2s, background-color 0.2s;
+    }
+
+    .search-btn:hover {
+        background-color: #000000;
+        transform: translateY(-50%) scale(1.02);
+    }
+
+    /* Course Cards */
+    .course-card-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        height: 100%;
+    }
+
+    .course-card {
+        background: var(--apple-card-bg);
+        border-radius: var(--apple-radius);
+        overflow: hidden;
+        border: none;
+        box-shadow: var(--apple-shadow);
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        height: 100%;
+        position: relative;
+    }
+
+    .course-card:hover {
+        transform: translateY(-6px);
+        box-shadow: var(--apple-shadow-hover);
+    }
+
+    .card-img-wrapper {
+        position: relative;
+        padding-top: 56.25%; /* 16:9 Aspect Ratio */
+        overflow: hidden;
+        background-color: #f2f2f7;
+    }
+
+    .card-img-wrapper img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .course-card:hover .card-img-wrapper img {
+        transform: scale(1.03);
+    }
+
+    .course-content {
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    .course-category {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--apple-blue);
+        margin-bottom: 0.25rem;
+    }
+
+    .course-title {
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1.3;
+        margin-bottom: 0.25rem;
+        color: var(--apple-text);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .course-instructor {
+        font-size: 0.8rem;
+        color: var(--apple-text-muted);
+        margin-bottom: 1rem;
+        flex-grow: 1;
+    }
+
+    .course-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid rgba(0,0,0,0.05);
+        padding-top: 0.75rem;
+        margin-top: auto;
+    }
+
+    .course-price {
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .price-free {
+        color: #34c759; /* Apple Green */
+    }
+
+    .price-discount {
+        color: var(--apple-text-muted);
+        text-decoration: line-through;
+        font-size: 0.75rem;
+        margin-left: 0.25rem;
+        font-weight: 400;
+    }
+
+    .enrolled-badge {
+        background: rgba(52, 199, 89, 0.1);
+        color: #34c759;
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 0.25rem 0.5rem;
+        border-radius: 8px;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 5rem 0;
+    }
+    
+    .empty-icon {
+        font-size: 3rem;
+        color: #d2d2d7;
+        margin-bottom: 1rem;
+    }
+    
+    .empty-text {
+        color: var(--apple-text-muted);
+        font-size: 1.1rem;
+    }
+
+    /* Pagination */
+    .apple-pagination {
+        margin-top: 4rem;
+    }
+
+    .apple-pagination .page-link {
+        border: none;
+        color: var(--apple-text);
+        background: transparent;
+        border-radius: 12px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 500;
+        margin: 0 4px;
+        transition: background-color 0.2s;
+    }
+
+    .apple-pagination .page-link:hover {
+        background: rgba(0,0,0,0.05);
+    }
+
+    .apple-pagination .page-item.active .page-link {
+        background: var(--apple-text);
+        color: white;
+    }
+</style>
+
+<div class="container pb-5">
+    
+    <!-- Hero & Search -->
+    <div class="hero-section">
+        <h1 class="hero-title">Khám phá tri thức mới.</h1>
+        <p class="hero-subtitle">Học hỏi không giới hạn với hàng ngàn khóa học chất lượng từ các chuyên gia.</p>
+    </div>
+
+    <div class="search-container">
+        <form method="get">
+            <i class="bi bi-search search-icon"></i>
+            <input type="text" asp-for="SearchRequest.Keyword" class="search-input" placeholder="Bạn muốn học gì hôm nay?" autocomplete="off" />
+            <button type="submit" class="search-btn">Tìm kiếm</button>
+        </form>
+    </div>
+
+    <!-- Course Grid -->
+    <div class="row g-4">
+        @foreach (var course in Model.Courses)
+        {
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2">
+                <a asp-page="./Details" asp-route-id="@course.CourseId" class="course-card-link">
+                    <div class="course-card">
+                        
+                        <div class="card-img-wrapper">
+                            @if (!string.IsNullOrEmpty(course.ThumbnailUrl))
+                            {
+                                <img src="@course.ThumbnailUrl" alt="@course.Title">
+                            }
+                            else
+                            {
+                                <div class="w-100 h-100 d-flex align-items-center justify-content-center position-absolute top-0 start-0">
+                                    <i class="bi bi-play-circle text-secondary opacity-50" style="font-size: 3rem;"></i>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="course-content">
+                            <span class="course-category">@course.CategoryName</span>
+                            <h3 class="course-title">@course.Title</h3>
+                            <div class="course-instructor">Dr. @course.TeacherName</div>
+                            
+                            <div class="course-footer">
+                                <div class="course-price-wrap">
+                                    @if (course.DiscountPrice.HasValue && course.DiscountPrice < course.Price)
+                                    {
+                                        <span class="course-price">@course.DiscountPrice.Value.ToString("N0") VNĐ</span>
+                                        <span class="price-discount">@course.Price.ToString("N0") VNĐ</span>
+                                    }
+                                    else if (course.Price == 0)
+                                    {
+                                        <span class="course-price price-free">Miễn phí</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="course-price">@course.Price.ToString("N0") VNĐ</span>
+                                    }
+                                </div>
+
+                                @if (course.IsEnrolled)
+                                {
+                                    <span class="enrolled-badge"><i class="bi bi-check2-circle me-1"></i>Đã mua</span>
+                                }
+                            </div>
+                        </div>
+
+                    </div>
+                </a>
+            </div>
+        }
+        
+        @if (!Model.Courses.Any())
+        {
+            <div class="col-12">
+                <div class="empty-state">
+                    <i class="bi bi-journal-x empty-icon"></i>
+                    <h4 class="fw-semibold">Không tìm thấy khóa học</h4>
+                    <p class="empty-text">Chúng tôi không tìm thấy kết quả phù hợp. Vui lòng thử từ khóa khác.</p>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="apple-pagination d-flex justify-content-center">
+            <ul class="pagination m-0">
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.SearchRequest.PageNumber ? "active" : "")">
+                        <a class="page-link" 
+                           asp-page="./Index" 
+                           asp-route-SearchRequest.Keyword="@Model.SearchRequest.Keyword" 
+                           asp-route-SearchRequest.PageNumber="@i">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>

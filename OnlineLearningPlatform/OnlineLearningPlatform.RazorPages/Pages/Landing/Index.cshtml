@@ -1,0 +1,694 @@
+@page
+@model OnlineLearningPlatform.RazorPages.Pages.Landing.IndexModel
+@{
+    ViewData["Title"] = "EduLearn — Nền tảng học trực tuyến";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <meta name="description" content="EduLearn — Học hỏi không giới hạn với hàng ngàn khóa học chất lượng từ các chuyên gia hàng đầu." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        /* ── Landing-specific overrides ── */
+        body { background: #fbfbfd; }
+
+        /* ─── NAV ─── */
+        .lp-nav {
+            position: sticky; top: 0; z-index: 1000;
+            height: 52px;
+            background: rgba(251,251,253,.88);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0,0,0,.06);
+        }
+        .lp-nav .container {
+            height: 100%; display: flex; align-items: center;
+            justify-content: space-between; gap: 24px;
+        }
+        .lp-brand {
+            font-size: 17px; font-weight: 700; letter-spacing: -.03em;
+            color: #1d1d1f !important; text-decoration: none;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .lp-brand-icon {
+            width: 28px; height: 28px; border-radius: 8px;
+            background: #0071e3; display: flex; align-items: center; justify-content: center;
+        }
+        .lp-brand-icon svg { width: 16px; height: 16px; color: #fff; }
+        .lp-nav-actions { display: flex; align-items: center; gap: 8px; }
+        .lp-btn-login {
+            font-size: 13px; font-weight: 500; color: #1d1d1f !important;
+            padding: 7px 16px; border-radius: 9999px;
+            border: 1px solid rgba(0,0,0,.18); background: transparent;
+            text-decoration: none; transition: background .2s;
+        }
+        .lp-btn-login:hover { background: rgba(0,0,0,.05); opacity:1 !important; }
+        .lp-btn-register {
+            font-size: 13px; font-weight: 500; color: #fff !important;
+            padding: 7px 18px; border-radius: 9999px;
+            background: #1d1d1f; text-decoration: none; transition: opacity .2s;
+        }
+        .lp-btn-register:hover { opacity: .8 !important; }
+
+        /* ─── HERO ─── */
+        .hero {
+            padding: 100px 0 72px;
+            text-align: center;
+            background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0,113,227,.07) 0%, transparent 70%);
+        }
+        .hero-eyebrow {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 12px; font-weight: 600; letter-spacing: .08em;
+            text-transform: uppercase; color: #0071e3;
+            background: rgba(0,113,227,.08); padding: 5px 14px;
+            border-radius: 9999px; margin-bottom: 24px;
+        }
+        .hero-eyebrow svg { width: 12px; height: 12px; }
+        .hero h1 {
+            font-size: clamp(2.6rem, 6vw, 4.2rem); font-weight: 800;
+            letter-spacing: -.05em; line-height: 1.06;
+            color: #1d1d1f; margin-bottom: 20px; max-width: 700px; margin-inline: auto;
+        }
+        .hero h1 span { color: #0071e3; }
+        .hero-sub {
+            font-size: 19px; color: #6e6e73; font-weight: 400;
+            max-width: 520px; margin: 0 auto 40px; line-height: 1.55;
+        }
+        .hero-actions {
+            display: flex; align-items: center; justify-content: center;
+            gap: 12px; flex-wrap: wrap;
+        }
+        .hero-btn-primary {
+            font-size: 15px; font-weight: 600; color: #fff !important;
+            padding: 13px 28px; border-radius: 9999px;
+            background: #0071e3; text-decoration: none;
+            transition: opacity .2s, transform .2s; letter-spacing: -.01em;
+        }
+        .hero-btn-primary:hover { opacity: .85 !important; transform: translateY(-1px); }
+        .hero-btn-secondary {
+            font-size: 15px; font-weight: 500; color: #1d1d1f !important;
+            padding: 13px 28px; border-radius: 9999px;
+            border: 1px solid rgba(0,0,0,.18); background: transparent;
+            text-decoration: none; transition: background .2s;
+        }
+        .hero-btn-secondary:hover { background: rgba(0,0,0,.05); opacity:1 !important; }
+
+        /* Stats bar */
+        .stats-bar {
+            display: flex; justify-content: center; gap: 48px; flex-wrap: wrap;
+            margin-top: 64px; padding-top: 40px;
+            border-top: 1px solid rgba(0,0,0,.07);
+        }
+        .stat-item { text-align: center; }
+        .stat-item .num {
+            font-size: 32px; font-weight: 800; letter-spacing: -.04em; color: #1d1d1f;
+        }
+        .stat-item .label {
+            font-size: 13px; color: #6e6e73; margin-top: 2px;
+        }
+
+        /* ─── SEARCH ─── */
+        .search-section { padding: 48px 0 36px; }
+        .search-section h2 {
+            font-size: 28px; font-weight: 700; letter-spacing: -.04em; color: #1d1d1f;
+            margin-bottom: 24px; text-align: center;
+        }
+        .lp-search-wrap {
+            position: relative; max-width: 560px; margin: 0 auto;
+        }
+        .lp-search-icon {
+            position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+            color: #aeaeb2; pointer-events: none;
+        }
+        .lp-search-icon svg { width: 16px; height: 16px; }
+        .lp-search-input {
+            width: 100%; padding: 14px 18px 14px 48px;
+            font-family: inherit; font-size: 15px; color: #1d1d1f;
+            background: #fff; border: 1px solid rgba(0,0,0,.1);
+            border-radius: 9999px; outline: none;
+            box-shadow: 0 2px 12px rgba(0,0,0,.04);
+            transition: border-color .2s, box-shadow .2s;
+        }
+        .lp-search-input:focus {
+            border-color: #0071e3;
+            box-shadow: 0 0 0 4px rgba(0,113,227,.12);
+        }
+        .lp-search-input::placeholder { color: #aeaeb2; }
+        .lp-search-btn {
+            position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+            font-family: inherit; font-size: 13px; font-weight: 600;
+            color: #fff; background: #1d1d1f; border: none;
+            padding: 9px 20px; border-radius: 9999px; cursor: pointer;
+            transition: opacity .2s;
+        }
+        .lp-search-btn:hover { opacity: .8; }
+
+        /* ─── COURSES GRID ─── */
+        .courses-section { padding: 0 0 80px; }
+        .section-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 28px;
+        }
+        .section-header h2 {
+            font-size: 22px; font-weight: 700; letter-spacing: -.03em; color: #1d1d1f;
+        }
+        .section-count {
+            font-size: 13px; color: #6e6e73;
+        }
+
+        /* Course Grid: responsive */
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        /* ─── COURSE CARD ─── */
+        .lp-course-card {
+            background: #fff; border-radius: 20px;
+            border: 1px solid rgba(0,0,0,.06);
+            overflow: hidden; display: flex; flex-direction: column;
+            transition: box-shadow .3s cubic-bezier(.16,1,.3,1), transform .3s cubic-bezier(.16,1,.3,1);
+            cursor: pointer; text-decoration: none !important; color: inherit !important;
+        }
+        .lp-course-card:hover {
+            box-shadow: 0 12px 40px rgba(0,0,0,.1);
+            transform: translateY(-4px); opacity: 1 !important;
+        }
+        .card-thumb {
+            position: relative; padding-top: 56.25%; overflow: hidden;
+            background: #f2f2f7; flex-shrink: 0;
+        }
+        .card-thumb img {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            object-fit: cover; transition: transform .5s ease;
+        }
+        .lp-course-card:hover .card-thumb img { transform: scale(1.04); }
+        .card-thumb-placeholder {
+            position: absolute; inset: 0; display: flex;
+            align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #e8f0fb 0%, #f0eeff 100%);
+        }
+        .card-thumb-placeholder svg { width: 40px; height: 40px; color: #0071e3; opacity: .4; }
+
+        /* Price badge on thumbnail */
+        .price-badge {
+            position: absolute; top: 10px; right: 10px;
+            font-size: 11px; font-weight: 700; letter-spacing: -.01em;
+            padding: 4px 10px; border-radius: 9999px;
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        }
+        .price-badge-free {
+            background: rgba(52,199,89,.18); color: #1a8038;
+            border: 1px solid rgba(52,199,89,.3);
+        }
+        .price-badge-paid {
+            background: rgba(255,255,255,.85); color: #1d1d1f;
+            border: 1px solid rgba(0,0,0,.08);
+        }
+        .price-badge-discount {
+            background: rgba(255,59,48,.12); color: #c0392b;
+            border: 1px solid rgba(255,59,48,.2);
+        }
+
+        .card-body { padding: 16px; flex: 1; display: flex; flex-direction: column; }
+        .card-category {
+            font-size: 10px; font-weight: 700; letter-spacing: .07em;
+            text-transform: uppercase; color: #0071e3; margin-bottom: 6px;
+        }
+        .card-title {
+            font-size: 15px; font-weight: 600; color: #1d1d1f;
+            line-height: 1.35; margin-bottom: 4px;
+            display: -webkit-box; -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .card-instructor {
+            font-size: 12px; color: #6e6e73; margin-bottom: 12px; flex: 1;
+        }
+        .card-footer {
+            display: flex; align-items: center; justify-content: space-between;
+            padding-top: 12px; border-top: 1px solid rgba(0,0,0,.05);
+            gap: 8px;
+        }
+        .card-price { font-size: 14px; font-weight: 700; color: #1d1d1f; }
+        .card-price-free { color: #34c759; }
+        .card-price-old {
+            font-size: 11px; font-weight: 400; color: #aeaeb2;
+            text-decoration: line-through; margin-left: 4px;
+        }
+
+        /* Star rating */
+        .star-row {
+            display: flex; align-items: center; gap: 4px;
+        }
+        .stars { display: flex; gap: 1px; }
+        .star { color: #ffd60a; font-size: 11px; }
+        .star-empty { color: #d2d2d7; font-size: 11px; }
+        .rating-count { font-size: 11px; color: #6e6e73; }
+
+        /* Review toggle */
+        .reviews-toggle {
+            margin-top: 10px;
+        }
+        .reviews-toggle-btn {
+            font-family: inherit; font-size: 12px; font-weight: 500;
+            color: #0071e3; background: rgba(0,113,227,.07);
+            border: 1px solid rgba(0,113,227,.15); border-radius: 9999px;
+            padding: 5px 12px; cursor: pointer; transition: background .2s;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .reviews-toggle-btn:hover { background: rgba(0,113,227,.12); }
+        .reviews-toggle-btn svg { width: 12px; height: 12px; transition: transform .2s; }
+        .reviews-toggle-btn.open svg { transform: rotate(180deg); }
+
+        .reviews-panel {
+            display: none; margin-top: 10px;
+            background: #f5f5f7; border-radius: 12px; overflow: hidden;
+        }
+        .reviews-panel.open { display: block; }
+        .review-item {
+            padding: 10px 12px; border-bottom: 1px solid rgba(0,0,0,.06);
+        }
+        .review-item:last-child { border-bottom: none; }
+        .review-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .review-avatar {
+            width: 22px; height: 22px; border-radius: 50%;
+            background: #0071e3; color: #fff; font-size: 10px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .review-name { font-size: 12px; font-weight: 600; color: #1d1d1f; flex: 1; }
+        .review-stars { display: flex; gap: 1px; }
+        .review-star { color: #ffd60a; font-size: 10px; }
+        .review-comment { font-size: 12px; color: #6e6e73; line-height: 1.5; }
+
+        /* CTA click-to-enroll overlay */
+        .enroll-cta {
+            display: none; position: absolute; inset: 0;
+            background: rgba(0,0,0,.45);
+            align-items: center; justify-content: center;
+            backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+            border-radius: 20px;
+        }
+        .lp-course-card:hover .enroll-cta { display: flex; }
+        .enroll-cta span {
+            font-size: 14px; font-weight: 600; color: #fff;
+            background: #0071e3; padding: 10px 20px; border-radius: 9999px;
+        }
+
+        /* ─── EMPTY STATE ─── */
+        .empty-state {
+            text-align: center; padding: 64px 0; color: #6e6e73;
+        }
+        .empty-state svg { width: 48px; height: 48px; color: #d2d2d7; margin: 0 auto 16px; }
+        .empty-state h3 { font-size: 17px; font-weight: 600; color: #1d1d1f; margin-bottom: 6px; }
+        .empty-state p { font-size: 14px; }
+
+        /* ─── PAGINATION ─── */
+        .lp-pagination {
+            display: flex; justify-content: center; align-items: center;
+            gap: 4px; margin-top: 48px;
+        }
+        .lp-page-btn {
+            font-family: inherit; font-size: 13px; font-weight: 500;
+            width: 36px; height: 36px; border-radius: 9999px;
+            border: 1px solid transparent; background: transparent; color: #1d1d1f;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            text-decoration: none; transition: background .15s;
+        }
+        .lp-page-btn:hover { background: rgba(0,0,0,.05); opacity:1 !important; }
+        .lp-page-btn.active {
+            background: #1d1d1f; color: #fff !important; border-color: #1d1d1f;
+        }
+        .lp-page-btn:disabled { opacity: .3; pointer-events: none; }
+
+        /* ─── CTA SECTION ─── */
+        .cta-section {
+            background: linear-gradient(135deg, #0071e3 0%, #0051a2 100%);
+            border-radius: 28px; padding: 64px 40px; text-align: center;
+            margin: 0 0 80px;
+        }
+        .cta-section h2 {
+            font-size: 32px; font-weight: 800; letter-spacing: -.04em;
+            color: #fff; margin-bottom: 12px;
+        }
+        .cta-section p {
+            font-size: 17px; color: rgba(255,255,255,.8); margin-bottom: 32px;
+        }
+        .cta-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+        .cta-btn-white {
+            font-size: 15px; font-weight: 600; color: #0071e3 !important;
+            padding: 12px 28px; border-radius: 9999px;
+            background: #fff; text-decoration: none; transition: opacity .2s;
+        }
+        .cta-btn-white:hover { opacity: .9 !important; }
+        .cta-btn-outline {
+            font-size: 15px; font-weight: 500; color: #fff !important;
+            padding: 12px 28px; border-radius: 9999px;
+            border: 1px solid rgba(255,255,255,.4); background: transparent;
+            text-decoration: none; transition: background .2s;
+        }
+        .cta-btn-outline:hover { background: rgba(255,255,255,.1); opacity:1 !important; }
+
+        /* ─── FOOTER ─── */
+        .lp-footer {
+            border-top: 1px solid rgba(0,0,0,.07);
+            padding: 32px 0; text-align: center;
+        }
+        .lp-footer p { font-size: 13px; color: #aeaeb2; }
+        .lp-footer a { color: #6e6e73; text-decoration: none; }
+        .lp-footer a:hover { color: #1d1d1f; }
+
+        /* ─── ANIMATIONS ─── */
+        @@keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .fade-up { animation: fadeUp .5s cubic-bezier(.25,.46,.45,.94) both; }
+        .fade-up-d1 { animation-delay: .08s; }
+        .fade-up-d2 { animation-delay: .16s; }
+        .fade-up-d3 { animation-delay: .24s; }
+
+        @@media (max-width: 640px) {
+            .hero { padding: 72px 0 52px; }
+            .hero h1 { font-size: 2.2rem; }
+            .stats-bar { gap: 28px; }
+            .cta-section { padding: 44px 24px; }
+            .course-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav class="lp-nav">
+    <div class="container">
+        <a href="/" class="lp-brand">
+            <div class="lp-brand-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                </svg>
+            </div>
+            EduLearn
+        </a>
+        <div class="lp-nav-actions">
+            <a href="/Auth/Login" class="lp-btn-login">Đăng nhập</a>
+            <a href="/Auth/Register" class="lp-btn-register">Đăng ký miễn phí</a>
+        </div>
+    </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero fade-up">
+    <div class="container">
+        <div class="hero-eyebrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            Nền tảng học trực tuyến hàng đầu Việt Nam
+        </div>
+        <h1>Học mọi thứ.<br /><span>Không giới hạn.</span></h1>
+        <p class="hero-sub">Hàng ngàn khóa học chất lượng từ các chuyên gia. Học theo tốc độ của bạn, ở bất cứ đâu.</p>
+        <div class="hero-actions">
+            <a href="/Auth/Register" class="hero-btn-primary">Bắt đầu học ngay</a>
+            <a href="#courses" class="hero-btn-secondary">Xem khóa học</a>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="num">@Model.TotalCount+</div>
+                <div class="label">Khóa học</div>
+            </div>
+            <div class="stat-item">
+                <div class="num">10K+</div>
+                <div class="label">Học viên</div>
+            </div>
+            <div class="stat-item">
+                <div class="num">200+</div>
+                <div class="label">Giảng viên</div>
+            </div>
+            <div class="stat-item">
+                <div class="num">4.8★</div>
+                <div class="label">Đánh giá TB</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── SEARCH + COURSES ── -->
+<section class="search-section fade-up fade-up-d1" id="courses">
+    <div class="container">
+        <h2>Khám phá khóa học</h2>
+        <div class="lp-search-wrap">
+            <form method="get">
+                <span class="lp-search-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                </span>
+                <input type="text" name="keyword" value="@Model.SearchKeyword"
+                       class="lp-search-input" placeholder="Tìm kiếm khóa học..." autocomplete="off" />
+                <button type="submit" class="lp-search-btn">Tìm</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<section class="courses-section fade-up fade-up-d2">
+    <div class="container">
+        <div class="section-header">
+            <h2>
+                @if (!string.IsNullOrEmpty(Model.SearchKeyword))
+                {
+                    <span>Kết quả cho "@Model.SearchKeyword"</span>
+                }
+                else
+                {
+                    <span>Tất cả khóa học</span>
+                }
+            </h2>
+            <span class="section-count">@Model.TotalCount khóa học</span>
+        </div>
+
+        @if (!Model.Courses.Any())
+        {
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <h3>Không tìm thấy khóa học</h3>
+                <p>Thử từ khóa khác hoặc <a href="/Landing" style="color:#0071e3">xem tất cả</a></p>
+            </div>
+        }
+        else
+        {
+            <div class="course-grid">
+                @foreach (var course in Model.Courses)
+                {
+                    var hasReviews = Model.CourseReviews.ContainsKey(course.CourseId);
+                    var ratings = Model.CourseRatings.ContainsKey(course.CourseId) ? Model.CourseRatings[course.CourseId] : (0.0, 0);
+                    var cardId = "card-" + course.CourseId.ToString("N");
+                    <div class="lp-course-card" onclick="goLogin('@course.CourseId')">
+
+                        <!-- Thumbnail -->
+                        <div class="card-thumb">
+                            @if (!string.IsNullOrEmpty(course.ThumbnailUrl))
+                            {
+                                <img src="@course.ThumbnailUrl" alt="@course.Title" loading="lazy" />
+                            }
+                            else
+                            {
+                                <div class="card-thumb-placeholder">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="2" y="3" width="20" height="14" rx="2"/>
+                                        <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+                                    </svg>
+                                </div>
+                            }
+                            @* Price badge *@
+                            @if (course.Price == 0)
+                            {
+                                <span class="price-badge price-badge-free">Miễn phí</span>
+                            }
+                            else if (course.DiscountPrice.HasValue && course.DiscountPrice < course.Price)
+                            {
+                                <span class="price-badge price-badge-discount">Sale</span>
+                            }
+                            else
+                            {
+                                <span class="price-badge price-badge-paid">@course.Price.ToString("N0")₫</span>
+                            }
+                        </div>
+
+                        <!-- Body -->
+                        <div class="card-body">
+                            @if (!string.IsNullOrEmpty(course.CategoryName))
+                            {
+                                <div class="card-category">@course.CategoryName</div>
+                            }
+                            <div class="card-title">@course.Title</div>
+                            <div class="card-instructor">@course.TeacherName</div>
+
+                            <div class="card-footer">
+                                <!-- Price -->
+                                <div>
+                                    @if (course.Price == 0)
+                                    {
+                                        <span class="card-price card-price-free">Miễn phí</span>
+                                    }
+                                    else if (course.DiscountPrice.HasValue && course.DiscountPrice < course.Price)
+                                    {
+                                        <span class="card-price">@course.DiscountPrice.Value.ToString("N0")₫</span>
+                                        <span class="card-price-old">@course.Price.ToString("N0")₫</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="card-price">@course.Price.ToString("N0")₫</span>
+                                    }
+                                </div>
+
+                                <!-- Star rating -->
+                                @if (ratings.Item2 > 0)
+                                {
+                                    <div class="star-row">
+                                        <div class="stars">
+                                            @{
+                                                int fullStars = (int)Math.Round(ratings.Item1);
+                                                for (int s = 1; s <= 5; s++)
+                                                {
+                                                    if (s <= fullStars)
+                                                    {
+                                                        <span class="star">★</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="star-empty">★</span>
+                                                    }
+                                                }
+                                            }
+                                        </div>
+                                        <span class="rating-count">(@ratings.Item2)</span>
+                                    </div>
+                                }
+                            </div>
+
+                            @* Review toggle — chỉ hiện nếu có review *@
+                            @if (hasReviews)
+                            {
+                                <div class="reviews-toggle" onclick="event.stopPropagation()">
+                                    <button type="button"
+                                            class="reviews-toggle-btn"
+                                            id="btn-@cardId"
+                                            onclick="toggleReviews('@cardId')">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="6 9 12 15 18 9"/>
+                                        </svg>
+                                        Xem đánh giá (@Model.CourseReviews[course.CourseId].Count)
+                                    </button>
+                                    <div class="reviews-panel" id="panel-@cardId">
+                                        @foreach (var review in Model.CourseReviews[course.CourseId])
+                                        {
+                                            <div class="review-item">
+                                                <div class="review-header">
+                                                    <div class="review-avatar">
+                                                        @(review.UserName.Length > 0 ? review.UserName[0].ToString().ToUpper() : "U")
+                                                    </div>
+                                                    <span class="review-name">@review.UserName</span>
+                                                    <div class="review-stars">
+                                                        @for (int s = 1; s <= 5; s++)
+                                                        {
+                                                            <span class="review-star">@(s <= review.Rating ? "★" : "☆")</span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                                <div class="review-comment">@review.Comment</div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Pagination -->
+            @if (Model.TotalPages > 1)
+            {
+                <div class="lp-pagination">
+                    @if (Model.CurrentPage > 1)
+                    {
+                        <a href="?page=@(Model.CurrentPage - 1)&keyword=@Model.SearchKeyword" class="lp-page-btn">
+                            ←
+                        </a>
+                    }
+                    @for (int p = Math.Max(1, Model.CurrentPage - 2); p <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); p++)
+                    {
+                        <a href="?page=@p&keyword=@Model.SearchKeyword" class="lp-page-btn @(p == Model.CurrentPage ? "active" : "")">
+                            @p
+                        </a>
+                    }
+                    @if (Model.CurrentPage < Model.TotalPages)
+                    {
+                        <a href="?page=@(Model.CurrentPage + 1)&keyword=@Model.SearchKeyword" class="lp-page-btn">
+                            →
+                        </a>
+                    }
+                </div>
+            }
+        }
+    </div>
+</section>
+
+<!-- ── CTA SECTION ── -->
+<section class="fade-up fade-up-d3">
+    <div class="container">
+        <div class="cta-section">
+            <h2>Sẵn sàng bắt đầu?</h2>
+            <p>Tham gia hàng ngàn học viên đang phát triển kỹ năng của mình mỗi ngày.</p>
+            <div class="cta-actions">
+                <a href="/Auth/Register" class="cta-btn-white">Đăng ký miễn phí</a>
+                <a href="/Auth/Login" class="cta-btn-outline">Đã có tài khoản</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer class="lp-footer">
+    <div class="container">
+        <p>Copyright &copy; 2026 EduLearn &nbsp;·&nbsp;
+            <a href="#">Trợ giúp</a> &nbsp;·&nbsp;
+            <a href="#">Điều khoản</a> &nbsp;·&nbsp;
+            <a href="#">Chính sách bảo mật</a>
+        </p>
+    </div>
+</footer>
+
+<script>
+    function goLogin(courseId) {
+        window.location.href = '/Auth/Login';
+    }
+
+    function toggleReviews(cardId) {
+        const panel = document.getElementById('panel-' + cardId);
+        const btn = document.getElementById('btn-' + cardId);
+        const isOpen = panel.classList.contains('open');
+        if (isOpen) {
+            panel.classList.remove('open');
+            btn.classList.remove('open');
+        } else {
+            panel.classList.add('open');
+            btn.classList.add('open');
+        }
+    }
+</script>
+</body>
+</html>

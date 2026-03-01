@@ -1,0 +1,44 @@
+@page
+@model OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Notifications.IndexModel
+@{
+    ViewData["Title"] = "Quản lý thông báo";
+}
+
+<div class="page-head">
+    <div class="breadcrumb">
+        <a asp-area="Admin" asp-page="/Dashboard">Dashboard</a>
+        <span class="breadcrumb-sep">/</span>
+        <span>Thông báo</span>
+    </div>
+    <h1>Quản lý thông báo hệ thống</h1>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+    <div class="alert" style="background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 12px 20px; border-radius: 8px; margin-bottom: 24px;">
+        @Model.SuccessMessage
+    </div>
+}
+
+<div class="card card-body" style="max-width: 600px;">
+    <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: 16px;">Phát thông báo hệ thống (Broadcast)</h3>
+    <p style="color: var(--color-label-2); margin-bottom: 24px;">
+        Gửi thông báo tới tất cả người dùng trên hệ thống. Thông báo này sẽ xuất hiện trong màn hình Thông Báo của họ.
+    </p>
+
+    <form method="post" asp-page-handler="Broadcast">
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label class="form-label">Nội dung thông báo <span style="color: var(--color-red);">*</span></label>
+            <textarea class="form-control" name="BroadcastMessage" rows="5" placeholder="Nhập nội dung bạn muốn gửi tới tất cả người dùng..." required>@Model.BroadcastMessage</textarea>
+            @Html.ValidationMessage("BroadcastMessage", new { @class = "text-danger", style = "display: block; margin-top: 8px; color: var(--color-red); font-size: 13px;" })
+        </div>
+
+        <div class="form-group" style="margin-bottom: 24px;">
+            <label class="form-label">URL đích (không bắt buộc)</label>
+            <input type="text" class="form-control" name="TargetUrl" value="@Model.TargetUrl" placeholder="Ví dụ: /Courses/Index hoặc https://example.com" />
+            <span style="display: block; font-size: 12px; color: var(--color-label-3); margin-top: 8px;">Nếu có link, người dùng có thể bấm vào thông báo để chuyển hướng.</span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Gửi thông báo</button>
+    </form>
+</div>

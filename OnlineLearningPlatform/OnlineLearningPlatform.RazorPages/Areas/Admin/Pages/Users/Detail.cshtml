@@ -1,0 +1,81 @@
+@page "{id}"
+@model OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Users.DetailModel
+@{
+    ViewData["Title"] = "Thông tin người dùng";
+    var avClass = Model.UserInfo?.Role switch { "Admin" => "u-avatar-admin", "Teacher" => "u-avatar-teacher", _ => "u-avatar-student" } ?? "";
+    var roleClass = Model.UserInfo?.Role switch { "Admin" => "role-admin", "Teacher" => "role-teacher", _ => "role-student" } ?? "";
+    var roleLabel = Model.UserInfo?.Role switch { "Teacher" => "Giảng viên", "Student" => "Học viên", _ => "Admin" } ?? "";
+}
+
+<div class="page-head fade-up">
+    <h1>Chi tiết người dùng</h1>
+    <div class="breadcrumb">
+        <a asp-area="Admin" asp-page="/Dashboard">Dashboard</a>
+        <span class="breadcrumb-sep">/</span>
+        <a asp-area="Admin" asp-page="/Users/Index">Người dùng</a>
+        <span class="breadcrumb-sep">/</span>
+        <span>Chi tiết</span>
+    </div>
+</div>
+
+@if (Model.UserInfo == null)
+{
+    <div class="alert alert-warning fade-up">Không tìm thấy người dùng này.</div>
+    <a asp-area="Admin" asp-page="/Users/Index" class="btn btn-secondary">Quay lại</a>
+}
+else
+{
+    <!-- Profile banner -->
+    <div class="profile-banner fade-up">
+        <div class="profile-av-lg @avClass">
+            @(Model.UserInfo.FullName?[0].ToString().ToUpper() ?? "U")
+        </div>
+        <div class="profile-meta">
+            <h2>@Model.UserInfo.FullName</h2>
+            <div class="profile-role-label">
+                <span class="role-pill @roleClass">@roleLabel</span>
+                &nbsp; Tham gia @Model.UserInfo.CreatedAt.ToString("MM/yyyy")
+            </div>
+        </div>
+        <div style="margin-left:auto;">
+            <a asp-area="Admin" asp-page="/Users/Edit" asp-route-id="@Model.UserInfo.Id"
+               class="btn btn-primary">Chỉnh sửa</a>
+        </div>
+    </div>
+
+    <!-- Detail info -->
+    <div class="card fade-up">
+        <div class="card-header">
+            <h2>Thông tin cá nhân</h2>
+        </div>
+        <div class="card-body">
+            <div class="detail-list">
+                <div class="detail-row">
+                    <div class="dr-label">Email</div>
+                    <div class="dr-value">@Model.UserInfo.Email</div>
+                </div>
+                <div class="detail-row">
+                    <div class="dr-label">Số điện thoại</div>
+                    <div class="dr-value">@(Model.UserInfo.PhoneNumber ?? "Chưa cập nhật")</div>
+                </div>
+                <div class="detail-row">
+                    <div class="dr-label">Ngày tham gia</div>
+                    <div class="dr-value">@Model.UserInfo.CreatedAt.ToString("dd/MM/yyyy")</div>
+                </div>
+                <div class="detail-row">
+                    <div class="dr-label">Role</div>
+                    <div class="dr-value"><span class="role-pill @roleClass">@roleLabel</span></div>
+                </div>
+                <div class="detail-row" style="grid-column: 1 / -1;">
+                    <div class="dr-label">Giới thiệu</div>
+                    <div class="dr-value">@(string.IsNullOrEmpty(Model.UserInfo.Bio) ? "Chưa có thông tin giới thiệu." : Model.UserInfo.Bio)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-5">
+        <a asp-area="Admin" asp-page="/Users/Index" class="btn btn-secondary">← Quay lại danh sách</a>
+    </div>
+}
+
