@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.SignalR;
+using OnlineLearningPlatform.RazorPages.Hubs;
 using OnlineLearningPlatform.Services.DTOs.User.Request;
 using OnlineLearningPlatform.Services.DTOs.User.Response;
 using OnlineLearningPlatform.Services.Interface;
@@ -11,10 +13,12 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Users
     public class IndexModel : PageModel
     {
         private readonly IUserService _userService;
+        private readonly IHubContext<DataHub> _hub;
 
-        public IndexModel(IUserService userService)
+        public IndexModel(IUserService userService, IHubContext<DataHub> hub)
         {
             _userService = userService;
+            _hub = hub;
         }
 
         // Kết quả search
@@ -74,6 +78,9 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Users
             if (result)
             {
                 SuccessMessage = "Xóa người dùng thành công!";
+
+                // Broadcast realtime: user bị xóa → các admin đang xem danh sách tự xóa row ngay
+                await _hub.Clients.All.SendAsync("UserDeleted", new { userId = id });
             }
             else
             {

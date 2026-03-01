@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.SignalR;
 using OnlineLearningPlatform.Models.Entities;
+using OnlineLearningPlatform.RazorPages.Hubs;
 using OnlineLearningPlatform.Services.Interface;
 using System.Security.Claims;
 
@@ -11,10 +13,12 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses
     public class DeleteModel : PageModel
     {
         private readonly ICourseService _courseService;
+        private readonly IHubContext<DataHub> _hub;
 
-        public DeleteModel(ICourseService courseService)
+        public DeleteModel(ICourseService courseService, IHubContext<DataHub> hub)
         {
             _courseService = courseService;
+            _hub = hub;
         }
 
         public Course? Course { get; set; }
@@ -47,6 +51,12 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses
 
             var result = await _courseService.DeleteAsync(id, teacherId);
             TempData[result.Success ? "SuccessMessage" : "ErrorMessage"] = result.Message;
+
+            if (result.Success)
+            {
+                // Broadcast realtime: khóa học bị xóa → tất cả list tự remove card/row ngay lập tức
+                await _hub.Clients.All.SendAsync("CourseDeleted", new { courseId = id });
+            }
 
             return RedirectToPage("/Courses/Index", new { area = "Teacher" });
         }

@@ -57,7 +57,7 @@
                 <tbody>
                     @if (Model.Courses.Count == 0)
                     {
-                        <tr>
+                        <tr id="empty-courses-row">
                             <td colspan="5" class="text-center text-muted py-4">No courses found.</td>
                         </tr>
                     }
@@ -65,11 +65,11 @@
                     {
                         foreach (var course in Model.Courses)
                         {
-                            <tr>
+                            <tr id="admin-course-row-@course.CourseId">
                                 <td>@course.CourseCode</td>
                                 <td>@course.Title</td>
                                 <td>@(course.Teacher?.FullName ?? "N/A")</td>
-                                <td>@course.Status</td>
+                                <td id="admin-course-status-@course.CourseId">@course.Status</td>
                                 <td class="text-end">
                                     <a class="btn btn-sm btn-outline-primary" asp-area="Admin" asp-page="/Courses/Details" asp-route-id="@course.CourseId">Details</a>
                                 </td>
@@ -81,3 +81,82 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+<script src="~/lib/microsoft-signalr/signalr.min.js"></script>
+<script>
+(function () {
+    // ==== SignalR: Admin Courses realtime ====
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl('/hubs/data')
+        .withAutomaticReconnect()
+        .build();
+
+    function escHtml(str) {
+        return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function showToast(msg, type) {
+        const toast = document.createElement('div');
+        toast.className = 'alert alert-' + (type || 'info');
+        toast.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;min-width:300px;animation:fadeIn .3s ease;max-width:420px;';
+        toast.innerHTML = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity .3s'; setTimeout(() => toast.remove(), 300); }, 4500);
+    }
+
+    // Khi Teacher tạo khóa học mới → thêm row vào bảng của Admin ngay
+    connection.on('CourseCreated', function (data) {
+        const tbody = document.querySelector('table tbody');
+        if (!tbody) return;
+        // Xóa empty row nếu có
+        const emptyRow = document.getElementById('empty-courses-row');
+        if (emptyRow) emptyRow.remove();
+
+        // Tránh duplicate
+        if (document.getElementById('admin-course-row-' + data.courseId)) return;
+
+        const tr = document.createElement('tr');
+        tr.id = 'admin-course-row-' + data.courseId;
+        tr.style.animation = 'fadeIn .4s ease';
+        tr.innerHTML = `
+            <td>${escHtml(data.courseCode || '')}</td>
+            <td>${escHtml(data.title || '')}</td>
+            <td>${escHtml(data.teacherName || '')}</td>
+            <td id="admin-course-status-${data.courseId}">Pending</td>
+            <td class="text-end">
+                <a class="btn btn-sm btn-outline-primary" href="/Admin/Courses/Details?id=${data.courseId}">Details</a>
+            </td>`;
+        tbody.insertBefore(tr, tbody.firstChild);
+        showToast('📚 Khóa học mới: <strong>' + escHtml(data.title) + '</strong> đang chờ duyệt.', 'info');
+    });
+
+    // Khi Admin approve/reject → cập nhật status cell ngay
+    connection.on('CourseStatusChanged', function (data) {
+        const statusCell = document.getElementById('admin-course-status-' + data.courseId);
+        if (!statusCell) return;
+        statusCell.textContent = data.status;
+
+        const row = document.getElementById('admin-course-row-' + data.courseId);
+        if (row) {
+            row.style.transition = 'background .4s ease';
+            row.style.background = data.status === 'Published' ? 'rgba(52,199,89,.08)' : 'rgba(255,59,48,.06)';
+            setTimeout(() => { row.style.background = ''; }, 1500);
+        }
+    });
+
+    // Khi Teacher xóa khóa học → xóa row khỏi bảng
+    connection.on('CourseDeleted', function (data) {
+        const row = document.getElementById('admin-course-row-' + data.courseId);
+        if (!row) return;
+        row.style.transition = 'opacity .35s ease';
+        row.style.opacity = '0';
+        setTimeout(() => row.remove(), 350);
+        showToast('🗑️ Một khóa học đã bị xóa.', 'warning');
+    });
+
+    connection.start().catch(err => console.warn('[SignalR DataHub] Admin Courses connect error:', err));
+})();
+</script>
+}
+

@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.SignalR;
+using OnlineLearningPlatform.RazorPages.Hubs;
 using OnlineLearningPlatform.Services.Interface;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
@@ -12,11 +14,13 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Sections
     {
         private readonly ICourseService _courseService;
         private readonly ISectionService _sectionService;
+        private readonly IHubContext<DataHub> _hub;
 
-        public CreateModel(ICourseService courseService, ISectionService sectionService)
+        public CreateModel(ICourseService courseService, ISectionService sectionService, IHubContext<DataHub> hub)
         {
             _courseService = courseService;
             _sectionService = sectionService;
+            _hub = hub;
         }
 
         [BindProperty(SupportsGet = true)]
@@ -67,6 +71,15 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Sections
                 ModelState.AddModelError(string.Empty, result.Message);
                 return Page();
             }
+
+            // Broadcast realtime: section mới được thêm → Teacher Course Details page tự append section
+            await _hub.Clients.All.SendAsync("SectionCreated", new
+            {
+                courseId = CourseId,
+                sectionId = result.Section?.SectionId ?? 0,
+                title = Title,
+                orderIndex = OrderIndex
+            });
 
             TempData["SuccessMessage"] = result.Message;
             return RedirectToPage("/Courses/Details", new { area = "Teacher", id = CourseId });

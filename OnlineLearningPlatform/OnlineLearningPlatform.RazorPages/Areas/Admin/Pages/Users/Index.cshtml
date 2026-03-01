@@ -72,7 +72,7 @@
                         var roleClass = user.Role switch { "Admin" => "role-admin", "Teacher" => "role-teacher", _ => "role-student" };
                         var roleLabel = user.Role switch { "Teacher" => "Giảng viên", "Student" => "Học viên", _ => user.Role };
 
-                        <tr>
+                        <tr id="user-row-@user.Id">
                             <td>
                                 <div class="user-cell">
                                     <div class="u-avatar @avClass">
@@ -104,7 +104,8 @@
             </table>
         </div>
 
-        <!-- Pagination -->
+        @* Pagination *@
+
         @if (Model.TotalPages > 1)
         {
             <div class="pagination">
@@ -157,3 +158,46 @@
         </div>
     }
 </div>
+
+@section Scripts {
+<script src="~/lib/microsoft-signalr/signalr.min.js"></script>
+<script>
+(function () {
+    // ==== SignalR: Admin Users realtime ====
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl('/hubs/data')
+        .withAutomaticReconnect()
+        .build();
+
+    function showToast(msg, type) {
+        const toast = document.createElement('div');
+        toast.className = 'alert alert-' + (type || 'info');
+        toast.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;min-width:280px;animation:fadeUp .3s ease forwards;';
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => { toast.style.opacity='0'; toast.style.transition='opacity .3s ease'; setTimeout(()=>toast.remove(),300); }, 4000);
+    }
+
+    // Khi Admin xóa user (ở tab/cửa sổ khác) → xóa row trên trang này
+    connection.on('UserDeleted', function (data) {
+        const row = document.getElementById('user-row-' + data.userId);
+        if (!row) return;
+        row.style.transition = 'opacity .35s ease, transform .35s ease';
+        row.style.opacity = '0';
+        row.style.transform = 'translateX(20px)';
+        setTimeout(() => {
+            row.remove();
+            // Cập nhật count header
+            const countEl = document.querySelector('.card-header h2');
+            if (countEl) {
+                const n = parseInt(countEl.textContent) - 1;
+                countEl.textContent = Math.max(0, n) + ' kết quả';
+            }
+        }, 350);
+        showToast('🗑️ Người dùng đã bị xóa khỏi hệ thống.', 'warning');
+    });
+
+    connection.start().catch(err => console.warn('[SignalR DataHub] Admin Users connect error:', err));
+})();
+</script>
+}

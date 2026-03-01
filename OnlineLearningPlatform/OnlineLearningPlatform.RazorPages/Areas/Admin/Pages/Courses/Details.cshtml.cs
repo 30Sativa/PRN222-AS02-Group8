@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.SignalR;
 using OnlineLearningPlatform.Models.Entities;
+using OnlineLearningPlatform.RazorPages.Hubs;
 using OnlineLearningPlatform.Services.Interface;
 using System.ComponentModel.DataAnnotations;
 
@@ -11,10 +13,12 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Courses
     public class DetailsModel : PageModel
     {
         private readonly ICourseService _courseService;
+        private readonly IHubContext<DataHub> _hub;
 
-        public DetailsModel(ICourseService courseService)
+        public DetailsModel(ICourseService courseService, IHubContext<DataHub> hub)
         {
             _courseService = courseService;
+            _hub = hub;
         }
 
         public Course? Course { get; set; }
@@ -40,6 +44,18 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Courses
         {
             var result = await _courseService.ApproveAsync(id);
             TempData[result.Success ? "SuccessMessage" : "ErrorMessage"] = result.Message;
+
+            if (result.Success)
+            {
+                // Broadcast realtime: course status changed → Admin list & Teacher course list update immediately
+                await _hub.Clients.All.SendAsync("CourseStatusChanged", new
+                {
+                    courseId = id,
+                    status = "Published",
+                    statusLabel = "✓ Xuất bản"
+                });
+            }
+
             return RedirectToPage("/Courses/Index", new { area = "Admin" });
         }
 
@@ -54,6 +70,18 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Courses
 
             var result = await _courseService.RejectAsync(id, RejectionReason);
             TempData[result.Success ? "SuccessMessage" : "ErrorMessage"] = result.Message;
+
+            if (result.Success)
+            {
+                // Broadcast realtime: course rejected → Admin list & Teacher list update badge
+                await _hub.Clients.All.SendAsync("CourseStatusChanged", new
+                {
+                    courseId = id,
+                    status = "Rejected",
+                    statusLabel = "✕ Từ chối"
+                });
+            }
+
             return RedirectToPage("/Courses/Index", new { area = "Admin" });
         }
     }

@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.SignalR;
+using OnlineLearningPlatform.RazorPages.Hubs;
 using OnlineLearningPlatform.Services.Interface;
 
 namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Categories
@@ -9,10 +11,12 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Categories
     public class EditModel : PageModel
     {
         private readonly ICategoryService _categoryService;
+        private readonly IHubContext<DataHub> _hub;
 
-        public EditModel(ICategoryService categoryService)
+        public EditModel(ICategoryService categoryService, IHubContext<DataHub> hub)
         {
             _categoryService = categoryService;
+            _hub = hub;
         }
 
         [BindProperty]
@@ -45,6 +49,13 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Categories
                 ModelState.AddModelError(string.Empty, result.Message);
                 return Page();
             }
+
+            // Broadcast realtime: danh mục được cập nhật → Teacher list tự đổi tên row
+            await _hub.Clients.All.SendAsync("CategoryUpdated", new
+            {
+                categoryId = CategoryId,
+                categoryName = CategoryName
+            });
 
             TempData["SuccessMessage"] = "Danh mục đã được cập nhật thành công.";
             return RedirectToPage("/Categories/Index", new { area = "Teacher" });
