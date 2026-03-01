@@ -1,0 +1,68 @@
+@page "{id:int}"
+@model OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Categories.DeleteModel
+@{
+    ViewData["Title"] = "Xóa danh mục";
+}
+
+<style>
+    .delete-wrap { max-width: 480px; margin: 0 auto; animation: fadeUp .35s ease forwards; }
+    .delete-icon {
+        width: 52px; height: 52px; border-radius: 50%;
+        background: var(--color-red-tint);
+        display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-5);
+    }
+    .delete-icon svg { width: 26px; height: 26px; color: var(--color-red); }
+    .cat-name-highlight {
+        display: inline-block;
+        background: var(--color-surface-2); border: 1px solid var(--color-border);
+        border-radius: var(--radius); padding: 8px 16px;
+        font-weight: 600; font-size: var(--text-md); color: var(--color-label-1);
+        margin: var(--space-4) 0;
+    }
+</style>
+
+<div class="delete-wrap">
+    <div class="page-head">
+        <h1>Xóa danh mục</h1>
+        <div class="breadcrumb">
+            <a asp-area="Teacher" asp-page="/Dashboard">Dashboard</a>
+            <span class="breadcrumb-sep">›</span>
+            <a asp-area="Teacher" asp-page="/Categories/Index">Danh mục</a>
+            <span class="breadcrumb-sep">›</span>
+            <span>Xóa</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body" style="text-align:center">
+            <div class="delete-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6l-1 14H6L5 6"/>
+                    <path d="M10 11v6"/><path d="M14 11v6"/>
+                    <path d="M9 6V4h6v2"/>
+                </svg>
+            </div>
+
+            <h2 style="font-size:var(--text-md);font-weight:600;margin-bottom:var(--space-2);">Xác nhận xóa danh mục</h2>
+            <p class="text-muted">Bạn có chắc chắn muốn xóa danh mục này? Hành động này không thể hoàn tác.</p>
+
+            <div class="cat-name-highlight">@Model.Category.CategoryName</div>
+
+            <div class="alert alert-warning" style="text-align:left;margin-bottom:var(--space-6);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Không thể xóa danh mục nếu vẫn còn khóa học sử dụng danh mục này.
+            </div>
+
+            <form method="post" asp-route-id="@Model.Category.CategoryId">
+                <div class="form-actions" style="justify-content:center">
+                    <button type="submit" class="btn btn-danger">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>
+                        Xóa danh mục
+                    </button>
+                    <a asp-area="Teacher" asp-page="/Categories/Index" class="btn btn-secondary">Hủy</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

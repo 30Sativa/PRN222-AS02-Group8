@@ -2,323 +2,491 @@
 @model OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses.CreateModel
 @using OnlineLearningPlatform.Models.Entities
 @{
-    ViewData["Title"] = "Create Course";
+    ViewData["Title"] = "Tạo khóa học mới";
 }
 
-<h2 class="mb-3">Create Course</h2>
+<style>
+/* ── Wizard layout ── */
+.wizard-wrap {
+    max-width: 860px; margin: 0 auto;
+}
 
-<form method="post" enctype="multipart/form-data">
-    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+/* ── Step pills ── */
+.step-pills {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0; margin-bottom: var(--space-8); position: relative;
+}
+.step-pills::before {
+    content: '';
+    position: absolute; top: 16px; left: 10%; right: 10%; height: 2px;
+    background: var(--color-border-light); z-index: 0;
+}
+.step-pill {
+    display: flex; flex-direction: column; align-items: center;
+    flex: 1; position: relative; z-index: 1; cursor: pointer;
+    background: none; border: none; gap: var(--space-2);
+}
+.step-pill-num {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 2px solid var(--color-border);
+    background: var(--color-surface);
+    display: flex; align-items: center; justify-content: center;
+    font-size: var(--text-xs); font-weight: 700; color: var(--color-label-2);
+    transition: all .25s ease;
+}
+.step-pill-label {
+    font-size: 11px; font-weight: 500; color: var(--color-label-2);
+    white-space: nowrap; text-align: center;
+}
+.step-pill.active .step-pill-num  { background: var(--color-blue); border-color: var(--color-blue); color: #fff; }
+.step-pill.active .step-pill-label { color: var(--color-blue); font-weight: 600; }
+.step-pill.done  .step-pill-num   { background: var(--color-green); border-color: var(--color-green); color: #fff; }
+.step-pill.done  .step-pill-label { color: var(--color-green); }
 
-    <div class="row g-3">
-        <div class="col-md-6">
-            <label asp-for="Input.CourseCode" class="form-label"></label>
-            <input asp-for="Input.CourseCode" class="form-control" />
-        </div>
-        <div class="col-md-6">
-            <label asp-for="Input.Slug" class="form-label"></label>
-            <input asp-for="Input.Slug" class="form-control" />
-        </div>
+/* ── Panels ── */
+.step-panel { display: none; }
+.step-panel.active { display: block; animation: fadeUp .3s ease forwards; }
 
-        <div class="col-12">
-            <label asp-for="Input.Title" class="form-label"></label>
-            <input asp-for="Input.Title" class="form-control" />
-        </div>
+.panel-head { margin-bottom: var(--space-6); }
+.panel-head h2 {
+    font-size: var(--text-lg); font-weight: 700;
+    letter-spacing: -.025em; color: var(--color-label-1);
+    display: flex; align-items: center; gap: var(--space-3); margin-bottom: 6px;
+}
+.panel-head h2 .step-emoji { font-size: 22px; }
+.panel-head p { font-size: var(--text-sm); color: var(--color-label-2); }
 
-        <div class="col-12">
-            <label asp-for="Input.Description" class="form-label"></label>
-            <textarea asp-for="Input.Description" class="form-control" rows="4"></textarea>
-        </div>
+/* ── Field helpers ── */
+.field-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+@@media(max-width:640px){ .field-row-2 { grid-template-columns: 1fr; } }
+.field-group { margin-bottom: var(--space-5); }
+.field-label {
+    display: block; font-size: var(--text-sm); font-weight: 500;
+    color: var(--color-label-1); margin-bottom: var(--space-2);
+}
+.field-label .req { color: var(--color-red); }
+.field-hint { display: block; font-size: var(--text-xs); color: var(--color-label-2); margin-top: 6px; }
 
-        <div class="col-md-4">
-            <label asp-for="Input.CategoryId" class="form-label">Category</label>
-            <select asp-for="Input.CategoryId" class="form-select">
-                <option value="">-- Select category --</option>
-                @foreach (var category in Model.Categories)
-                {
-                    <option value="@category.CategoryId">@category.CategoryName</option>
-                }
-            </select>
-        </div>
+/* ── Price toggle ── */
+.price-type-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3);
+    margin-bottom: var(--space-5);
+}
+.price-type-card {
+    border: 2px solid var(--color-border); border-radius: var(--radius-lg);
+    padding: var(--space-4); cursor: pointer; transition: all .2s ease;
+    background: var(--color-surface); display: flex; align-items: center; gap: var(--space-3);
+}
+.price-type-card:hover { border-color: var(--color-blue); }
+.price-type-card.selected { border-color: var(--color-blue); background: var(--color-blue-tint); }
+.price-type-card input[type=radio] { display: none; }
+.price-type-icon { font-size: 24px; }
+.price-type-text strong { display: block; font-size: var(--text-sm); font-weight: 600; color: var(--color-label-1); }
+.price-type-text span { font-size: var(--text-xs); color: var(--color-label-2); }
 
-        <div class="col-md-4">
-            <label asp-for="Input.Level" class="form-label"></label>
-            <select asp-for="Input.Level" class="form-select" asp-items="Html.GetEnumSelectList<CourseLevel>()"></select>
-        </div>
+/* ── Thumbnail upload ── */
+.thumb-zone {
+    border: 2px dashed var(--color-border); border-radius: var(--radius-lg);
+    padding: var(--space-8); text-align: center; cursor: pointer;
+    transition: border-color .2s ease, background .2s ease; position: relative;
+}
+.thumb-zone:hover { border-color: var(--color-blue); background: var(--color-blue-tint); }
+.thumb-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.thumb-zone-icon { font-size: 32px; margin-bottom: var(--space-2); }
+.thumb-zone p { font-size: var(--text-sm); color: var(--color-label-2); }
+.thumb-zone strong { color: var(--color-blue); }
+#thumbPreview { margin-top: var(--space-3); border-radius: var(--radius-lg); overflow: hidden; display: none; }
+#thumbPreview img { width: 100%; max-height: 220px; object-fit: cover; display: block; border-radius: var(--radius-lg); }
 
-        <div class="col-md-4">
-            <label asp-for="Input.Language" class="form-label"></label>
-            <input asp-for="Input.Language" class="form-control" />
-        </div>
+/* ── Step footer ── */
+.step-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: var(--space-8); padding-top: var(--space-5);
+    border-top: 1px solid var(--color-border-light);
+}
+.step-footer-end { display: flex; gap: var(--space-3); }
 
-        <div class="col-md-6">
-            <label asp-for="Input.Price" class="form-label"></label>
-            <input asp-for="Input.Price" class="form-control" />
-        </div>
+/* ── Review summary ── */
+.review-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3);
+    margin-bottom: var(--space-5);
+}
+@@media(max-width:600px){ .review-grid { grid-template-columns: 1fr; } }
+.review-cell { background: var(--color-surface-2); border-radius: var(--radius); padding: var(--space-4); }
+.review-cell-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--color-label-2); margin-bottom: 4px; }
+.review-cell-value { font-size: var(--text-sm); font-weight: 600; color: var(--color-label-1); word-break: break-word; }
+</style>
 
-        <div class="col-md-6">
-            <label asp-for="Input.DiscountPrice" class="form-label"></label>
-            <input asp-for="Input.DiscountPrice" class="form-control" />
-        </div>
+<div class="wizard-wrap fade-up">
 
-        <div class="col-12">
-            <label asp-for="Input.ThumbnailUrl" class="form-label"></label>
-            <input asp-for="Input.ThumbnailUrl" class="form-control" />
+    <div class="page-head">
+        <h1>Tạo khóa học mới</h1>
+        <div class="breadcrumb">
+            <a asp-area="Teacher" asp-page="/Dashboard">Dashboard</a>
+            <span class="breadcrumb-sep">›</span>
+            <a asp-area="Teacher" asp-page="/Courses/Index">Khóa học</a>
+            <span class="breadcrumb-sep">›</span>
+            <span>Tạo mới</span>
         </div>
     </div>
 
-    <hr class="my-4" />
-
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">Sections & Lessons</h4>
-        <button type="button" class="btn btn-outline-primary" id="btnAddSection">+ Add Section</button>
+    <!-- Step pills indicator -->
+    <div class="step-pills" id="stepPills">
+        <button type="button" class="step-pill active" data-goto="1">
+            <span class="step-pill-num" id="num1">1</span>
+            <span class="step-pill-label">Thông tin cơ bản</span>
+        </button>
+        <button type="button" class="step-pill" data-goto="2">
+            <span class="step-pill-num" id="num2">2</span>
+            <span class="step-pill-label">Danh mục & Trình độ</span>
+        </button>
+        <button type="button" class="step-pill" data-goto="3">
+            <span class="step-pill-num" id="num3">3</span>
+            <span class="step-pill-label">Giá & Hình ảnh</span>
+        </button>
     </div>
 
-    <div id="sectionsContainer"></div>
+    <!-- Server validation errors -->
+    <div asp-validation-summary="All" class="alert alert-danger" id="serverErrors"></div>
 
-    <div class="mt-4 d-flex gap-2">
-        <button type="submit" class="btn btn-primary">Create Course</button>
-        <a asp-area="Teacher" asp-page="/Courses/Index" class="btn btn-secondary">Back to List</a>
-    </div>
-</form>
+    <form method="post" id="courseForm">
 
-<template id="sectionTemplate">
-    <div class="card shadow-sm border-0 mb-3 section-item">
-        <div class="card-header d-flex justify-content-between align-items-center bg-light">
-            <strong class="section-title">Section</strong>
-            <button type="button" class="btn btn-sm btn-outline-danger btn-remove-section">Remove Section</button>
-        </div>
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-8">
-                    <label class="form-label">Section Title</label>
-                    <input class="form-control section-title-input" />
+        <!-- ═══ STEP 1: Basic Info ═══ -->
+        <div class="step-panel card active" id="panel1">
+            <div class="card-body">
+                <div class="panel-head">
+                    <h2><span class="step-emoji">📝</span> Thông tin cơ bản</h2>
+                    <p>Tiêu đề, mã và mô tả giúp học viên hiểu rõ khóa học của bạn.</p>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label">Order</label>
-                    <input class="form-control section-order-input" type="number" min="1" value="1" />
+
+                <div class="field-group">
+                    <label class="field-label" for="Input_Title">
+                        Tiêu đề khóa học <span class="req">*</span>
+                    </label>
+                    <input asp-for="Input.Title" id="Input_Title" class="form-control"
+                           placeholder="VD: Lập trình React từ cơ bản đến nâng cao" />
+                    <span class="field-hint">Ngắn gọn, hấp dẫn — nêu rõ giá trị bạn mang lại.</span>
+                    <span asp-validation-for="Input.Title" class="form-error"></span>
+                </div>
+
+                <div class="field-row-2">
+                    <div class="field-group" style="margin-bottom:0">
+                        <label class="field-label" for="Input_CourseCode">
+                            Mã khóa học <span class="req">*</span>
+                        </label>
+                        <input asp-for="Input.CourseCode" id="Input_CourseCode" class="form-control"
+                               placeholder="VD: REACT101" maxlength="20" />
+                        <span class="field-hint">Viết hoa, không dấu, tối đa 20 ký tự.</span>
+                        <span asp-validation-for="Input.CourseCode" class="form-error"></span>
+                    </div>
+                    <div class="field-group" style="margin-bottom:0">
+                        <label class="field-label" for="Input_Slug">
+                            Đường dẫn (Slug) <span class="req">*</span>
+                        </label>
+                        <input asp-for="Input.Slug" id="Input_Slug" class="form-control"
+                               placeholder="VD: lap-trinh-react-co-ban" maxlength="220" />
+                        <span class="field-hint">Tự động tạo từ tiêu đề. Chỉ dùng a-z, 0-9, dấu -.</span>
+                        <span asp-validation-for="Input.Slug" class="form-error"></span>
+                    </div>
+                </div>
+
+                <div class="field-group" style="margin-top:var(--space-5)">
+                    <label class="field-label" for="Input_Description">Mô tả khóa học</label>
+                    <textarea asp-for="Input.Description" id="Input_Description" class="form-control"
+                              rows="5" placeholder="Mô tả những gì học viên sẽ học được, đối tượng phù hợp, yêu cầu đầu vào..."></textarea>
+                    <span class="field-hint">Mô tả tốt giúp tăng tỷ lệ đăng ký đáng kể.</span>
+                </div>
+
+                <div class="step-footer">
+                    <a asp-area="Teacher" asp-page="/Courses/Index" class="btn btn-secondary">Hủy</a>
+                    <div class="step-footer-end">
+                        <button type="button" class="btn btn-primary" id="nextTo2" onclick="gotoStep(2)">
+                            Tiếp theo
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                    </div>
                 </div>
             </div>
-
-            <div class="d-flex justify-content-between align-items-center mt-3 mb-2">
-                <h6 class="mb-0">Lessons</h6>
-                <button type="button" class="btn btn-sm btn-outline-primary btn-add-lesson">+ Add Lesson</button>
-            </div>
-
-            <div class="lessons-container"></div>
         </div>
-    </div>
-</template>
 
-<template id="lessonTemplate">
-    <div class="border rounded p-3 mb-2 lesson-item bg-white">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <strong class="lesson-title">Lesson</strong>
-            <button type="button" class="btn btn-sm btn-outline-danger btn-remove-lesson">Remove</button>
-        </div>
-        <div class="row g-2">
-            <div class="col-md-5">
-                <label class="form-label">Lesson Title</label>
-                <input class="form-control lesson-title-input" />
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Type</label>
-                <select class="form-select lesson-type-input">
-                    @foreach (LessonType type in Enum.GetValues(typeof(LessonType)))
-                    {
-                        <option value="@type">@type</option>
-                    }
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Order</label>
-                <input class="form-control lesson-order-input" type="number" min="1" value="1" />
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
-                <div class="form-check">
-                    <input class="form-check-input lesson-preview-input" type="checkbox" />
-                    <label class="form-check-label">Preview</label>
+        <!-- ═══ STEP 2: Category & Level ═══ -->
+        <div class="step-panel card" id="panel2">
+            <div class="card-body">
+                <div class="panel-head">
+                    <h2><span class="step-emoji">🏷️</span> Danh mục & Trình độ</h2>
+                    <p>Giúp học viên tìm kiếm đúng khóa học phù hợp với họ.</p>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label" for="Input_CategoryId">Danh mục</label>
+                    <select asp-for="Input.CategoryId" id="Input_CategoryId" class="form-control">
+                        <option value="">-- Chọn danh mục --</option>
+                        @foreach (var cat in Model.Categories)
+                        {
+                            <option value="@cat.CategoryId">@cat.CategoryName</option>
+                        }
+                    </select>
+                    <span class="field-hint">
+                        Không tìm thấy danh mục phù hợp?
+                        <a asp-area="Teacher" asp-page="/Categories/Create" target="_blank" style="font-weight:500">
+                            Tạo danh mục mới ↗
+                        </a>
+                    </span>
+                </div>
+
+                <div class="field-row-2">
+                    <div class="field-group" style="margin-bottom:0">
+                        <label class="field-label" for="Input_Level">Trình độ</label>
+                        <select asp-for="Input.Level" id="Input_Level" class="form-control"
+                                asp-items="Html.GetEnumSelectList<CourseLevel>()"></select>
+                        <span class="field-hint">Beginner = Cơ bản · Intermediate = Trung cấp · Advanced = Nâng cao.</span>
+                    </div>
+                    <div class="field-group" style="margin-bottom:0">
+                        <label class="field-label" for="Input_Language">Ngôn ngữ giảng dạy</label>
+                        <input asp-for="Input.Language" id="Input_Language" class="form-control"
+                               placeholder="vi" maxlength="10" />
+                        <span class="field-hint">vi = Tiếng Việt, en = English.</span>
+                    </div>
+                </div>
+
+                <div class="step-footer">
+                    <button type="button" class="btn btn-secondary" onclick="gotoStep(1)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                        Quay lại
+                    </button>
+                    <div class="step-footer-end">
+                        <button type="button" class="btn btn-primary" onclick="gotoStep(3)">
+                            Tiếp theo
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <div class="col-12 reading-content-group">
-                <label class="form-label">Reading Content (optional)</label>
-                <textarea class="form-control lesson-content-input" rows="2"></textarea>
-            </div>
+        <!-- ═══ STEP 3: Price & Thumbnail ═══ -->
+        <div class="step-panel card" id="panel3">
+            <div class="card-body">
+                <div class="panel-head">
+                    <h2><span class="step-emoji">💰</span> Học phí & Hình ảnh</h2>
+                    <p>Đặt giá và thêm ảnh bìa thu hút. Bạn có thể cập nhật sau.</p>
+                </div>
 
-            <div class="col-12 video-upload-group" style="display:none;">
-                <label class="form-label">Video File</label>
-                <input class="form-control lesson-video-file-input" type="file" accept="video/mp4,video/webm,video/ogg" />
-                <div class="form-text">Required for Video. Max 200MB.</div>
-            </div>
+                <!-- Price type -->
+                <div class="field-group">
+                    <label class="field-label">Loại học phí</label>
+                    <div class="price-type-row">
+                        <label class="price-type-card selected" id="cardFree">
+                            <input type="radio" name="_priceType" value="free" checked onchange="setPriceType('free')" />
+                            <span class="price-type-icon">🎁</span>
+                            <div class="price-type-text">
+                                <strong>Miễn phí</strong>
+                                <span>Mở cho tất cả học viên</span>
+                            </div>
+                        </label>
+                        <label class="price-type-card" id="cardPaid">
+                            <input type="radio" name="_priceType" value="paid" onchange="setPriceType('paid')" />
+                            <span class="price-type-icon">💳</span>
+                            <div class="price-type-text">
+                                <strong>Có phí</strong>
+                                <span>Thu học phí từ học viên</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
 
-            <div class="col-12 reading-pdf-group">
-                <label class="form-label">Reading PDF (optional)</label>
-                <input class="form-control lesson-reading-pdf-file-input" type="file" accept="application/pdf,.pdf" />
-                <div class="form-text">Optional for Reading. PDF only, max 50MB.</div>
+                <div id="paidFields" style="display:none">
+                    <div class="field-row-2">
+                        <div class="field-group">
+                            <label class="field-label" for="Input_Price">Giá gốc (VNĐ)</label>
+                            <input asp-for="Input.Price" id="Input_Price" class="form-control"
+                                   type="number" min="0" step="1000" placeholder="VD: 299000" />
+                            <span asp-validation-for="Input.Price" class="form-error"></span>
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label" for="Input_DiscountPrice">Giá khuyến mãi (VNĐ)</label>
+                            <input asp-for="Input.DiscountPrice" id="Input_DiscountPrice" class="form-control"
+                                   type="number" min="0" step="1000" placeholder="Để trống nếu không giảm" />
+                            <span asp-validation-for="Input.DiscountPrice" class="form-error"></span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Hidden price = 0 for free courses -->
+                <input asp-for="Input.Price" id="hiddenPrice" type="hidden" value="0" />
+
+                <!-- Thumbnail -->
+                <div class="field-group">
+                    <label class="field-label">Ảnh bìa khóa học</label>
+                    <div class="thumb-zone" id="thumbZone">
+                        <input type="file" id="thumbFile" accept="image/*" onchange="previewFile(this)" />
+                        <div class="thumb-zone-icon">🖼️</div>
+                        <p><strong>Nhấn để chọn ảnh</strong> hoặc nhập URL bên dưới</p>
+                        <p style="font-size:11px;margin-top:4px;color:var(--color-label-3)">PNG, JPG, WebP · Khuyến nghị 1280×720px</p>
+                    </div>
+                    <div id="thumbPreview">
+                        <img id="thumbImg" src="" alt="Preview" />
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="clearThumb()" style="margin-top:8px">
+                            Xóa ảnh
+                        </button>
+                    </div>
+                    <div style="margin-top:var(--space-3)">
+                        <label class="field-label" style="font-size:var(--text-xs)">Hoặc nhập URL ảnh bìa</label>
+                        <input asp-for="Input.ThumbnailUrl" id="Input_ThumbnailUrl" class="form-control"
+                               placeholder="https://..." oninput="previewUrl(this.value)" style="font-size:var(--text-sm)" />
+                    </div>
+                </div>
+
+                <div class="step-footer">
+                    <button type="button" class="btn btn-secondary" onclick="gotoStep(2)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                        Quay lại
+                    </button>
+                    <div class="step-footer-end">
+                        <a asp-area="Teacher" asp-page="/Courses/Index" class="btn btn-secondary">Hủy</a>
+                        <button type="submit" class="btn btn-primary" id="btnSubmit">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            Tạo khóa học
+                        </button>
+                    </div>
+                </div>
+
+                <div class="alert alert-info" style="margin-top:var(--space-5);margin-bottom:0">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span>Sau khi tạo xong, bạn sẽ được chuyển đến trang <strong>Quản lý nội dung</strong> để thêm sections và lessons.</span>
+                </div>
             </div>
         </div>
-    </div>
-</template>
+
+    </form>
+</div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-    <script>
-        (function () {
-            const sectionsContainer = document.getElementById('sectionsContainer');
-            const sectionTemplate = document.getElementById('sectionTemplate');
-            const lessonTemplate = document.getElementById('lessonTemplate');
-            const btnAddSection = document.getElementById('btnAddSection');
+<partial name="_ValidationScriptsPartial" />
+<script>
+(function () {
+    /* ── Step navigation ── */
+    let current = 1;
+    const TOTAL = 3;
 
-            const initialSections = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Sections));
+    window.gotoStep = function (n) {
+        if (n < 1 || n > TOTAL) return;
+        document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('panel' + n).classList.add('active');
 
-            function createHidden(name, value) {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = name;
-                input.value = value ?? '';
-                input.dataset.dynamic = '1';
-                return input;
+        document.querySelectorAll('.step-pill').forEach(function (pill, idx) {
+            const s = idx + 1;
+            pill.classList.remove('active', 'done');
+            if (s === n) pill.classList.add('active');
+            else if (s < n) pill.classList.add('done');
+            // Show checkmark for done steps
+            const numEl = document.getElementById('num' + s);
+            if (numEl) {
+                if (s < n) numEl.innerHTML = '✓';
+                else numEl.textContent = s;
             }
+        });
 
-            function toggleLessonFields(lessonNode) {
-                const type = lessonNode.querySelector('.lesson-type-input').value;
-                const videoGroup = lessonNode.querySelector('.video-upload-group');
-                const readingPdfGroup = lessonNode.querySelector('.reading-pdf-group');
-                const readingContentGroup = lessonNode.querySelector('.reading-content-group');
+        current = n;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
-                if (type === 'Video') {
-                    videoGroup.style.display = 'block';
-                    readingPdfGroup.style.display = 'none';
-                    readingContentGroup.style.display = 'none';
-                } else if (type === 'Reading') {
-                    videoGroup.style.display = 'none';
-                    readingPdfGroup.style.display = 'block';
-                    readingContentGroup.style.display = 'block';
-                } else {
-                    videoGroup.style.display = 'none';
-                    readingPdfGroup.style.display = 'none';
-                    readingContentGroup.style.display = 'none';
-                }
+    // Allow clicking step pills to navigate
+    document.querySelectorAll('.step-pill').forEach(function (pill) {
+        pill.addEventListener('click', function () {
+            const t = parseInt(this.dataset.goto);
+            gotoStep(t);
+        });
+    });
+
+    /* ── Slug auto-generation ── */
+    const titleEl = document.getElementById('Input_Title');
+    const slugEl  = document.getElementById('Input_Slug');
+    const codeEl  = document.getElementById('Input_CourseCode');
+
+    function toSlug(s) {
+        const map = {à:'a',á:'a',ả:'a',ã:'a',ạ:'a',ă:'a',ắ:'a',ằ:'a',ẳ:'a',ẵ:'a',ặ:'a',â:'a',ấ:'a',ầ:'a',ẩ:'a',ẫ:'a',ậ:'a',è:'e',é:'e',ẻ:'e',ẽ:'e',ẹ:'e',ê:'e',ế:'e',ề:'e',ể:'e',ễ:'e',ệ:'e',ì:'i',í:'i',ỉ:'i',ĩ:'i',ị:'i',ò:'o',ó:'o',ỏ:'o',õ:'o',ọ:'o',ô:'o',ố:'o',ồ:'o',ổ:'o',ỗ:'o',ộ:'o',ơ:'o',ớ:'o',ờ:'o',ở:'o',ỡ:'o',ợ:'o',ù:'u',ú:'u',ủ:'u',ũ:'u',ụ:'u',ư:'u',ứ:'u',ừ:'u',ử:'u',ữ:'u',ự:'u',ỳ:'y',ý:'y',ỷ:'y',ỹ:'y',ỵ:'y',đ:'d'};
+        return s.toLowerCase().split('').map(c => map[c] || c).join('')
+            .replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-').replace(/-+/g,'-');
+    }
+
+    titleEl?.addEventListener('input', function () {
+        if (!slugEl.dataset.edited) {
+            slugEl.value = toSlug(this.value);
+        }
+        if (!codeEl.value) {
+            const words = this.value.toUpperCase().split(/\s+/).filter(Boolean);
+            if (words.length > 0) {
+                codeEl.placeholder = words.map(w => w[0]).join('').substring(0, 6) || 'CODE';
             }
+        }
+    });
+    slugEl?.addEventListener('input', function () { this.dataset.edited = '1'; });
 
-            function renderSection(sectionData) {
-                const node = sectionTemplate.content.firstElementChild.cloneNode(true);
-                const lessonsContainer = node.querySelector('.lessons-container');
+    /* ── Price type toggle ── */
+    window.setPriceType = function (type) {
+        const cardFree = document.getElementById('cardFree');
+        const cardPaid = document.getElementById('cardPaid');
+        const paidFields = document.getElementById('paidFields');
+        const hiddenPrice = document.getElementById('hiddenPrice');
+        const inputPrice = document.getElementById('Input_Price');
 
-                const sectionTitleInput = node.querySelector('.section-title-input');
-                const sectionOrderInput = node.querySelector('.section-order-input');
-                const btnRemoveSection = node.querySelector('.btn-remove-section');
-                const btnAddLesson = node.querySelector('.btn-add-lesson');
+        if (type === 'free') {
+            cardFree.classList.add('selected');
+            cardPaid.classList.remove('selected');
+            paidFields.style.display = 'none';
+            hiddenPrice.disabled = false;
+            hiddenPrice.value = '0';
+            if (inputPrice) inputPrice.disabled = true;
+        } else {
+            cardPaid.classList.add('selected');
+            cardFree.classList.remove('selected');
+            paidFields.style.display = '';
+            hiddenPrice.disabled = true;
+            if (inputPrice) inputPrice.disabled = false;
+        }
+    };
+    // Init
+    setPriceType('free');
 
-                sectionTitleInput.value = sectionData?.title || '';
-                sectionOrderInput.value = sectionData?.orderIndex || 1;
+    /* ── Thumbnail ── */
+    window.previewFile = function (input) {
+        if (!input.files || !input.files[0]) return;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            document.getElementById('thumbImg').src = e.target.result;
+            document.getElementById('thumbPreview').style.display = 'block';
+            document.getElementById('thumbZone').style.display = 'none';
+            document.getElementById('Input_ThumbnailUrl').value = '';
+        };
+        reader.readAsDataURL(input.files[0]);
+    };
+    window.previewUrl = function (url) {
+        if (url && url.startsWith('http')) {
+            document.getElementById('thumbImg').src = url;
+            document.getElementById('thumbPreview').style.display = 'block';
+            document.getElementById('thumbZone').style.display = 'none';
+        }
+    };
+    window.clearThumb = function () {
+        document.getElementById('thumbImg').src = '';
+        document.getElementById('thumbPreview').style.display = 'none';
+        document.getElementById('thumbZone').style.display = 'block';
+        document.getElementById('thumbFile').value = '';
+        document.getElementById('Input_ThumbnailUrl').value = '';
+    };
 
-                btnRemoveSection.addEventListener('click', () => {
-                    node.remove();
-                    refreshLabels();
-                });
+    /* ── Submit: ensure correct price field is sent ── */
+    document.getElementById('courseForm').addEventListener('submit', function () {
+        const btn = document.getElementById('btnSubmit');
+        btn.disabled = true;
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Đang tạo...';
+    });
 
-                btnAddLesson.addEventListener('click', () => {
-                    lessonsContainer.appendChild(renderLesson());
-                    refreshLabels();
-                });
-
-                const initialLessons = sectionData?.lessons?.length ? sectionData.lessons : [null];
-                initialLessons.forEach(l => lessonsContainer.appendChild(renderLesson(l)));
-
-                return node;
-            }
-
-            function renderLesson(lessonData) {
-                const node = lessonTemplate.content.firstElementChild.cloneNode(true);
-                node.querySelector('.lesson-title-input').value = lessonData?.title || '';
-                node.querySelector('.lesson-type-input').value = lessonData?.lessonType || 'Reading';
-                node.querySelector('.lesson-order-input').value = lessonData?.orderIndex || 1;
-                node.querySelector('.lesson-preview-input').checked = !!lessonData?.isPreview;
-                node.querySelector('.lesson-content-input').value = lessonData?.content || '';
-
-                node.querySelector('.lesson-type-input').addEventListener('change', () => toggleLessonFields(node));
-                toggleLessonFields(node);
-
-                node.querySelector('.btn-remove-lesson').addEventListener('click', () => {
-                    const parent = node.parentElement;
-                    node.remove();
-                    if (parent && parent.children.length === 0) {
-                        parent.appendChild(renderLesson());
-                    }
-                    refreshLabels();
-                });
-
-                return node;
-            }
-
-            function refreshLabels() {
-                const sectionItems = sectionsContainer.querySelectorAll('.section-item');
-                sectionItems.forEach((sectionNode, sIndex) => {
-                    sectionNode.querySelector('.section-title').textContent = `Section ${sIndex + 1}`;
-
-                    const lessonItems = sectionNode.querySelectorAll('.lesson-item');
-                    lessonItems.forEach((lessonNode, lIndex) => {
-                        lessonNode.querySelector('.lesson-title').textContent = `Lesson ${lIndex + 1}`;
-                    });
-                });
-            }
-
-            function beforeSubmitBuildInputs(form) {
-                form.querySelectorAll('input[type="hidden"][data-dynamic="1"]').forEach(x => x.remove());
-
-                const sectionItems = sectionsContainer.querySelectorAll('.section-item');
-                sectionItems.forEach((sectionNode, sIndex) => {
-                    const sectionTitle = sectionNode.querySelector('.section-title-input').value;
-                    const sectionOrder = sectionNode.querySelector('.section-order-input').value || '1';
-
-                    const sPrefix = `Sections[${sIndex}]`;
-                    form.appendChild(createHidden(`${sPrefix}.Title`, sectionTitle));
-                    form.appendChild(createHidden(`${sPrefix}.OrderIndex`, sectionOrder));
-
-                    const lessonItems = sectionNode.querySelectorAll('.lesson-item');
-                    lessonItems.forEach((lessonNode, lIndex) => {
-                        const lPrefix = `${sPrefix}.Lessons[${lIndex}]`;
-
-                        const title = lessonNode.querySelector('.lesson-title-input').value;
-                        const type = lessonNode.querySelector('.lesson-type-input').value;
-                        const order = lessonNode.querySelector('.lesson-order-input').value || '1';
-                        const isPreview = lessonNode.querySelector('.lesson-preview-input').checked;
-                        const content = lessonNode.querySelector('.lesson-content-input').value;
-
-                        form.appendChild(createHidden(`${lPrefix}.Title`, title));
-                        form.appendChild(createHidden(`${lPrefix}.LessonType`, type));
-                        form.appendChild(createHidden(`${lPrefix}.OrderIndex`, order));
-                        form.appendChild(createHidden(`${lPrefix}.IsPreview`, isPreview ? 'true' : 'false'));
-                        form.appendChild(createHidden(`${lPrefix}.Content`, content));
-
-                        const videoInput = lessonNode.querySelector('.lesson-video-file-input');
-                        const pdfInput = lessonNode.querySelector('.lesson-reading-pdf-file-input');
-
-                        videoInput.name = `${lPrefix}.VideoFile`;
-                        pdfInput.name = `${lPrefix}.ReadingPdfFile`;
-                    });
-                });
-            }
-
-            btnAddSection.addEventListener('click', () => {
-                sectionsContainer.appendChild(renderSection());
-                refreshLabels();
-            });
-
-            if (initialSections && initialSections.length > 0) {
-                initialSections.forEach(s => sectionsContainer.appendChild(renderSection(s)));
-            } else {
-                sectionsContainer.appendChild(renderSection());
-            }
-
-            refreshLabels();
-
-            const form = document.querySelector('form[method="post"]');
-            form.addEventListener('submit', function () {
-                beforeSubmitBuildInputs(form);
-            });
-        })();
-    </script>
+    /* ── If server returned errors, go back to step 1 ── */
+    const errBox = document.getElementById('serverErrors');
+    if (errBox && errBox.textContent.trim().length > 0) {
+        gotoStep(1);
+    }
+})();
+</script>
 }

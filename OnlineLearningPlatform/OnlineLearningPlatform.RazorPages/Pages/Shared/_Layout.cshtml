@@ -28,6 +28,8 @@
                 @if (User.IsInRole("Teacher"))
                 {
                     <li><a asp-area="Teacher" asp-page="/Dashboard">Dashboard</a></li>
+                    <li><a asp-area="Teacher" asp-page="/Courses/Index">Khóa học</a></li>
+                    <li><a asp-area="Teacher" asp-page="/Categories/Index">Danh mục</a></li>
                     <li><a asp-area="Teacher" asp-page="/Profile">Hồ sơ</a></li>
                 }
                 @if (User.IsInRole("Student"))

@@ -4,84 +4,354 @@
     ViewData["Title"] = "Dashboard";
 }
 
+<style>
+    /* ── Section label ── */
+    .stat-section-label {
+        font-size: var(--text-xs); font-weight: 600;
+        text-transform: uppercase; letter-spacing: .07em;
+        color: var(--color-label-2);
+        margin-bottom: var(--space-3); margin-top: var(--space-6);
+    }
+    .stat-section-label:first-of-type { margin-top: 0; }
+
+    /* ── Icon trong stat card ── */
+    .stat-card-icon {
+        width: 36px; height: 36px; border-radius: var(--radius-sm);
+        display: flex; align-items: center; justify-content: center;
+        margin-bottom: var(--space-3);
+    }
+    .stat-card-icon svg { width: 18px; height: 18px; }
+
+    .icon-blue   { background: var(--color-blue-tint);  color: var(--color-blue); }
+    .icon-green  { background: var(--color-green-tint); color: var(--color-green); }
+    .icon-amber  { background: var(--color-amber-tint); color: var(--color-amber); }
+    .icon-purple { background: #f0eeff;                 color: #6b21a8; }
+
+    .stat-sub { font-size: 11px; color: var(--color-label-3); margin-top: 4px; }
+
+    /* ── 2-col grid ── */
+    .dash-grid {
+        display: grid; grid-template-columns: 1fr 1fr;
+        gap: var(--space-5); margin-top: var(--space-5);
+    }
+    @@media (max-width: 768px) { .dash-grid { grid-template-columns: 1fr; } }
+
+    /* ── Welcome banner ── */
+    .welcome-banner {
+        background: linear-gradient(135deg, #0071e3 0%, #5856d6 100%);
+        border-radius: var(--radius-xl);
+        padding: var(--space-8) var(--space-10);
+        display: flex; align-items: center; justify-content: space-between;
+        gap: var(--space-6); margin-bottom: var(--space-8);
+        overflow: hidden; position: relative;
+    }
+    .welcome-banner::before {
+        content: '';
+        position: absolute; top: -40px; right: -40px;
+        width: 200px; height: 200px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.08);
+    }
+    .welcome-banner::after {
+        content: '';
+        position: absolute; bottom: -60px; right: 80px;
+        width: 150px; height: 150px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.05);
+    }
+    .welcome-text { position: relative; z-index: 1; }
+    .welcome-text h2 {
+        font-size: var(--text-xl); font-weight: 700;
+        color: #fff; letter-spacing: -.03em; margin-bottom: var(--space-2);
+    }
+    .welcome-text p { font-size: var(--text-sm); color: rgba(255,255,255,.80); }
+    .welcome-actions { position: relative; z-index: 1; display: flex; gap: var(--space-3); flex-shrink: 0; }
+    .btn-white {
+        background: rgba(255,255,255,.18);
+        color: #fff !important;
+        border: 1px solid rgba(255,255,255,.30);
+        backdrop-filter: blur(8px);
+        font-size: var(--text-sm); font-weight: 500;
+        border-radius: var(--radius-full); padding: 9px 20px;
+        text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+        transition: background var(--transition);
+    }
+    .btn-white:hover { background: rgba(255,255,255,.28); opacity: 1 !important; }
+    .btn-white-solid {
+        background: #fff; color: #0071e3 !important;
+        font-size: var(--text-sm); font-weight: 600;
+        border-radius: var(--radius-full); padding: 9px 20px;
+        text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+        transition: opacity var(--transition);
+        border: none;
+    }
+    .btn-white-solid:hover { opacity: .88 !important; }
+
+    @@media (max-width: 640px) {
+        .welcome-banner { flex-direction: column; padding: var(--space-6); }
+        .welcome-actions { flex-wrap: wrap; }
+    }
+
+    /* ── Mini-list ── */
+    .mini-list { list-style: none; }
+    .mini-list-item {
+        display: flex; align-items: center; gap: var(--space-3);
+        padding: var(--space-3) 0;
+        border-bottom: 1px solid var(--color-border-light);
+    }
+    .mini-list-item:last-child { border-bottom: none; }
+    .mini-list-icon {
+        width: 36px; height: 36px; border-radius: var(--radius-sm);
+        background: var(--color-surface-2);
+        display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .mini-list-icon svg { width: 16px; height: 16px; color: var(--color-label-2); }
+    .mini-list-body { flex: 1; min-width: 0; }
+    .mini-list-title {
+        font-size: var(--text-sm); font-weight: 500; color: var(--color-label-1);
+        overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+    }
+    .mini-list-meta { font-size: 11px; color: var(--color-label-2); margin-top: 2px; }
+
+    .empty-state {
+        text-align: center; padding: var(--space-10) var(--space-6);
+        color: var(--color-label-2); font-size: var(--text-sm);
+    }
+
+    /* ── Status badges ── */
+    .status-pill {
+        display: inline-flex; align-items: center;
+        padding: 3px 10px; border-radius: var(--radius-full);
+        font-size: 11px; font-weight: 500; white-space: nowrap;
+    }
+    .status-published { background: var(--color-green-tint); color: var(--color-green); }
+    .status-pending   { background: var(--color-amber-tint); color: var(--color-amber); }
+    .status-draft     { background: var(--color-surface-2);  color: var(--color-label-2); }
+    .status-rejected  { background: var(--color-red-tint);   color: var(--color-red); }
+
+    @@keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(12px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeInUp .4s cubic-bezier(.25,.46,.45,.94) both; }
+    .delay-1 { animation-delay: .06s; }
+    .delay-2 { animation-delay: .12s; }
+    .delay-3 { animation-delay: .18s; }
+</style>
+
+@* ── PAGE HEADER ── *@
 <div class="page-head fade-up">
-    <h1>Xin chào, @(Model.UserInfo?.FullName ?? "Bạn")</h1>
-    <div class="breadcrumb"><span>Giảng viên</span></div>
+    <h1>Dashboard</h1>
+    <div class="breadcrumb">
+        <span>Giảng viên</span>
+        <span class="breadcrumb-sep">›</span>
+        <span>Tổng quan</span>
+    </div>
 </div>
 
-<div class="stat-grid fade-up">
+@* ── WELCOME BANNER ── *@
+<div class="welcome-banner fade-up delay-1">
+    <div class="welcome-text">
+        <h2>Xin chào, @(Model.UserInfo?.FullName ?? "Giảng viên") 👋</h2>
+        <p>Quản lý khóa học, bài giảng và theo dõi học viên của bạn tại đây.</p>
+    </div>
+    <div class="welcome-actions">
+        <a asp-area="Teacher" asp-page="/Courses/Create" class="btn-white-solid">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Tạo khóa học mới
+        </a>
+        <a asp-area="Teacher" asp-page="/Courses/Index" class="btn-white">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Xem tất cả khóa học
+        </a>
+    </div>
+</div>
+
+@* ── STATS ── *@
+<p class="stat-section-label fade-up delay-2">Tổng quan giảng dạy</p>
+<div class="stat-grid fade-up delay-2">
+
     <div class="stat-card">
+        <div class="stat-card-icon icon-blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                <line x1="8" y1="21" x2="16" y2="21"/>
+                <line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+        </div>
         <div class="stat-label">Khóa học của tôi</div>
-        <div class="stat-value">—</div>
-        <div class="stat-meta">Chức năng đang phát triển</div>
+        <div class="stat-value">@Model.TotalCourses</div>
+        <div class="stat-sub">@Model.PublishedCourses đã xuất bản</div>
     </div>
+
     <div class="stat-card">
+        <div class="stat-card-icon icon-green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+        </div>
         <div class="stat-label">Tổng học viên</div>
-        <div class="stat-value">—</div>
-        <div class="stat-meta">Chức năng đang phát triển</div>
+        <div class="stat-value">@Model.TotalStudents</div>
+        <div class="stat-sub">Trên tất cả các khóa học</div>
     </div>
+
     <div class="stat-card">
-        <div class="stat-label">Đánh giá trung bình</div>
-        <div class="stat-value">—</div>
-        <div class="stat-meta">Chức năng đang phát triển</div>
+        <div class="stat-card-icon icon-amber">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+            </svg>
+        </div>
+        <div class="stat-label">Chờ duyệt</div>
+        <div class="stat-value">@Model.PendingCourses</div>
+        <div class="stat-sub">Khóa học đang chờ admin xét duyệt</div>
     </div>
+
     <div class="stat-card">
-        <div class="stat-label">Thu nhập</div>
-        <div class="stat-value">—</div>
-        <div class="stat-meta">Chức năng đang phát triển</div>
+        <div class="stat-card-icon icon-purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+        </div>
+        <div class="stat-label">Tổng bài học</div>
+        <div class="stat-value">@Model.TotalLessons</div>
+        <div class="stat-sub">Trên tất cả các khóa học</div>
     </div>
+
 </div>
 
-<div class="card fade-up">
-    <div class="card-header"><h2>Truy cập nhanh</h2></div>
-    <div class="card-body">
-        <div class="quick-grid">
-            <a asp-area="Teacher" asp-page="/Profile" class="quick-item">
-                <div class="quick-item-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                        <circle cx="12" cy="7" r="4"/>
-                    </svg>
-                </div>
-                <div class="quick-item-title">Hồ sơ giảng viên</div>
-                <div class="quick-item-desc">Xem và cập nhật thông tin của bạn</div>
-            </a>
+@* ── ROW 1: My Courses + Quick Access ── *@
+<div class="dash-grid fade-up delay-3">
 
-            <div class="quick-item quick-item-disabled">
-                <span class="badge-soon">Sắp có</span>
-                <div class="quick-item-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+    @* Danh sách khóa học gần đây *@
+    <div class="card">
+        <div class="card-header">
+            <h2>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;margin-right:6px;vertical-align:-2px;color:var(--color-blue)">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+                Khóa học của tôi
+            </h2>
+            <a asp-area="Teacher" asp-page="/Courses/Index" class="btn btn-sm btn-secondary">Xem tất cả</a>
+        </div>
+        <div class="card-body" style="padding:0 var(--space-6) var(--space-4);">
+            @if (!Model.RecentCourses.Any())
+            {
+                <div class="empty-state">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto var(--space-3)">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                        <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
                     </svg>
+                    <p>Bạn chưa có khóa học nào.<br/><a asp-area="Teacher" asp-page="/Courses/Create">Tạo khóa học đầu tiên →</a></p>
                 </div>
-                <div class="quick-item-title">Khóa học của tôi</div>
-                <div class="quick-item-desc">Quản lý nội dung và bài học</div>
-            </div>
+            }
+            else
+            {
+                <ul class="mini-list">
+                    @foreach (var course in Model.RecentCourses)
+                    {
+                        string statusClass = course.Status switch {
+                            "Published" => "status-published",
+                            "Pending"   => "status-pending",
+                            "Rejected"  => "status-rejected",
+                            _           => "status-draft"
+                        };
+                        string statusLabel = course.Status switch {
+                            "Published" => "Đã xuất bản",
+                            "Pending"   => "Chờ duyệt",
+                            "Rejected"  => "Bị từ chối",
+                            _           => "Nháp"
+                        };
+                        <li class="mini-list-item">
+                            <div class="mini-list-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                                    <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+                                </svg>
+                            </div>
+                            <div class="mini-list-body">
+                                <div class="mini-list-title" title="@course.Title">@course.Title</div>
+                                <div class="mini-list-meta">
+                                    <span class="status-pill @statusClass">@statusLabel</span>
+                                    <span style="margin-left:6px">@course.EnrollmentCount HV</span>
+                                </div>
+                            </div>
+                            <a asp-area="Teacher" asp-page="/Courses/Details" asp-route-id="@course.CourseId"
+                               class="btn btn-sm btn-secondary" style="flex-shrink:0">
+                                Chi tiết
+                            </a>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
 
-            <div class="quick-item quick-item-disabled">
-                <span class="badge-soon">Sắp có</span>
-                <div class="quick-item-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-                    </svg>
-                </div>
-                <div class="quick-item-title">Tạo khóa học</div>
-                <div class="quick-item-desc">Thiết kế và xuất bản khóa học mới</div>
-            </div>
+    @* Quick Access *@
+    <div class="card">
+        <div class="card-header">
+            <h2>Truy cập nhanh</h2>
+        </div>
+        <div class="card-body">
+            <div class="quick-grid" style="grid-template-columns:1fr 1fr;gap:var(--space-3);">
 
-            <div class="quick-item quick-item-disabled">
-                <span class="badge-soon">Sắp có</span>
-                <div class="quick-item-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="20" x2="18" y2="10"/>
-                        <line x1="12" y1="20" x2="12" y2="4"/>
-                        <line x1="6" y1="20" x2="6" y2="14"/>
-                    </svg>
-                </div>
-                <div class="quick-item-title">Thống kê</div>
-                <div class="quick-item-desc">Theo dõi hiệu suất giảng dạy</div>
+                <a asp-area="Teacher" asp-page="/Courses/Index" class="quick-item">
+                    <div class="quick-item-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                            <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+                        </svg>
+                    </div>
+                    <div class="quick-item-title">Khóa học của tôi</div>
+                    <div class="quick-item-desc">Quản lý và chỉnh sửa nội dung</div>
+                </a>
+
+                <a asp-area="Teacher" asp-page="/Courses/Create" class="quick-item">
+                    <div class="quick-item-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                    </div>
+                    <div class="quick-item-title">Tạo khóa học</div>
+                    <div class="quick-item-desc">Thiết kế và xuất bản khóa học mới</div>
+                </a>
+
+                <a asp-area="Teacher" asp-page="/Profile" class="quick-item">
+                    <div class="quick-item-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </div>
+                    <div class="quick-item-title">Hồ sơ giảng viên</div>
+                    <div class="quick-item-desc">Xem và cập nhật thông tin của bạn</div>
+                </a>
+
+                <a asp-area="Teacher" asp-page="/EditProfile" class="quick-item">
+                    <div class="quick-item-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                    </div>
+                    <div class="quick-item-title">Chỉnh sửa hồ sơ</div>
+                    <div class="quick-item-desc">Cập nhật ảnh đại diện, bio...</div>
+                </a>
+
+                <a asp-area="Teacher" asp-page="/Categories/Index" class="quick-item">
+                    <div class="quick-item-icon" style="background:#f0eeff">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#6b21a8" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                            <line x1="7" y1="7" x2="7.01" y2="7"/>
+                        </svg>
+                    </div>
+                    <div class="quick-item-title">Danh mục</div>
+                    <div class="quick-item-desc">Quản lý loại & danh mục khóa học</div>
+                </a>
+
             </div>
         </div>
     </div>
+
 </div>

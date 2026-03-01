@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace OnlineLearningPlatform.Models.Migrations
 {
     /// <inheritdoc />
-    public partial class ass2 : Migration
+    public partial class DbLan3 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -621,7 +621,9 @@ namespace OnlineLearningPlatform.Models.Migrations
                     VideoOriginalFileName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     VideoDurationSeconds = table.Column<int>(type: "int", nullable: true),
                     VideoStatus = table.Column<int>(type: "int", nullable: true),
-                    Content = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ReadingPdfStoragePath = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    ReadingPdfOriginalFileName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -642,6 +644,7 @@ namespace OnlineLearningPlatform.Models.Migrations
                     CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     OrderDetailId = table.Column<int>(type: "int", nullable: true),
                     EnrolledAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastAccessedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -970,9 +973,11 @@ namespace OnlineLearningPlatform.Models.Migrations
                 filter: "[OrderDetailId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Enrollments_UserId",
+                name: "IX_Enrollments_UserId_CourseId",
                 table: "Enrollments",
-                column: "UserId");
+                columns: new[] { "UserId", "CourseId" },
+                unique: true,
+                filter: "[IsActive] = 1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_LearningPathCourses_CourseId",

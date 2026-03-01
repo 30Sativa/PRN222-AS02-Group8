@@ -575,6 +575,9 @@ namespace OnlineLearningPlatform.Models.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("LastAccessedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int?>("OrderDetailId")
                         .HasColumnType("int");
 
@@ -590,7 +593,9 @@ namespace OnlineLearningPlatform.Models.Migrations
                         .IsUnique()
                         .HasFilter("[OrderDetailId] IS NOT NULL");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "CourseId")
+                        .IsUnique()
+                        .HasFilter("[IsActive] = 1");
 
                     b.ToTable("Enrollments");
                 });

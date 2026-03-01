@@ -12,8 +12,8 @@ using OnlineLearningPlatform.Models;
 namespace OnlineLearningPlatform.Models.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260227051508_ass2")]
-    partial class ass2
+    [Migration("20260301053637_DbLan3")]
+    partial class DbLan3
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -578,6 +578,9 @@ namespace OnlineLearningPlatform.Models.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("LastAccessedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int?>("OrderDetailId")
                         .HasColumnType("int");
 
@@ -593,7 +596,9 @@ namespace OnlineLearningPlatform.Models.Migrations
                         .IsUnique()
                         .HasFilter("[OrderDetailId] IS NOT NULL");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "CourseId")
+                        .IsUnique()
+                        .HasFilter("[IsActive] = 1");
 
                     b.ToTable("Enrollments");
                 });
@@ -767,6 +772,14 @@ namespace OnlineLearningPlatform.Models.Migrations
 
                     b.Property<int>("OrderIndex")
                         .HasColumnType("int");
+
+                    b.Property<string>("ReadingPdfOriginalFileName")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("ReadingPdfStoragePath")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("SectionId")
                         .HasColumnType("int");
