@@ -5,7 +5,13 @@ using OnlineLearningPlatform.Models.Entities;
 using OnlineLearningPlatform.RazorPages.Hubs;
 using OnlineLearningPlatform.Services.DTOs.Progress;
 using OnlineLearningPlatform.Services.Interface;
+using OnlineLearningPlatform.Services.DTOs.Discussion;
+using OnlineLearningPlatform.Services.DTOs.Review;
 using System.Security.Claims;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System;
 
 namespace OnlineLearningPlatform.RazorPages.Areas.Student.Pages
 {
@@ -14,15 +20,30 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Student.Pages
         private readonly IEnrollmentService _enrollmentService;
         private readonly IProgressService _progressService;
         private readonly IHubContext<ProgressHub> _progressHub;
+        private readonly IDiscussionService _discussionService;
+        private readonly IReviewService _reviewService;
+        private readonly ICertificateService _certificateService;
+        private readonly INotificationService _notificationService;
+        private readonly IHubContext<NotificationHub> _notificationHub;
 
         public LearnCourseModel(
             IEnrollmentService enrollmentService,
             IProgressService progressService,
-            IHubContext<ProgressHub> progressHub)
+            IHubContext<ProgressHub> progressHub,
+            IDiscussionService discussionService,
+            IReviewService reviewService,
+            ICertificateService certificateService,
+            INotificationService notificationService,
+            IHubContext<NotificationHub> notificationHub)
         {
             _enrollmentService = enrollmentService;
             _progressService = progressService;
             _progressHub = progressHub;
+            _discussionService = discussionService;
+            _reviewService = reviewService;
+            _certificateService = certificateService;
+            _notificationService = notificationService;
+            _notificationHub = notificationHub;
         }
 
         // ===== Bind properties =====
@@ -30,8 +51,24 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Student.Pages
         public Course Course { get; set; } = default!;
         public Lesson? CurrentLesson { get; set; }
         public CourseProgressDto Progress { get; set; } = default!;
-        public HashSet<int> CompletedLessonIds { get; set; } = new();
+        public HashSet<int> CompletedLessonIds { get; set; } = new HashSet<int>();
         public int? ResumeLessonId { get; set; }
+
+        public List<DiscussionTopicDto> Topics { get; set; } = new List<DiscussionTopicDto>();
+
+        [BindProperty]
+        public string NewTopicTitle { get; set; } = string.Empty;
+
+        [BindProperty]
+        public string NewReplyContent { get; set; } = string.Empty;
+
+        public ReviewDto? MyReview { get; set; }
+
+        [BindProperty]
+        public int ReviewRating { get; set; }
+
+        [BindProperty]
+        public string ReviewComment { get; set; } = string.Empty;
 
         // ===== GET: /Student/LearnCourse?courseId=xxx&lessonId=yyy =====
 
@@ -40,7 +77,7 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Student.Pages
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return RedirectToPage("/Auth/Login");
 
-            // Kiểm tra enrollment
+            // Kiểm tra enrollment — chỉ học viên đã ghi danh mới vào được
             var enrollment = await _enrollmentService.GetEnrollmentAsync(userId, courseId);
             if (enrollment == null)
                 return RedirectToPage("/Student/Dashboard");
@@ -78,7 +115,55 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Student.Pages
                     .FirstOrDefault(l => !l.IsDeleted);
             }
 
+            // Lấy danh sách Discussion (ưu tiên thuộc lesson hiện tại nếu muốn, hoặc lấy toàn bộ course)
+            // Lấy top 20 discussion của khóa học
+            Topics = await _discussionService.GetCourseTopicsAsync(courseId, 1, 20);
+
+            // Fetch MyReview if already submitted
+            MyReview = await _reviewService.GetUserReviewAsync(userId, courseId);
+
             return Page();
+        }
+
+        public async Task<IActionResult> OnPostCreateTopicAsync(Guid courseId, int? lessonId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return RedirectToPage("/Auth/Login");
+
+            if (!string.IsNullOrWhiteSpace(NewTopicTitle))
+            {
+                await _discussionService.CreateTopicAsync(courseId, lessonId, NewTopicTitle, userId);
+            }
+
+            return RedirectToPage(new { courseId = courseId, lessonId = lessonId });
+        }
+
+        public async Task<IActionResult> OnPostCreateReplyAsync(Guid courseId, int? lessonId, Guid topicId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return RedirectToPage("/Auth/Login");
+
+            if (!string.IsNullOrWhiteSpace(NewReplyContent))
+            {
+                await _discussionService.CreateReplyAsync(topicId, NewReplyContent, null, userId);
+            }
+
+            return RedirectToPage(new { courseId = courseId, lessonId = lessonId });
+        }
+
+        public async Task<IActionResult> OnPostSubmitReviewAsync(Guid courseId, int? lessonId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return RedirectToPage("/Auth/Login");
+
+            if (ReviewRating < 1 || ReviewRating > 5)
+            {
+                ReviewRating = 5;
+            }
+
+            await _reviewService.SubmitReviewAsync(userId, courseId, ReviewRating, ReviewComment);
+            
+            return RedirectToPage(new { courseId = courseId, lessonId = lessonId });
         }
 
         // ===== POST: AJAX mark lesson complete (4.7) =====
@@ -105,6 +190,24 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Student.Pages
                         completedLessons = result.CompletedLessons,
                         totalLessons = result.TotalLessons
                     });
+
+                if (result.IsCourseCompleted)
+                {
+                    var certResult = await _certificateService.TryIssueCertificateAsync(userId, request.CourseId);
+                    if (certResult.Success && !certResult.AlreadyIssued && certResult.Certificate != null)
+                    {
+                        var msg = $"Chúc mừng! Bạn đã hoàn thành {certResult.Certificate.CourseTitle} và nhận được chứng chỉ.";
+                        await _notificationService.SendToUserAsync(userId, "CertificateIssued", msg, "/Student/Certificates");
+                        
+                        await _notificationHub.Clients.User(userId)
+                            .SendAsync("ReceiveNotification", new 
+                            { 
+                                title = "Chứng chỉ mới",
+                                message = msg,
+                                url = "/Student/Certificates"
+                            });
+                    }
+                }
             }
 
             return new JsonResult(new

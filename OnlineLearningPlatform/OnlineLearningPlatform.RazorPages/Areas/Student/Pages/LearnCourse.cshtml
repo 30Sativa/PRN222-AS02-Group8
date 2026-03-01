@@ -443,96 +443,258 @@
             var isCompleted = Model.CompletedLessonIds.Contains(lesson.LessonId);
 
             <div class="learn-content-inner">
-                <div class="lesson-header">
-                    <h1>@lesson.Title</h1>
-                    <div class="lesson-meta">
-                        <span>@(lesson.LessonType switch
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs mb-4 px-2 border-0" id="lessonTabs" role="tablist">
+                    <li class="nav-item border-0 mb-0" role="presentation">
+                        <button class="nav-link border-0 text-dark fw-bold active rounded-pill px-4" id="content-tab" data-bs-toggle="tab" data-bs-target="#content" type="button" role="tab" style="background-color: transparent;">Nội dung bài học</button>
+                    </li>
+                    <li class="nav-item border-0 mb-0" role="presentation">
+                        <button class="nav-link border-0 text-dark fw-bold rounded-pill px-4 ms-2" id="discuss-tab" data-bs-toggle="tab" data-bs-target="#discuss" type="button" role="tab" style="background-color: transparent;">Thảo luận chung</button>
+                    </li>
+                    @if (Model.Progress.PercentComplete >= 100)
+                    {
+                        <li class="nav-item border-0 mb-0" role="presentation">
+                            <button class="nav-link border-0 fw-bold rounded-pill px-4 ms-2" id="review-tab" data-bs-toggle="tab" data-bs-target="#review" type="button" role="tab" style="background-color: transparent; color: #ff9f0a;">🌟 Đánh giá khóa học</button>
+                        </li>
+                    }
+                </ul>
+                
+                <style>
+                    .nav-tabs .nav-link.active {
+                        background-color: var(--color-blue) !important;
+                        color: white !important;
+                        box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+                    }
+                    .nav-tabs .nav-link:hover:not(.active) {
+                        background-color: var(--color-surface-2);
+                    }
+                </style>
+
+                <!-- Tab content -->
+                <div class="tab-content" id="lessonTabsContent">
+                    
+                    <!-- CONTENT TAB -->
+                    <div class="tab-pane fade show active" id="content" role="tabpanel">
+                        <div class="lesson-header mt-2">
+                            <h1>@lesson.Title</h1>
+                            <div class="lesson-meta">
+                                <span>@(lesson.LessonType switch
+                                {
+                                    LessonType.Video => "📹 Video",
+                                    LessonType.Reading => "📖 Bài đọc",
+                                    LessonType.Quiz => "📝 Quiz",
+                                    LessonType.Assignment => "📋 Bài tập",
+                                    _ => ""
+                                })</span>
+                                @if (lesson.VideoDurationSeconds.HasValue)
+                                {
+                                    var mins = lesson.VideoDurationSeconds.Value / 60;
+                                    var secs = lesson.VideoDurationSeconds.Value % 60;
+                                    <span>⏱ @(mins):@(secs.ToString("D2"))</span>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Video player -->
+                        @if (lesson.LessonType == LessonType.Video && !string.IsNullOrEmpty(lesson.VideoStoragePath))
                         {
-                            LessonType.Video => "📹 Video",
-                            LessonType.Reading => "📖 Bài đọc",
-                            LessonType.Quiz => "📝 Quiz",
-                            LessonType.Assignment => "📋 Bài tập",
-                            _ => ""
-                        })</span>
-                        @if (lesson.VideoDurationSeconds.HasValue)
-                        {
-                            var mins = lesson.VideoDurationSeconds.Value / 60;
-                            var secs = lesson.VideoDurationSeconds.Value % 60;
-                            <span>⏱ @(mins):@(secs.ToString("D2"))</span>
+                            <div class="video-container">
+                                <video id="videoPlayer" controls preload="metadata">
+                                    <source src="@lesson.VideoStoragePath" type="video/mp4" />
+                                    Trình duyệt không hỗ trợ video.
+                                </video>
+                            </div>
                         }
-                    </div>
-                </div>
 
-                <!-- Video player -->
-                @if (lesson.LessonType == LessonType.Video && !string.IsNullOrEmpty(lesson.VideoStoragePath))
-                {
-                    <div class="video-container">
-                        <video id="videoPlayer" controls preload="metadata">
-                            <source src="@lesson.VideoStoragePath" type="video/mp4" />
-                            Trình duyệt không hỗ trợ video.
-                        </video>
-                    </div>
-                }
+                        <!-- Reading content -->
+                        @if (lesson.LessonType == LessonType.Reading && !string.IsNullOrEmpty(lesson.Content))
+                        {
+                            <div class="reading-content">
+                                @Html.Raw(lesson.Content)
+                            </div>
+                        }
 
-                <!-- Reading content -->
-                @if (lesson.LessonType == LessonType.Reading && !string.IsNullOrEmpty(lesson.Content))
-                {
-                    <div class="reading-content">
-                        @Html.Raw(lesson.Content)
-                    </div>
-                }
+                        <!-- Quiz / Assignment placeholder -->
+                        @if (lesson.LessonType == LessonType.Quiz)
+                        {
+                            <div class="reading-content">
+                                <p>Bài quiz này sẽ được làm trong phần Quiz.</p>
+                            </div>
+                        }
+                        @if (lesson.LessonType == LessonType.Assignment)
+                        {
+                            <div class="reading-content">
+                                <p>Bài tập sẽ được nộp trong phần Assignment.</p>
+                            </div>
+                        }
 
-                <!-- Quiz / Assignment placeholder -->
-                @if (lesson.LessonType == LessonType.Quiz)
-                {
-                    <div class="reading-content">
-                        <p>Bài quiz này sẽ được làm trong phần Quiz.</p>
-                    </div>
-                }
-                @if (lesson.LessonType == LessonType.Assignment)
-                {
-                    <div class="reading-content">
-                        <p>Bài tập sẽ được nộp trong phần Assignment.</p>
-                    </div>
-                }
+                        <!-- Actions: mark complete + next lesson -->
+                        <div class="lesson-actions">
+                            @if (isCompleted)
+                            {
+                                <button class="btn-mark-complete completed" disabled id="btnMarkComplete">
+                                    ✓ Đã hoàn thành
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn-mark-complete incomplete" id="btnMarkComplete"
+                                        onclick="markComplete(@lesson.LessonId, '@Model.Course.CourseId')">
+                                    ✓ Đánh dấu hoàn thành
+                                </button>
+                            }
 
-                <!-- Actions: mark complete + next lesson -->
-                <div class="lesson-actions">
-                    @if (isCompleted)
+                            @{
+                                // Tìm bài tiếp theo
+                                var allLessons = Model.Course.Sections
+                                    .OrderBy(s => s.OrderIndex)
+                                    .SelectMany(s => s.Lessons.Where(l => !l.IsDeleted).OrderBy(l => l.OrderIndex))
+                                    .ToList();
+                                var currentIdx = allLessons.FindIndex(l => l.LessonId == lesson.LessonId);
+                                var nextLesson = currentIdx >= 0 && currentIdx < allLessons.Count - 1
+                                    ? allLessons[currentIdx + 1]
+                                    : null;
+                            }
+
+                            @if (nextLesson != null)
+                            {
+                                <a class="btn-next-lesson"
+                                   href="/Student/LearnCourse?courseId=@Model.Course.CourseId&lessonId=@nextLesson.LessonId">
+                                    Bài tiếp theo →
+                                </a>
+                            }
+                        </div>
+                    </div> <!-- End Content Tab -->
+
+                    <!-- DISCUSS TAB -->
+                    <div class="tab-pane fade" id="discuss" role="tabpanel">
+                        <div class="mt-4">
+                            <h3 class="fw-bold mb-4" style="font-size: 1.4rem;">Thảo luận chung</h3>
+                            
+                            <!-- Create Topic Form -->
+                            <div class="card border-0 shadow-sm rounded-4 mb-4" style="background: var(--apple-card-bg);">
+                                <div class="card-body p-4">
+                                    <form method="post" asp-page-handler="CreateTopic" asp-route-courseId="@Model.Course.CourseId" asp-route-lessonId="@lesson.LessonId">
+                                        <div class="mb-3">
+                                            <textarea asp-for="NewTopicTitle" class="form-control border-0 bg-light rounded-3" rows="2" placeholder="Bạn có câu hỏi gì cần trao đổi?"></textarea>
+                                        </div>
+                                        <div class="text-end">
+                                            <button type="submit" class="btn btn-primary rounded-pill px-4" style="background-color: var(--color-blue); border:none; font-weight: 500;">
+                                                Đăng câu hỏi
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Topics List -->
+                            <div class="discussion-list">
+                                @if (Model.Topics != null && Model.Topics.Any())
+                                {
+                                    @foreach (var topic in Model.Topics)
+                                    {
+                                        <div class="card border-0 shadow-sm rounded-4 mb-3" style="background: var(--apple-card-bg);">
+                                            <div class="card-body p-4">
+                                                <!-- Topic Header -->
+                                                <div class="d-flex w-100 justify-content-between align-items-center mb-2">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="fw-bold me-2">@topic.CreatorName</div>
+                                                        @if (topic.CreatorRole == "Teacher" || topic.CreatorRole == "Admin")
+                                                        {
+                                                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2">Giảng viên</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2">Học viên</span>
+                                                        }
+                                                    </div>
+                                                    <span class="text-muted small">@topic.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                                </div>
+                                                
+                                                <!-- Topic Content -->
+                                                <p class="mb-3 fs-5">@topic.Title</p>
+
+                                                <!-- Replies -->
+                                                @if (topic.Replies != null && topic.Replies.Any())
+                                                {
+                                                    <div class="ms-4 ps-3 border-start">
+                                                        @foreach (var reply in topic.Replies)
+                                                        {
+                                                            <div class="mb-3">
+                                                                <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                                                                    <div class="d-flex align-items-center">
+                                                                        <div class="fw-bold me-2" style="font-size: 0.95rem;">@reply.UserName</div>
+                                                                        @if (reply.UserRole == "Teacher" || reply.UserRole == "Admin")
+                                                                        {
+                                                                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill" style="font-size:0.7rem;">Giảng viên</span>
+                                                                        }
+                                                                    </div>
+                                                                    <span class="text-muted" style="font-size: 0.8rem;">@reply.CreatedAt.ToString("dd/MM HH:mm")</span>
+                                                                </div>
+                                                                <p class="mb-0 text-dark" style="font-size: 0.95rem;">@reply.Content</p>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                }
+
+                                                <!-- Reply Form -->
+                                                <div class="ms-4 ps-3 mt-3">
+                                                    <form method="post" asp-page-handler="CreateReply" asp-route-courseId="@Model.Course.CourseId" asp-route-lessonId="@lesson.LessonId" asp-route-topicId="@topic.TopicId">
+                                                        <div class="input-group shadow-sm rounded-pill overflow-hidden">
+                                                            <input type="text" name="NewReplyContent" class="form-control border-0 bg-light ps-4 py-2" placeholder="Viết phản hồi...">
+                                                            <button class="btn btn-primary px-4 fw-bold" type="submit" style="background-color: var(--color-blue); border:none;">Gửi</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="text-center text-muted py-4">Chưa có thảo luận nào. Bạn hãy là người đầu tiên đặt câu hỏi!</div>
+                                }
+                            </div>
+                        </div>
+                    </div> <!-- End Discuss Tab -->
+
+                    <!-- REVIEW TAB -->
+                    @if (Model.Progress.PercentComplete >= 100)
                     {
-                        <button class="btn-mark-complete completed" disabled id="btnMarkComplete">
-                            ✓ Đã hoàn thành
-                        </button>
-                    }
-                    else
-                    {
-                        <button class="btn-mark-complete incomplete" id="btnMarkComplete"
-                                onclick="markComplete(@lesson.LessonId, '@Model.Course.CourseId')">
-                            ✓ Đánh dấu hoàn thành
-                        </button>
-                    }
+                        <div class="tab-pane fade" id="review" role="tabpanel">
+                            <div class="mt-4 text-center">
+                                <h2 class="mb-2 fw-bold" style="font-size: 1.8rem;">Chúc mừng bạn đã hoàn thành khóa học! 🎉</h2>
+                                <p class="text-muted mb-4 fs-5">Hãy chia sẻ cảm nhận của bạn để giúp khóa học ngày càng hoàn thiện hơn nhé.</p>
 
-                    @{
-                        // Tìm bài tiếp theo
-                        var allLessons = Model.Course.Sections
-                            .OrderBy(s => s.OrderIndex)
-                            .SelectMany(s => s.Lessons.Where(l => !l.IsDeleted).OrderBy(l => l.OrderIndex))
-                            .ToList();
-                        var currentIdx = allLessons.FindIndex(l => l.LessonId == lesson.LessonId);
-                        var nextLesson = currentIdx >= 0 && currentIdx < allLessons.Count - 1
-                            ? allLessons[currentIdx + 1]
-                            : null;
+                                <div class="card border-0 shadow-sm rounded-4 mx-auto text-start" style="background: var(--apple-card-bg); max-width: 600px;">
+                                    <div class="card-body p-4 p-md-5">
+                                        <form method="post" asp-page-handler="SubmitReview" asp-route-courseId="@Model.Course.CourseId" asp-route-lessonId="@lesson.LessonId">
+                                            <div class="mb-4">
+                                                <label class="form-label text-muted small fw-bold text-uppercase">Chấm điểm khóa học</label>
+                                                <select asp-for="ReviewRating" class="form-select border-0 bg-light rounded-3 py-2 fs-5" style="width: 100%;">
+                                                    <option value="5" selected="@(Model.MyReview?.Rating == 5)">⭐⭐⭐⭐⭐ (5) Tuyệt vời</option>
+                                                    <option value="4" selected="@(Model.MyReview?.Rating == 4)">⭐⭐⭐⭐ (4) Rất tốt</option>
+                                                    <option value="3" selected="@(Model.MyReview?.Rating == 3)">⭐⭐⭐ (3) Tạm ổn</option>
+                                                    <option value="2" selected="@(Model.MyReview?.Rating == 2)">⭐⭐ (2) Kém</option>
+                                                    <option value="1" selected="@(Model.MyReview?.Rating == 1)">⭐ (1) Rất tệ</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-4">
+                                                <label class="form-label text-muted small fw-bold text-uppercase">Nhận xét của bạn</label>
+                                                <textarea asp-for="ReviewComment" class="form-control border-0 bg-light rounded-3" rows="4" placeholder="Nhập cảm nhận của bạn về nội dung, giảng viên, và chất lượng video...">@(Model.MyReview?.Comment)</textarea>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary rounded-pill w-100 py-3 fw-bold fs-5 shadow-sm" style="background-color: var(--color-blue); border:none;">
+                                                @(Model.MyReview != null ? "Cập Nhật Đánh Giá" : "Gửi Đánh Giá Khóa Học")
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!-- End Review Tab -->
                     }
-
-                    @if (nextLesson != null)
-                    {
-                        <a class="btn-next-lesson"
-                           href="/Student/LearnCourse?courseId=@Model.Course.CourseId&lessonId=@nextLesson.LessonId">
-                            Bài tiếp theo →
-                        </a>
-                    }
-                </div>
+                </div> <!-- End Tab Content -->
             </div>
+
         }
         else
         {

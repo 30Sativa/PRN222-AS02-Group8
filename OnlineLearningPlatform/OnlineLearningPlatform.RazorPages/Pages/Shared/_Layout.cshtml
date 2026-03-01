@@ -24,6 +24,7 @@
                 {
                     <li><a asp-area="Admin" asp-page="/Dashboard">Dashboard</a></li>
                     <li><a asp-area="Admin" asp-page="/Users/Index">Người dùng</a></li>
+                    <li><a asp-area="Admin" asp-page="/Notifications/Index">Thông báo</a></li>
                 }
                 @if (User.IsInRole("Teacher"))
                 {
@@ -35,19 +36,21 @@
                 @if (User.IsInRole("Student"))
                 {
                     <li><a asp-area="Student" asp-page="/Dashboard">Dashboard</a></li>
-                    <li><a asp-area="Student" asp-page="/Courses/Index">Khám phá khóa học</a></li>
+                    <li><a asp-area="Student" asp-page="/Courses/Index">Khám phá</a></li>
                     <li><a asp-area="Student" asp-page="/MyLearning">Khóa học của tôi</a></li>
-                    <li><a asp-area="Student" asp-page="/Wallet/Index">Ví của tôi</a></li>
+                    <li><a asp-area="Student" asp-page="/Notifications/Index">Thông báo</a></li>
+                    <li><a asp-area="Student" asp-page="/Certificates/Index">Chứng chỉ</a></li>
                     <li><a asp-area="Student" asp-page="/Profile">Hồ sơ</a></li>
                 }
             </ul>
 
             <div class="nav-user">
-                <div class="nav-avatar">
+
+                <div class="nav-avatar" style="margin-left: 16px;">
                     @(User.Identity?.Name?[0].ToString().ToUpper() ?? "U")
                 </div>
-                <span class="nav-user-name">@User.Identity?.Name</span>
-                <form method="post" asp-page="/Auth/Logout">
+                <span class="nav-user-name" style="margin-left: 8px;">@User.Identity?.Name</span>
+                <form method="post" asp-page="/Auth/Logout" style="margin-left: 12px;">
                     <button type="submit" class="btn-nav-logout">Đăng xuất</button>
                 </form>
             </div>
@@ -78,6 +81,7 @@
 
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
 @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

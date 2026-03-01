@@ -43,7 +43,8 @@ namespace OnlineLearningPlatform.Models.Entities
         RefundApproved,
         NewLesson,
         AssignmentGraded,
-        System
+        System,
+        CertificateIssued
     }
 }
 

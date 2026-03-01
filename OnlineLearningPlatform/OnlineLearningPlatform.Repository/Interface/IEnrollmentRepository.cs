@@ -45,6 +45,11 @@ namespace OnlineLearningPlatform.Repository.Interface
         Task<int> CountByCourseAsync(Guid courseId);
 
         /// <summary>
+        /// Lấy danh sách học viên trong khóa học.
+        /// </summary>
+        Task<List<Enrollment>> GetByCourseIdAsync(Guid courseId);
+
+        /// <summary>
         /// Cập nhật LastAccessedAt (dùng mỗi lần vào học).
         /// </summary>
         Task UpdateLastAccessedAsync(string userId, Guid courseId);

@@ -79,6 +79,16 @@ namespace OnlineLearningPlatform.Repository.Implement
                 .CountAsync(e => e.CourseId == courseId && e.IsActive);
         }
 
+        public async Task<List<Enrollment>> GetByCourseIdAsync(Guid courseId)
+        {
+            return await _context.Enrollments
+                .AsNoTracking()
+                .Include(e => e.User)
+                .Where(e => e.CourseId == courseId && e.IsActive)
+                .OrderByDescending(e => e.EnrolledAt)
+                .ToListAsync();
+        }
+
         public async Task UpdateLastAccessedAsync(string userId, Guid courseId)
         {
             var enrollment = await _context.Enrollments

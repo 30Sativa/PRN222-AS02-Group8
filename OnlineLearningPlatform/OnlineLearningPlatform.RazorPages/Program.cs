@@ -58,6 +58,10 @@ namespace OnlineLearningPlatform.RazorPages
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<IPaymentService, PaymentService>();
             builder.Services.AddScoped<IWalletService, WalletService>();
+            builder.Services.AddScoped<IReviewService, ReviewService>();
+            builder.Services.AddScoped<IDiscussionService, DiscussionService>();
+            builder.Services.AddScoped<ICertificateService, CertificateService>();
+            builder.Services.AddScoped<INotificationService, NotificationService>();
 
             // Repositories
             builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -79,6 +83,10 @@ namespace OnlineLearningPlatform.RazorPages
             // Payment, Order, Wallet repositories
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
             builder.Services.AddScoped<IWalletRepository, WalletRepository>();
+            builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+            builder.Services.AddScoped<IDiscussionRepository, DiscussionRepository>();
+            builder.Services.AddScoped<ICertificateRepository, CertificateRepository>();
+            builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
             builder.Services.AddAuthorization(options =>
             {
@@ -94,6 +102,8 @@ namespace OnlineLearningPlatform.RazorPages
                 options.Conventions.AuthorizeAreaFolder("Student", "/", "Student");
                 options.Conventions.AllowAnonymousToFolder("/Auth");
             });
+
+            builder.Services.AddControllers();
 
             // ================= SIGNALR =================
             builder.Services.AddSignalR();
@@ -120,7 +130,9 @@ namespace OnlineLearningPlatform.RazorPages
 
             app.MapGet("/", () => Results.Redirect("/Auth/Login"));
             app.MapRazorPages();
+            app.MapControllers();
             app.MapHub<ProgressHub>("/hubs/progress");
+            app.MapHub<NotificationHub>("/hubs/notification");
 
             app.Run();
         }

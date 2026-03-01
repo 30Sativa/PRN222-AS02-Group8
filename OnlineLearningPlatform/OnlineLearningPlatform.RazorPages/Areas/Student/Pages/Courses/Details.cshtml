@@ -266,6 +266,92 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Reviews Section -->
+                <div class="reviews-section mt-5 pt-3 mb-5">
+                    <h2 class="course-title" style="font-size: 1.6rem;">Đánh giá của học viên</h2>
+                    
+                    <div class="d-flex align-items-center mb-4 mt-3">
+                        <div class="display-4 fw-bold me-3 text-dark">@Model.AverageRating.ToString("0.0")</div>
+                        <div>
+                            <div class="text-warning mb-1" style="font-size: 1.2rem;">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    if (i <= Math.Round(Model.AverageRating, 0, MidpointRounding.AwayFromZero))
+                                    {
+                                        <i class="bi bi-star-fill"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-star"></i>
+                                    }
+                                }
+                            </div>
+                            <div class="text-muted small">@Model.ReviewCount đánh giá</div>
+                        </div>
+                    </div>
+
+                    @if (Model.Course.IsEnrolled)
+                    {
+                        <div class="card border-0 shadow-sm rounded-4 mb-4" style="background: var(--apple-card-bg);">
+                            <div class="card-body p-4">
+                                <h5 class="fw-bold mb-3">@(Model.MyReview != null ? "Cập nhật đánh giá của bạn" : "Thêm đánh giá")</h5>
+                                <form method="post" asp-page-handler="SubmitReview" asp-route-id="@Model.Course.CourseId">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted small fw-semibold">Gắn sao</label>
+                                        <select asp-for="ReviewRating" class="form-select border-0 bg-light rounded-3" style="max-width: 150px;">
+                                            <option value="5" selected="@(Model.MyReview?.Rating == 5)">5 Sao (Tuyệt vời)</option>
+                                            <option value="4" selected="@(Model.MyReview?.Rating == 4)">4 Sao (Rất tốt)</option>
+                                            <option value="3" selected="@(Model.MyReview?.Rating == 3)">3 Sao (Tạm ổn)</option>
+                                            <option value="2" selected="@(Model.MyReview?.Rating == 2)">2 Sao (Kém)</option>
+                                            <option value="1" selected="@(Model.MyReview?.Rating == 1)">1 Sao (Rất tệ)</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted small fw-semibold">Nội dung đánh giá</label>
+                                        <textarea asp-for="ReviewComment" class="form-control border-0 bg-light rounded-3" rows="3" placeholder="Chia sẻ cảm nhận của bạn về khóa học này...">@(Model.MyReview?.Comment)</textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold" style="background-color: var(--apple-blue); border:none;">
+                                        Gửi Đánh Giá
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="review-list">
+                        @if (Model.Reviews != null && Model.Reviews.Any())
+                        {
+                            @foreach (var review in Model.Reviews)
+                            {
+                                <div class="review-item border-bottom py-4">
+                                    <div class="d-flex w-100 justify-content-between align-items-center mb-2">
+                                        <p class="mb-0 fw-bold">@review.UserName</p>
+                                        <span class="text-muted small">@review.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                    </div>
+                                    <div class="text-warning mb-2" style="font-size: 0.9rem;">
+                                        @for (var i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= review.Rating)
+                                            {
+                                                <i class="bi bi-star-fill"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-star"></i>
+                                            }
+                                        }
+                                    </div>
+                                    <p class="text-muted mb-0">@review.Comment</p>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p class="text-muted fst-italic">Chưa có đánh giá nào cho khóa học này.</p>
+                        }
+                    </div>
+                </div>
             </div>
 
             <!-- Right Pricing Column -->
