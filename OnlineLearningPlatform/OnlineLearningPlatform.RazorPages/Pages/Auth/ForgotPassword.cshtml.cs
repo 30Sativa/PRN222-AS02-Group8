@@ -24,11 +24,23 @@ namespace OnlineLearningPlatform.RazorPages.Pages.Auth
         [BindProperty]
         public string Email { get; set; }
 
+        public bool IsSuccess { get; set; }
+
         public async Task<IActionResult> OnPostAsync()
         {
+            if (string.IsNullOrEmpty(Email))
+            {
+                ModelState.AddModelError(string.Empty, "Vui lòng nhập email.");
+                return Page();
+            }
+
             var user = await _userManager.FindByEmailAsync(Email);
             if (user == null)
+            {
+                // Vẫn hiển thị thành công để bảo mật (không tiết lộ email có tồn tại hay không)
+                IsSuccess = true;
                 return Page();
+            }
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
@@ -46,7 +58,8 @@ namespace OnlineLearningPlatform.RazorPages.Pages.Auth
                 "Reset Password",
                 $"Click <a href='{callbackUrl}'>here</a> to reset your password.");
 
-            return RedirectToPage("/Auth/Login");
+            IsSuccess = true;
+            return Page();
         }
     }
 }

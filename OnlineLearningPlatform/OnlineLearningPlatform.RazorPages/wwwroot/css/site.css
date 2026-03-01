@@ -372,6 +372,20 @@ img {
     color: #fff !important;
 }
 
+.btn-google {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    color: var(--color-label-1) !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+}
+
+.btn-google:hover {
+    background: var(--color-surface-2);
+    border-color: var(--color-border);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .08);
+    opacity: 1;
+}
+
 .btn-sm {
     font-size: var(--text-xs);
     padding: 6px 14px;
@@ -1331,5 +1345,6 @@ textarea.form-control {
          f o n t - s i z e :   1 1 p x ; 
          c o l o r :   v a r ( - - c o l o r - l a b e l - 3 ) ; 
  } 
-  
+ 
+ 
  

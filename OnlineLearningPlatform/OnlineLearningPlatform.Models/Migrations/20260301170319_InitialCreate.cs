@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace OnlineLearningPlatform.Models.Migrations
 {
     /// <inheritdoc />
-    public partial class dblan3 : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -224,6 +224,7 @@ namespace OnlineLearningPlatform.Models.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    WalletUsed = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     PaymentMethod = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     TransactionId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
@@ -623,7 +624,9 @@ namespace OnlineLearningPlatform.Models.Migrations
                     VideoOriginalFileName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     VideoDurationSeconds = table.Column<int>(type: "int", nullable: true),
                     VideoStatus = table.Column<int>(type: "int", nullable: true),
-                    Content = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ReadingPdfStoragePath = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    ReadingPdfOriginalFileName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -644,6 +647,7 @@ namespace OnlineLearningPlatform.Models.Migrations
                     CourseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     OrderDetailId = table.Column<int>(type: "int", nullable: true),
                     EnrolledAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastAccessedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -972,9 +976,11 @@ namespace OnlineLearningPlatform.Models.Migrations
                 filter: "[OrderDetailId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Enrollments_UserId",
+                name: "IX_Enrollments_UserId_CourseId",
                 table: "Enrollments",
-                column: "UserId");
+                columns: new[] { "UserId", "CourseId" },
+                unique: true,
+                filter: "[IsActive] = 1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_LearningPathCourses_CourseId",

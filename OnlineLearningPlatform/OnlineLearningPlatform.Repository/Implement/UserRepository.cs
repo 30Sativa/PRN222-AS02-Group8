@@ -35,7 +35,7 @@ namespace OnlineLearningPlatform.Repository.Implement
         public async Task<string> GenerateEmailConfirmationTokenAsync(ApplicationUser user)
         {
             return await _userManager.GenerateEmailConfirmationTokenAsync(user);
-
+        }
         public async Task<List<ApplicationUser>> GetAllUsersAsync()
         {
             return await _userManager.Users.ToListAsync();
@@ -48,11 +48,6 @@ namespace OnlineLearningPlatform.Repository.Implement
         }
 
         public async Task<ApplicationUser?> GetUserByIdAsync(string userId)
-        {
-            return await _userManager.FindByIdAsync(userId);
-        }
-
-        public async Task<ApplicationUser> GetUserByIdAsync(string userId)
         {
             return await _userManager.FindByIdAsync(userId);
         }

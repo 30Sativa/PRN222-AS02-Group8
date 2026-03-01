@@ -19,8 +19,7 @@ namespace OnlineLearningPlatform.RazorPages.Pages.Auth
         }
 
         [BindProperty]
-
-        public LoginRequest LoginRequest { get; set; }
+        public LoginRequest LoginRequest { get; set; } = new();
 
         public void OnGet()
         {
@@ -30,8 +29,6 @@ namespace OnlineLearningPlatform.RazorPages.Pages.Auth
                 ViewData["EmailConfirmedMessage"] = "Email confirmed successfully! You can now log in.";
             }
         }
-
-        public LoginRequest LoginRequest { get; set; } = new();
 
 
         public async Task<IActionResult> OnPostAsync()

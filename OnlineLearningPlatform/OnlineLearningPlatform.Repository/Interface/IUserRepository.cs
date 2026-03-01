@@ -7,10 +7,8 @@ namespace OnlineLearningPlatform.Repository.Interface
     {
         Task<IdentityResult> CreateUserAsync(ApplicationUser user, string password);
 
-        Task<ApplicationUser> GetUserByIdAsync(string userId); 
-        Task<ApplicationUser> GetUserByEmailAsync(string email);
-
-        // Nullable vì email có thể ko tồn tại trong DB
+        // Nullable vì user có thể không tồn tại trong DB
+        Task<ApplicationUser?> GetUserByIdAsync(string userId);
         Task<ApplicationUser?> GetUserByEmailAsync(string email);
 
         Task<SignInResult> PasswordSignInAsync(string email, string password);
@@ -19,10 +17,6 @@ namespace OnlineLearningPlatform.Repository.Interface
         Task AddToRoleAsync(ApplicationUser user, string role);
         Task SignOutAsync();
 
-        
-
-
-        Task<ApplicationUser?> GetUserByIdAsync(string userId);
         Task<List<ApplicationUser>> GetAllUsersAsync();
         Task UpdateUserAsync(ApplicationUser user);
         // Lấy role của 1 user

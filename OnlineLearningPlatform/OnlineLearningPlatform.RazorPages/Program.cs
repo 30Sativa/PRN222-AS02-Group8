@@ -11,7 +11,6 @@ using OnlineLearningPlatform.Services.Implementations;
 using OnlineLearningPlatform.Services.Interface;
 using OnlineLearningPlatform.Services.Settings;
 
-
 namespace OnlineLearningPlatform.RazorPages
 {
     public class Program
@@ -20,15 +19,16 @@ namespace OnlineLearningPlatform.RazorPages
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // ================= DATABASE =================
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(
+                    builder.Configuration.GetConnectionString("DefaultConnection")));
 
+            // ================= IDENTITY =================
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-
             {
                 options.SignIn.RequireConfirmedAccount = false;
 
-                // Password rule (tuỳ chỉnh nếu muốn)
                 options.Password.RequireDigit = false;
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
@@ -37,32 +37,22 @@ namespace OnlineLearningPlatform.RazorPages
             })
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
+
+            // ================= SETTINGS =================
             builder.Services.Configure<EmailSettings>(
                 builder.Configuration.GetSection("EmailSettings"));
 
             builder.Services.Configure<AppSettings>(
                 builder.Configuration.GetSection("AppSettings"));
+
             // ================= COOKIE CONFIG =================
-
-                {
-                    options.SignIn.RequireConfirmedAccount = false;
-                    options.Password.RequireDigit = false;
-                    options.Password.RequireUppercase = false;
-                    options.Password.RequireLowercase = false;
-                    options.Password.RequireNonAlphanumeric = false;
-                    options.Password.RequiredLength = 6;
-                })
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
-
-
             builder.Services.ConfigureApplicationCookie(options =>
             {
                 options.LoginPath = "/Auth/Login";
                 options.AccessDeniedPath = "/Auth/AccessDenied";
             });
 
-            // Services
+            // ================= SERVICES =================
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<ICourseService, CourseService>();
@@ -73,10 +63,8 @@ namespace OnlineLearningPlatform.RazorPages
             builder.Services.AddScoped<IProgressService, ProgressService>();
             builder.Services.AddScoped<ISectionService, SectionService>();
             builder.Services.AddScoped<ILessonService, LessonService>();
-            // Dashboard service: tổng hợp stat cho Admin Dashboard
             builder.Services.AddScoped<IDashboardService, DashboardService>();
-            
-            // Payment, Order, Wallet services
+
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<IPaymentService, PaymentService>();
             builder.Services.AddScoped<IWalletService, WalletService>();
@@ -85,19 +73,10 @@ namespace OnlineLearningPlatform.RazorPages
             builder.Services.AddScoped<ICertificateService, CertificateService>();
             builder.Services.AddScoped<INotificationService, NotificationService>();
 
-            // Repositories
-            builder.Services.AddScoped<IUserRepository, UserRepository>();
-
             builder.Services.AddScoped<IEmailService, EmailService>();
-            // ================= EXTERNAL AUTHENTICATION =================
-            builder.Services.AddAuthentication()
-                                                .AddGoogle(options =>
-                                                {
-                                                    options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
-                                                    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-                                                });
-            // ================= AUTHORIZATION POLICIES =================
 
+            // ================= REPOSITORIES =================
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
             builder.Services.AddScoped<ICourseRepository, CourseRepository>();
             builder.Services.AddScoped<IQuizRepository, QuizRepository>();
@@ -106,14 +85,9 @@ namespace OnlineLearningPlatform.RazorPages
             builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
             builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
             builder.Services.AddScoped<IProgressRepository, ProgressRepository>();
-
-
             builder.Services.AddScoped<ISectionRepository, SectionRepository>();
             builder.Services.AddScoped<ILessonRepository, LessonRepository>();
-            // Dashboard repository: query tổng hợp cho Dashboard, không dùng UserManager
             builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
-            
-            // Payment, Order, Wallet repositories
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
             builder.Services.AddScoped<IWalletRepository, WalletRepository>();
             builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
@@ -121,13 +95,28 @@ namespace OnlineLearningPlatform.RazorPages
             builder.Services.AddScoped<ICertificateRepository, CertificateRepository>();
             builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
+            // ================= EXTERNAL AUTH =================
+            builder.Services.AddAuthentication()
+                .AddGoogle(options =>
+                {
+                    options.ClientId =
+                        builder.Configuration["Authentication:Google:ClientId"] ?? string.Empty;
+                    options.ClientSecret =
+                        builder.Configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
+                });
+
+            // ================= AUTHORIZATION =================
             builder.Services.AddAuthorization(options =>
             {
-                options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
-                options.AddPolicy("Teacher", policy => policy.RequireRole("Teacher"));
-                options.AddPolicy("Student", policy => policy.RequireRole("Student"));
+                options.AddPolicy("Admin",
+                    policy => policy.RequireRole("Admin"));
+                options.AddPolicy("Teacher",
+                    policy => policy.RequireRole("Teacher"));
+                options.AddPolicy("Student",
+                    policy => policy.RequireRole("Student"));
             });
 
+            // ================= RAZOR PAGES =================
             builder.Services.AddRazorPages(options =>
             {
                 options.Conventions.AuthorizeAreaFolder("Admin", "/", "Admin");
@@ -144,12 +133,14 @@ namespace OnlineLearningPlatform.RazorPages
 
             var app = builder.Build();
 
+            // ================= SEED DATA =================
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
                 await SeedData.InitializeAsync(services);
             }
 
+            // ================= MIDDLEWARE =================
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Error");
@@ -158,13 +149,17 @@ namespace OnlineLearningPlatform.RazorPages
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+
             app.UseRouting();
+
             app.UseAuthentication();
             app.UseAuthorization();
 
+            // ================= ROUTING =================
             app.MapGet("/", () => Results.Redirect("/Landing"));
             app.MapRazorPages();
             app.MapControllers();
+
             app.MapHub<ProgressHub>("/hubs/progress");
             app.MapHub<NotificationHub>("/hubs/notification");
             app.MapHub<DataHub>("/hubs/data");

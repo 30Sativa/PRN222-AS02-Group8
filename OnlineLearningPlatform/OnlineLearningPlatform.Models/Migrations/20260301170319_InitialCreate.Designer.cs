@@ -12,8 +12,8 @@ using OnlineLearningPlatform.Models;
 namespace OnlineLearningPlatform.Models.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260301070650_AddWalletUsedToOrder")]
-    partial class AddWalletUsedToOrder
+    [Migration("20260301170319_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -655,6 +655,12 @@ namespace OnlineLearningPlatform.Models.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("ResetOtp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RestOtpExpiry")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
