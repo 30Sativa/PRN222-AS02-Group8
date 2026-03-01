@@ -101,6 +101,7 @@ namespace OnlineLearningPlatform.RazorPages
                 options.Conventions.AuthorizeAreaFolder("Teacher", "/", "Teacher");
                 options.Conventions.AuthorizeAreaFolder("Student", "/", "Student");
                 options.Conventions.AllowAnonymousToFolder("/Auth");
+                options.Conventions.AllowAnonymousToFolder("/Landing");
             });
 
             builder.Services.AddControllers();
@@ -128,7 +129,7 @@ namespace OnlineLearningPlatform.RazorPages
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.MapGet("/", () => Results.Redirect("/Auth/Login"));
+            app.MapGet("/", () => Results.Redirect("/Landing"));
             app.MapRazorPages();
             app.MapControllers();
             app.MapHub<ProgressHub>("/hubs/progress");
