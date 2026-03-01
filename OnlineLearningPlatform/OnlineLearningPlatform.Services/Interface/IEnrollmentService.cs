@@ -7,9 +7,9 @@ namespace OnlineLearningPlatform.Services.Interface
     {
         /// <summary>
         /// Ghi danh học viên vào khóa học.
-        /// Kiểm tra: khóa free → enroll ngay, khóa trả phí → cần đã thanh toán.
+        /// Kiểm tra: khóa free → enroll ngay, khóa trả phí → cần đã thanh toán hoặc forceEnroll = true.
         /// </summary>
-        Task<EnrollmentResult> EnrollAsync(string userId, Guid courseId);
+        Task<EnrollmentResult> EnrollAsync(string userId, Guid courseId, bool forceEnroll = false);
 
         /// <summary>
         /// Kiểm tra học viên đã ghi danh (active) chưa.
@@ -30,5 +30,10 @@ namespace OnlineLearningPlatform.Services.Interface
         /// Cập nhật LastAccessedAt mỗi khi học viên xem bài.
         /// </summary>
         Task UpdateLastAccessedAsync(string userId, Guid courseId);
+
+        /// <summary>
+        /// Hủy ghi danh (isactive = false)
+        /// </summary>
+        Task<bool> CancelEnrollmentAsync(string userId, Guid courseId);
     }
 }

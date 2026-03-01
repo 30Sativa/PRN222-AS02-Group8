@@ -148,23 +148,23 @@
     }
 
     .course-content {
-        padding: 1.5rem;
+        padding: 1rem;
         display: flex;
         flex-direction: column;
-        height: calc(100% - 56.25%); /* fill remaining space */
+        flex-grow: 1;
     }
 
     .course-category {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         color: var(--apple-blue);
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.25rem;
     }
 
     .course-title {
-        font-size: 1.15rem;
+        font-size: 1rem;
         font-weight: 600;
         line-height: 1.3;
         margin-bottom: 0.25rem;
@@ -176,9 +176,9 @@
     }
 
     .course-instructor {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         color: var(--apple-text-muted);
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
         flex-grow: 1;
     }
 
@@ -187,13 +187,13 @@
         justify-content: space-between;
         align-items: center;
         border-top: 1px solid rgba(0,0,0,0.05);
-        padding-top: 1rem;
+        padding-top: 0.75rem;
         margin-top: auto;
     }
 
     .course-price {
         font-weight: 600;
-        font-size: 1.1rem;
+        font-size: 1rem;
     }
 
     .price-free {
@@ -203,18 +203,18 @@
     .price-discount {
         color: var(--apple-text-muted);
         text-decoration: line-through;
-        font-size: 0.85rem;
-        margin-left: 0.4rem;
+        font-size: 0.75rem;
+        margin-left: 0.25rem;
         font-weight: 400;
     }
 
     .enrolled-badge {
         background: rgba(52, 199, 89, 0.1);
         color: #34c759;
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         font-weight: 600;
-        padding: 0.35rem 0.75rem;
-        border-radius: 12px;
+        padding: 0.25rem 0.5rem;
+        border-radius: 8px;
     }
 
     /* Empty State */

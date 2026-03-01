@@ -11,11 +11,13 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Student.Pages
     {
         private readonly IEnrollmentService _enrollmentService;
         private readonly IProgressService _progressService;
+        private readonly IOrderService _orderService; // Injected IOrderService
 
-        public MyLearningModel(IEnrollmentService enrollmentService, IProgressService progressService)
+        public MyLearningModel(IEnrollmentService enrollmentService, IProgressService progressService, IOrderService orderService)
         {
             _enrollmentService = enrollmentService;
             _progressService = progressService;
+            _orderService = orderService; // Assign IOrderService
         }
 
         public List<EnrolledCourseViewModel> EnrolledCourses { get; set; } = new();
@@ -41,6 +43,25 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Student.Pages
             }
 
             return Page();
+        }
+
+        // Added OnPostRefundAsync method
+        public async Task<IActionResult> OnPostRefundAsync(Guid courseId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return RedirectToPage("/Auth/Login");
+
+            var result = await _orderService.RefundCourseToWalletAsync(userId, courseId);
+            if (result.Success)
+            {
+                TempData["SuccessMessage"] = result.Message;
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.Message;
+            }
+
+            return RedirectToPage();
         }
     }
 

@@ -29,7 +29,7 @@ namespace OnlineLearningPlatform.Services.Implement
             return wallet;
         }
 
-        public async Task<bool> AddFundsAsync(string userId, decimal amount, string description, int? relatedOrderId = null)
+        public async Task<bool> AddFundsAsync(string userId, decimal amount, string description, int? relatedOrderId = null, WalletTransactionType type = WalletTransactionType.TopUp)
         {
             if (amount <= 0) return false;
 
@@ -43,7 +43,7 @@ namespace OnlineLearningPlatform.Services.Implement
             {
                 WalletId = wallet.WalletId,
                 Amount = amount,
-                Type = WalletTransactionType.TopUp,
+                Type = type,
                 Description = description,
                 OrderId = relatedOrderId,
                 CreatedAt = DateTime.UtcNow

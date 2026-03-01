@@ -20,14 +20,10 @@ namespace OnlineLearningPlatform.Services.Implement
             var completed = await _progressRepo.CountCompletedAsync(userId, courseId);
             var total = await _progressRepo.CountTotalLessonsAsync(courseId);
 
-            // Lấy tên khóa học
-            var enrollment = await _enrollmentRepo.GetByUserAndCourseAsync(userId, courseId);
-            var courseTitle = enrollment?.Course?.Title ?? string.Empty;
-
             return new CourseProgressDto
             {
                 CourseId = courseId,
-                CourseTitle = courseTitle,
+                CourseTitle = string.Empty, // Bỏ load title ở đây để tiết kiệm DB call, ghép ở UI Layer
                 TotalLessons = total,
                 CompletedLessons = completed
             };

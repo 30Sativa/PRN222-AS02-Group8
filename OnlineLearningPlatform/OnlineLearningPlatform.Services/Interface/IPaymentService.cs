@@ -6,6 +6,6 @@ namespace OnlineLearningPlatform.Services.Interface
     public interface IPaymentService
     {
         string CreateVnPayPaymentUrl(Order order, HttpContext context);
-        Task<bool> ProcessVnPayCallbackAsync(IQueryCollection collections);
+        Task<(bool IsSuccess, int? OrderId, string Message)> ProcessVnPayCallbackAsync(IQueryCollection collections);
     }
 }

@@ -26,9 +26,20 @@ namespace OnlineLearningPlatform.Services.Implement
             var courses = await _courseRepo.SearchPublishedCoursesAsync(keyword);
             var mapped = new List<StudentCourseResponse>();
 
+            // Optimize: Get all enrolled course IDs for the user in ONE query
+            HashSet<Guid> enrolledCourseIds = new HashSet<Guid>();
+            if (!string.IsNullOrEmpty(userId))
+            {
+                var userEnrollments = await _enrollmentRepo.GetByUserIdAsync(userId);
+                foreach(var e in userEnrollments)
+                {
+                    enrolledCourseIds.Add(e.CourseId);
+                }
+            }
+
             foreach (var c in courses)
             {
-                var isEnrolled = !string.IsNullOrEmpty(userId) && await _enrollmentRepo.IsEnrolledAsync(userId, c.CourseId);
+                var isEnrolled = enrolledCourseIds.Contains(c.CourseId);
                 mapped.Add(new StudentCourseResponse
                 {
                     CourseId = c.CourseId,

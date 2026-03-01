@@ -16,7 +16,7 @@ namespace OnlineLearningPlatform.Services.Implement
             _courseRepo = courseRepo;
         }
 
-        public async Task<EnrollmentResult> EnrollAsync(string userId, Guid courseId)
+        public async Task<EnrollmentResult> EnrollAsync(string userId, Guid courseId, bool forceEnroll = false)
         {
             // Kiểm tra khóa học tồn tại và đã xuất bản
             var course = await _courseRepo.GetByIdAsync(courseId);
@@ -30,9 +30,9 @@ namespace OnlineLearningPlatform.Services.Implement
             if (await _enrollmentRepo.IsEnrolledAsync(userId, courseId))
                 return EnrollmentResult.Fail("Bạn đã ghi danh khóa học này rồi.");
 
-            // Khóa trả phí → cần kiểm tra đã thanh toán (OrderDetail)
+            // Khóa trả phí → cần kiểm tra đã thanh toán (OrderDetail) trừ khi forceEnroll
             var effectivePrice = course.DiscountPrice ?? course.Price;
-            if (effectivePrice > 0)
+            if (effectivePrice > 0 && !forceEnroll)
             {
                 // Nếu khóa trả phí, chưa có payment flow → từ chối
                 return EnrollmentResult.Fail("Khóa học này yêu cầu thanh toán. Vui lòng mua khóa học trước.");
@@ -71,6 +71,17 @@ namespace OnlineLearningPlatform.Services.Implement
         public async Task UpdateLastAccessedAsync(string userId, Guid courseId)
         {
             await _enrollmentRepo.UpdateLastAccessedAsync(userId, courseId);
+        }
+
+        public async Task<bool> CancelEnrollmentAsync(string userId, Guid courseId)
+        {
+            var enrollment = await _enrollmentRepo.GetByUserAndCourseAsync(userId, courseId);
+            if (enrollment != null)
+            {
+                enrollment.IsActive = false;
+                return await _enrollmentRepo.UpdateAsync(enrollment);
+            }
+            return false;
         }
     }
 }

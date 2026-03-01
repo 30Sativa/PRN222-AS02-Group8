@@ -194,6 +194,19 @@
     <p>Tiếp tục học tập và theo dõi tiến độ của bạn</p>
 </div>
 
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success mt-3 mb-4 rounded-3 border-0" role="alert" style="background-color: rgba(52, 199, 89, 0.1); color: #34c759;">
+        <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger mt-3 mb-4 rounded-3 border-0" role="alert" style="background-color: rgba(255, 59, 48, 0.1); color: #ff3b30;">
+        <i class="bi bi-x-circle-fill me-2"></i> @TempData["ErrorMessage"]
+    </div>
+}
+
 @if (Model.EnrolledCourses.Any())
 {
     <div class="courses-grid">
@@ -251,6 +264,15 @@
                             Lần truy cập cuối: @item.Enrollment.LastAccessedAt.Value.ToString("dd/MM/yyyy HH:mm")
                         </div>
                     }
+
+                    <div class="mt-3 text-end border-top pt-2">
+                        <form method="post" asp-page-handler="Refund" asp-route-courseId="@course.CourseId"
+                              onsubmit="return confirm('Bạn có chắc chắn muốn yêu cầu hoàn tiền khóa học này không? Quyền truy cập sẽ bị hủy lập tức!');">
+                            <button type="submit" class="btn btn-sm text-danger" style="background: none; border: none; font-size: 0.85rem; padding: 0;">
+                                <i class="bi bi-arrow-return-left"></i> Hoàn tiền về ví
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         }

@@ -95,6 +95,10 @@ namespace OnlineLearningPlatform.Models
                 .Property(o => o.TotalAmount)
                 .HasColumnType("decimal(18,2)");
 
+            builder.Entity<Order>()
+                .Property(o => o.WalletUsed)
+                .HasColumnType("decimal(18,2)");
+
             builder.Entity<OrderDetail>()
                 .Property(od => od.Price)
                 .HasColumnType("decimal(18,2)");

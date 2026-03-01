@@ -25,6 +25,12 @@ namespace OnlineLearningPlatform.Models.Entities
         [Column(TypeName = "decimal(18,2)")]
         public decimal TotalAmount { get; set; }
 
+        /// <summary>
+        /// Số tiền đã sử dụng từ Wallet để thanh toán cho đơn hàng này.
+        /// </summary>
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal WalletUsed { get; set; } = 0;
+
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
 
         /// <summary>

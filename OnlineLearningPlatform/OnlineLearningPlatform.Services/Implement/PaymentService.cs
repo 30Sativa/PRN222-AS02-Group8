@@ -26,8 +26,9 @@ namespace OnlineLearningPlatform.Services.Implement
             vnpay.AddRequestData("vnp_Command", "pay");
             vnpay.AddRequestData("vnp_TmnCode", _configuration["Vnpay:TmnCode"] ?? "");
             
-            // Số tiền VNPAY yêu cầu nhân 100
-            int finalAmount = (int)(order.TotalAmount * 100);
+            // Số tiền VNPAY yêu cầu nhân 100, chỉ thanh toán phần còn lại sau khi trừ đi phần đã dùng từ ví
+            decimal amountToPay = order.TotalAmount - order.WalletUsed;
+            int finalAmount = (int)(amountToPay * 100);
             vnpay.AddRequestData("vnp_Amount", finalAmount.ToString());
 
             vnpay.AddRequestData("vnp_CreateDate", order.CreatedAt.ToString("yyyyMMddHHmmss"));
@@ -48,7 +49,7 @@ namespace OnlineLearningPlatform.Services.Implement
             return paymentUrl;
         }
 
-        public async Task<bool> ProcessVnPayCallbackAsync(IQueryCollection collections)
+        public async Task<(bool IsSuccess, int? OrderId, string Message)> ProcessVnPayCallbackAsync(IQueryCollection collections)
         {
             var vnpay = new VnPayLibrary();
             foreach (var (key, value) in collections)
@@ -77,22 +78,24 @@ namespace OnlineLearningPlatform.Services.Implement
                     if (vnp_ResponseCode == "00")
                     {
                         // Success -> Complete order -> Auto Enroll
-                        return await _orderService.CompleteOrderAsync(orderId, vnp_TransactionId, gatewayResponse);
+                        bool success = await _orderService.CompleteOrderAsync(orderId, vnp_TransactionId, gatewayResponse);
+                        return (success, orderId, success ? "Thanh toán thành công" : "Lỗi cập nhật trạng thái đơn hàng");
                     }
                     else
                     {
-                        // Failed
-                        return await _orderService.FailOrderAsync(orderId, gatewayResponse);
+                        // Failed, hoàn lại tiền ví nếu có dùng
+                        await _orderService.FailOrderAsync(orderId, gatewayResponse);
+                        return (false, orderId, "Thanh toán bị hủy hoặc thất bại từ ví điện tử VNPAY.");
                     }
                 }
                 else
                 {
                     // Invalid signature
                     await _orderService.FailOrderAsync(orderId, "Invalid signature");
-                    return false;
+                    return (false, orderId, "Chữ ký không hợp lệ từ VNPAY.");
                 }
             }
-            return false;
+            return (false, null, "Không tìm thấy mã đơn hàng hợp lệ.");
         }
     }
 }
