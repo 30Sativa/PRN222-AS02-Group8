@@ -44,6 +44,15 @@
             </button>
         </form>
 
+        <div class="mt-4 text-center">
+            <p class="text-muted mb-2" style="font-size: 0.9rem;">Đăng nhập nhanh (Tài khoản Demo):</p>
+            <div class="d-flex justify-content-center gap-2 flex-wrap">
+                <button type="button" class="btn btn-outline-danger btn-sm px-3 rounded-pill" onclick="fillDemo('admin@gmail.com', 'Admin@123')">Admin</button>
+                <button type="button" class="btn btn-outline-info btn-sm px-3 rounded-pill" onclick="fillDemo('teacher@gmail.com', 'Teacher@123')">Teacher</button>
+                <button type="button" class="btn btn-outline-success btn-sm px-3 rounded-pill" onclick="fillDemo('student@gmail.com', 'Student@123')">Student</button>
+            </div>
+        </div>
+
         <div class="auth-footer">
             Chưa có tài khoản?
             <a asp-page="/Auth/Register">Đăng ký ngay</a>
@@ -53,4 +62,12 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        function fillDemo(email, password) {
+            document.querySelector('input[type="email"]').value = email;
+            document.querySelector('input[type="password"]').value = password;
+            // Optionally auto submit:
+            // document.querySelector('form').submit();
+        }
+    </script>
 }

@@ -35,6 +35,7 @@
                 @if (User.IsInRole("Student"))
                 {
                     <li><a asp-area="Student" asp-page="/Dashboard">Dashboard</a></li>
+                    <li><a asp-area="Student" asp-page="/Courses/Index">Khám phá khóa học</a></li>
                     <li><a asp-area="Student" asp-page="/MyLearning">Khóa học của tôi</a></li>
                     <li><a asp-area="Student" asp-page="/Profile">Hồ sơ</a></li>
                 }

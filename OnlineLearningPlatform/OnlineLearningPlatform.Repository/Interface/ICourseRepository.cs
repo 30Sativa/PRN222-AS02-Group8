@@ -26,5 +26,6 @@ namespace OnlineLearningPlatform.Repository.Interface
         Task<bool> RejectAsync(Guid courseId, string reason);
         Task<IEnumerable<Course>> GetCoursesWithSectionsAndQuizzesAsync();
         Task<IEnumerable<Course>> GetPublishedCoursesWithEnrollmentsAsync();
+        Task<List<Course>> SearchPublishedCoursesAsync(string? keyword);
     }
 }

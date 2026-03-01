@@ -53,6 +53,11 @@ namespace OnlineLearningPlatform.RazorPages
             builder.Services.AddScoped<ILessonService, LessonService>();
             // Dashboard service: tổng hợp stat cho Admin Dashboard
             builder.Services.AddScoped<IDashboardService, DashboardService>();
+            
+            // Payment, Order, Wallet services
+            builder.Services.AddScoped<IOrderService, OrderService>();
+            builder.Services.AddScoped<IPaymentService, PaymentService>();
+            builder.Services.AddScoped<IWalletService, WalletService>();
 
             // Repositories
             builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -70,6 +75,10 @@ namespace OnlineLearningPlatform.RazorPages
             builder.Services.AddScoped<ILessonRepository, LessonRepository>();
             // Dashboard repository: query tổng hợp cho Dashboard, không dùng UserManager
             builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
+            
+            // Payment, Order, Wallet repositories
+            builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+            builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 
             builder.Services.AddAuthorization(options =>
             {

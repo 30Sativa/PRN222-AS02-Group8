@@ -161,6 +161,26 @@ namespace OnlineLearningPlatform.Repository.Implement
         public async Task<IEnumerable<Course>> GetPublishedCoursesWithEnrollmentsAsync() =>
             await _context.Courses.Include(c => c.Enrollments).Include(c => c.Sections).ThenInclude(s => s.Lessons).ThenInclude(l => l.Quizzes)
                 .Where(c => !c.IsDeleted && c.Status == CourseStatus.Published).ToListAsync();
+
+        public async Task<List<Course>> SearchPublishedCoursesAsync(string? keyword)
+        {
+            var query = _context.Courses
+                .Include(c => c.Teacher)
+                .Include(c => c.Category)
+                .Where(c => !c.IsDeleted && c.Status == CourseStatus.Published)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                var term = keyword.Trim().ToLower();
+                query = query.Where(c => 
+                    c.Title.ToLower().Contains(term) || 
+                    (c.Description != null && c.Description.ToLower().Contains(term))
+                );
+            }
+
+            return await query.OrderByDescending(c => c.CreatedAt).ToListAsync();
+        }
     }
-    }
+}
 

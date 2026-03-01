@@ -1,0 +1,362 @@
+@page "{id:guid}"
+@model OnlineLearningPlatform.RazorPages.Areas.Student.Pages.Courses.DetailsModel
+@{
+    ViewData["Title"] = Model.Course.Title;
+}
+
+<style>
+    /* Typography & Core Variables */
+    :root {
+        --apple-bg: #fbfbfd;
+        --apple-text: #1d1d1f;
+        --apple-text-muted: #86868b;
+        --apple-blue: #0071e3;
+        --apple-card-bg: #ffffff;
+        --apple-radius: 24px;
+        --apple-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        --apple-border: rgba(0,0,0,0.05);
+    }
+
+    body {
+        background-color: var(--apple-bg);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: var(--apple-text);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* Hero Section */
+    .hero-container {
+        padding: 5rem 0 4rem;
+        background: radial-gradient(circle at 50% 10%, #ffffff 0%, #fbfbfd 100%);
+    }
+
+    .hero-category {
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--apple-blue);
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .hero-title {
+        font-weight: 800;
+        font-size: 3.5rem;
+        letter-spacing: -0.04em;
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
+        color: var(--apple-text);
+    }
+
+    .hero-subtitle {
+        font-size: 1.25rem;
+        color: var(--apple-text-muted);
+        line-height: 1.6;
+        margin-bottom: 2.5rem;
+        font-weight: 400;
+    }
+
+    /* Media Wrapper */
+    .media-wrapper {
+        border-radius: var(--apple-radius);
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+        position: relative;
+        padding-top: 56.25%; /* 16:9 Aspect Ratio */
+        background-color: #f2f2f7;
+    }
+
+    .media-wrapper img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Pricing & Action */
+    .pricing-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.5);
+        border-radius: var(--apple-radius);
+        padding: 2rem;
+        box-shadow: var(--apple-shadow);
+    }
+
+    .price-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+
+    .price-original {
+        font-size: 1.1rem;
+        color: var(--apple-text-muted);
+        text-decoration: line-through;
+        margin-left: 0.5rem;
+        font-weight: 400;
+    }
+
+    .action-btn {
+        width: 100%;
+        padding: 1.1rem;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        border: none;
+        display: inline-block;
+        text-align: center;
+        text-decoration: none;
+    }
+
+    .action-btn-primary {
+        background-color: var(--apple-text);
+        color: #ffffff;
+    }
+
+    .action-btn-primary:hover {
+        background-color: #000000;
+        transform: scale(1.02);
+        color: #ffffff;
+    }
+
+    .action-btn-enrolled {
+        background-color: rgba(52, 199, 89, 0.1);
+        color: #34c759;
+    }
+    .action-btn-enrolled:hover {
+        background-color: rgba(52, 199, 89, 0.15);
+        color: #34c759;
+    }
+
+    /* Content Area */
+    .content-section {
+        padding: 4rem 0;
+    }
+
+    .content-card {
+        background: var(--apple-card-bg);
+        border-radius: var(--apple-radius);
+        padding: 3rem;
+        box-shadow: var(--apple-shadow);
+        border: 1px solid var(--apple-border);
+    }
+
+    .section-title {
+        font-weight: 700;
+        font-size: 1.8rem;
+        letter-spacing: -0.02em;
+        margin-bottom: 1.5rem;
+    }
+
+    .prose-content {
+        font-size: 1.15rem;
+        line-height: 1.8;
+        color: #333336;
+    }
+
+    /* Features Grid */
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+        margin-top: 4rem;
+        padding-top: 3rem;
+        border-top: 1px solid var(--apple-border);
+    }
+
+    .feature-item {
+        text-align: center;
+    }
+
+    .feature-icon {
+        font-size: 2rem;
+        color: var(--apple-text);
+        margin-bottom: 1rem;
+    }
+
+    .feature-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .feature-desc {
+        color: var(--apple-text-muted);
+        font-size: 0.95rem;
+    }
+
+    @@media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        .content-card {
+            padding: 2rem;
+        }
+        .feature-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+    }
+</style>
+
+<!-- Hero / Overview -->
+<div class="hero-container">
+    <div class="container">
+        <!-- Back Link -->
+        <a asp-page="./Index" class="text-decoration-none mb-4 d-inline-block" style="color: var(--apple-text-muted); font-weight: 500;">
+            <i class="bi bi-chevron-left me-1"></i> Trở về danh sách
+        </a>
+
+        <div class="row gy-5 align-items-center">
+            
+            <!-- Left: Text content & Pricing -->
+            <div class="col-lg-5 order-2 order-lg-1 pe-lg-5">
+                <span class="hero-category">@Model.Course.CategoryName</span>
+                <h1 class="hero-title">@Model.Course.Title</h1>
+                <p class="hero-subtitle">Giảng viên <strong>@Model.Course.TeacherName</strong>. Khai phá tiềm năng của bạn với khóa học từ chuyên gia.</p>
+                
+                <div class="pricing-card mt-4">
+                    <div class="mb-4">
+                        @if (Model.Course.DiscountPrice.HasValue && Model.Course.DiscountPrice < Model.Course.Price)
+                        {
+                            <span class="price-value">@Model.Course.DiscountPrice.Value.ToString("N0") VNĐ</span>
+                            <span class="price-original">@Model.Course.Price.ToString("N0") VNĐ</span>
+                        }
+                        else if (Model.Course.Price == 0)
+                        {
+                            <span class="price-value text-success">Miễn phí</span>
+                        }
+                        else
+                        {
+                            <span class="price-value">@Model.Course.Price.ToString("N0") VNĐ</span>
+                        }
+                    </div>
+
+                    @if (Model.Course.IsEnrolled)
+                    {
+                        <a asp-page="/LearnCourse" asp-route-courseId="@Model.Course.CourseId" class="action-btn action-btn-enrolled">
+                            <i class="bi bi-play-fill me-2"></i>Tiếp tục học
+                        </a>
+                    }
+                    else
+                    {
+                        if (Model.Course.Price > 0 || (Model.Course.DiscountPrice > 0)) 
+                        {
+                            <!-- Button trigger modal for Paid Course -->
+                            <button type="button" class="action-btn action-btn-primary" data-bs-toggle="modal" data-bs-target="#refundPolicyModal">
+                                Mua khóa học
+                            </button>
+                        } 
+                        else 
+                        {
+                            <!-- Direct Enroll for Free Course -->
+                            <form method="post" asp-page-handler="Enroll" asp-route-id="@Model.Course.CourseId">
+                                <button type="submit" class="action-btn action-btn-primary">
+                                    Học ngay
+                                </button>
+                            </form>
+                        }
+                    }
+                </div>
+            </div>
+
+            <!-- Right: Media Showcase -->
+            <div class="col-lg-7 order-1 order-lg-2">
+                <div class="media-wrapper">
+                    @if (!string.IsNullOrEmpty(Model.Course.ThumbnailUrl))
+                    {
+                        <img src="@Model.Course.ThumbnailUrl" alt="@Model.Course.Title" />
+                    }
+                    else
+                    {
+                        <div class="d-flex align-items-center justify-content-center w-100 h-100 position-absolute top-0 start-0">
+                            <i class="bi bi-collection-play text-muted opacity-25" style="font-size: 6rem;"></i>
+                        </div>
+                    }
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Content -->
+<div class="content-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="content-card">
+                    <h2 class="section-title">Về khóa học này</h2>
+                    
+                    <div class="prose-content">
+                        @if (!string.IsNullOrEmpty(Model.Course.Description))
+                        {
+                            @Html.Raw(Model.Course.Description)
+                        }
+                        else
+                        {
+                            <p class="text-muted fst-italic">Giảng viên chưa cập nhật mô tả cho khóa học này.</p>
+                        }
+                    </div>
+
+                    <!-- Features -->
+                    <div class="feature-grid">
+                        <div class="feature-item">
+                            <i class="bi bi-globe2 feature-icon"></i>
+                            <div class="feature-title">Ngôn ngữ</div>
+                            <div class="feature-desc">@Model.Course.Language</div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="bi bi-bar-chart feature-icon"></i>
+                            <div class="feature-title">Trình độ</div>
+                            <div class="feature-desc">@Model.Course.Level</div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="bi bi-infinity feature-icon"></i>
+                            <div class="feature-title">Truy cập</div>
+                            <div class="feature-desc">Trọn đời</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Refund Policy -->
+<div class="modal fade" id="refundPolicyModal" tabindex="-1" aria-labelledby="refundPolicyModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: var(--apple-radius); border: none; box-shadow: var(--apple-shadow-hover);">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold" id="refundPolicyModalLabel">Chính sách hoàn tiền</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-info border-0 bg-light" role="alert">
+            <i class="bi bi-info-circle-fill me-2 text-primary"></i> Vui lòng đọc kỹ chính sách trước khi thanh toán:
+        </div>
+        <ul class="mb-0 text-muted" style="line-height: 1.8;">
+            <li>Tiền hoàn lại sẽ được <strong>cộng trực tiếp vào Ví điện tử nội bộ</strong> của bạn, không hoàn về tài khoản ngân hàng hoặc ví VNPAY.</li>
+            <li>Bạn có thể yêu cầu hoàn tiền trong vòng <strong>7 ngày</strong> kể từ lúc mua khóa học.</li>
+            <li>Chính sách hoàn tiền <strong>không áp dụng</strong> nếu bạn đã hoàn thành quá 20% thời lượng của khóa học.</li>
+        </ul>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Hủy bỏ</button>
+        <form method="post" asp-page-handler="Enroll" asp-route-id="@Model.Course.CourseId" class="m-0">
+            <button type="submit" class="btn btn-primary rounded-pill px-4" style="background-color: var(--apple-blue); border: none;">Đồng ý & Thanh toán</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
