@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OnlineLearningPlatform.Models;
 
@@ -11,9 +12,11 @@ using OnlineLearningPlatform.Models;
 namespace OnlineLearningPlatform.Models.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260226040944_dblan3")]
+    partial class dblan3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -575,9 +578,6 @@ namespace OnlineLearningPlatform.Models.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime?>("LastAccessedAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<int?>("OrderDetailId")
                         .HasColumnType("int");
 
@@ -593,9 +593,7 @@ namespace OnlineLearningPlatform.Models.Migrations
                         .IsUnique()
                         .HasFilter("[OrderDetailId] IS NOT NULL");
 
-                    b.HasIndex("UserId", "CourseId")
-                        .IsUnique()
-                        .HasFilter("[IsActive] = 1");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Enrollments");
                 });
@@ -776,14 +774,6 @@ namespace OnlineLearningPlatform.Models.Migrations
                     b.Property<int>("OrderIndex")
                         .HasColumnType("int");
 
-                    b.Property<string>("ReadingPdfOriginalFileName")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("ReadingPdfStoragePath")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.Property<int>("SectionId")
                         .HasColumnType("int");
 
@@ -915,9 +905,6 @@ namespace OnlineLearningPlatform.Models.Migrations
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<decimal>("WalletUsed")
-                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("OrderId");
 

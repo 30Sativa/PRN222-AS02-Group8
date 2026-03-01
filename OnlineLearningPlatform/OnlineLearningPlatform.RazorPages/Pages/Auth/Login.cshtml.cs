@@ -19,7 +19,20 @@ namespace OnlineLearningPlatform.RazorPages.Pages.Auth
         }
 
         [BindProperty]
+
+        public LoginRequest LoginRequest { get; set; }
+
+        public void OnGet()
+        {
+            // Hiển thị thông báo thành công nếu vừa xác nhận email
+            if (TempData["EmailConfirmed"] != null && (bool)TempData["EmailConfirmed"])
+            {
+                ViewData["EmailConfirmedMessage"] = "Email confirmed successfully! You can now log in.";
+            }
+        }
+
         public LoginRequest LoginRequest { get; set; } = new();
+
 
         public async Task<IActionResult> OnPostAsync()
         {

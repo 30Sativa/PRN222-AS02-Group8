@@ -9,6 +9,7 @@ using OnlineLearningPlatform.Repository.Interface;
 using OnlineLearningPlatform.Services.Implement;
 using OnlineLearningPlatform.Services.Implementations;
 using OnlineLearningPlatform.Services.Interface;
+using OnlineLearningPlatform.Services.Settings;
 
 
 namespace OnlineLearningPlatform.RazorPages
@@ -23,6 +24,26 @@ namespace OnlineLearningPlatform.RazorPages
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+
+            {
+                options.SignIn.RequireConfirmedAccount = false;
+
+                // Password rule (tuỳ chỉnh nếu muốn)
+                options.Password.RequireDigit = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 6;
+            })
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
+            builder.Services.Configure<EmailSettings>(
+                builder.Configuration.GetSection("EmailSettings"));
+
+            builder.Services.Configure<AppSettings>(
+                builder.Configuration.GetSection("AppSettings"));
+            // ================= COOKIE CONFIG =================
+
                 {
                     options.SignIn.RequireConfirmedAccount = false;
                     options.Password.RequireDigit = false;
@@ -33,6 +54,7 @@ namespace OnlineLearningPlatform.RazorPages
                 })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+
 
             builder.Services.ConfigureApplicationCookie(options =>
             {
@@ -65,6 +87,17 @@ namespace OnlineLearningPlatform.RazorPages
 
             // Repositories
             builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+            builder.Services.AddScoped<IEmailService, EmailService>();
+            // ================= EXTERNAL AUTHENTICATION =================
+            builder.Services.AddAuthentication()
+                                                .AddGoogle(options =>
+                                                {
+                                                    options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+                                                    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+                                                });
+            // ================= AUTHORIZATION POLICIES =================
+
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
             builder.Services.AddScoped<ICourseRepository, CourseRepository>();
             builder.Services.AddScoped<IQuizRepository, QuizRepository>();

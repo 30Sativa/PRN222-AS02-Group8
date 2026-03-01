@@ -1,0 +1,21 @@
+﻿@page
+@model OnlineLearningPlatform.RazorPages.Pages.Auth.ConfirmEmailModel
+
+<div class="container mt-5">
+    <div class="card shadow p-4 text-center">
+        <h2>Email Confirmation</h2>
+
+        @if (!string.IsNullOrEmpty(Model.Message))
+        {
+            <div class="alert alert-danger mt-3">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <p class="mb-0 mt-2">@Model.Message</p>
+            </div>
+        }
+
+        <div class="mt-4">
+            <a asp-page="/Auth/Login" class="btn btn-primary">Go to Login</a>
+            <a asp-page="/Auth/Register" class="btn btn-outline-secondary ms-2">Back to Register</a>
+        </div>
+    </div>
+</div>

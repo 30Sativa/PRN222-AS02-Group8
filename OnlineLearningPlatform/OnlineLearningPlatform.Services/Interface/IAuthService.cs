@@ -12,6 +12,7 @@ namespace OnlineLearningPlatform.Services.Interface
     {
         Task<AuthResult> RegisterAsync(RegisterRequest request);
         Task<AuthResult> LoginAsync(LoginRequest request);
+        Task<AuthResult> ConfirmEmailAsync(string userId, string token);
         Task LogoutAsync();
     }
 }

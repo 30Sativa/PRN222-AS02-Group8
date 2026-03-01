@@ -1,0 +1,56 @@
+﻿@page
+@model OnlineLearningPlatform.RazorPages.Pages.Auth.RegisterConfirmationModel
+
+<div class="container mt-5">
+    <div class="card shadow p-4">
+        <div class="text-center mb-4">
+            <div class="mb-3">
+                <i class="bi bi-envelope-check" style="font-size: 4rem; color: #0d6efd;"></i>
+            </div>
+            <h2 class="text-primary">Check Your Email</h2>
+        </div>
+
+        <div class="alert alert-info" role="alert">
+            <h5 class="alert-heading">
+                <i class="bi bi-info-circle-fill"></i> Account Created Successfully
+            </h5>
+            <p class="mb-0">
+                Your account has been created, but it's <strong>not activated yet</strong>.
+            </p>
+        </div>
+
+        <div class="card bg-light mb-4">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="bi bi-envelope"></i> Next Steps:
+                </h6>
+                <ol class="mb-0 ps-3">
+                    <li class="mb-2">
+                        Check your inbox at <strong class="text-primary">@Model.Email</strong>
+                    </li>
+                    <li class="mb-2">
+                        Click the confirmation link in the email
+                    </li>
+                    <li>
+                        Return here to log in after confirming
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="alert alert-warning" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <strong>Important:</strong> You cannot log in until you confirm your email address.
+        </div>
+
+        <div class="text-center mt-4">
+            <a asp-page="/Auth/Login" class="btn btn-outline-secondary">
+                <i class="bi bi-box-arrow-in-right"></i> Go to Login
+            </a>
+            <p class="text-muted small mt-3 mb-0">
+                Didn't receive the email? Check your spam folder or 
+                <a asp-page="/Auth/Register">try registering again</a>.
+            </p>
+        </div>
+    </div>
+</div>
