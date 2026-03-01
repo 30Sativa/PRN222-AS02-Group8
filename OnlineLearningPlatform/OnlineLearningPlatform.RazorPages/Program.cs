@@ -134,6 +134,7 @@ namespace OnlineLearningPlatform.RazorPages
             app.MapControllers();
             app.MapHub<ProgressHub>("/hubs/progress");
             app.MapHub<NotificationHub>("/hubs/notification");
+            app.MapHub<DataHub>("/hubs/data");
 
             app.Run();
         }

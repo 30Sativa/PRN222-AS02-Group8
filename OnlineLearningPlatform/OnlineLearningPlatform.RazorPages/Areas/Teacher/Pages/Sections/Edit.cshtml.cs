@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.SignalR;
+using OnlineLearningPlatform.RazorPages.Hubs;
 using OnlineLearningPlatform.Services.Interface;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
@@ -8,7 +10,7 @@ using System.Security.Claims;
 namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Sections
 {
     [Authorize(Roles = "Teacher")]
-    public class EditModel(ISectionService sectionService) : PageModel
+    public class EditModel(ISectionService sectionService, IHubContext<DataHub> hub) : PageModel
     {
         [BindProperty]
         public int SectionId { get; set; }
@@ -67,6 +69,15 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Sections
                 ModelState.AddModelError(string.Empty, result.Message);
                 return Page();
             }
+
+            // Broadcast realtime: section được cập nhật → Teacher Course Details tự đổi tên section
+            await hub.Clients.All.SendAsync("SectionUpdated", new
+            {
+                courseId = CourseId,
+                sectionId = SectionId,
+                title = Title,
+                orderIndex = OrderIndex
+            });
 
             TempData["SuccessMessage"] = result.Message;
             return RedirectToPage("/Courses/Details", new { area = "Teacher", id = CourseId });

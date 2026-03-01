@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.SignalR;
 using OnlineLearningPlatform.Models.Entities;
+using OnlineLearningPlatform.RazorPages.Hubs;
 using OnlineLearningPlatform.Services.DTOs.Course.Request;
 using OnlineLearningPlatform.Services.Interface;
 using System.Security.Claims;
@@ -13,11 +15,13 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses
     {
         private readonly ICourseService _courseService;
         private readonly ICategoryService _categoryService;
+        private readonly IHubContext<DataHub> _hub;
 
-        public EditModel(ICourseService courseService, ICategoryService categoryService)
+        public EditModel(ICourseService courseService, ICategoryService categoryService, IHubContext<DataHub> hub)
         {
             _courseService = courseService;
             _categoryService = categoryService;
+            _hub = hub;
         }
 
         [BindProperty]
@@ -82,6 +86,17 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses
                 ModelState.AddModelError(string.Empty, result.Message);
                 return Page();
             }
+
+            // Broadcast realtime: khóa học được cập nhật → Admin và Teacher list tự refresh thông tin
+            await _hub.Clients.All.SendAsync("CourseUpdated", new
+            {
+                courseId = id,
+                title = Input.Title,
+                price = Input.Price,
+                level = Input.Level.ToString(),
+                language = Input.Language,
+                thumbnailUrl = Input.ThumbnailUrl
+            });
 
             TempData["SuccessMessage"] = result.Message;
             return RedirectToPage("/Courses/Index", new { area = "Teacher" });

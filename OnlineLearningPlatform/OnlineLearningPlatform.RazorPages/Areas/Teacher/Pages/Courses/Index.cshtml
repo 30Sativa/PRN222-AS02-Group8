@@ -400,34 +400,85 @@
 </div>
 
 @section Scripts {
+<script src="~/lib/microsoft-signalr/signalr.min.js"></script>
 <script>
-// Poll status every 8 seconds (lighter on server)
 (function () {
-    if (!document.querySelector('[data-cid]')) return;
-    const LABELS = {
-        Published: '✓ Xuất bản',
-        Pending:   '⏳ Chờ duyệt',
-        Rejected:  '✕ Từ chối'
-    };
-    const CLASSES = {
-        Published: 'ribbon-published',
-        Pending:   'ribbon-pending',
-        Rejected:  'ribbon-rejected'
-    };
-    setInterval(function () {
-        fetch(window.location.pathname + '?handler=Statuses')
-            .then(r => r.ok ? r.json() : null)
-            .then(data => {
-                if (!data) return;
-                data.forEach(item => {
-                    const el = document.querySelector('[data-cid="' + item.courseId + '"]');
-                    if (!el) return;
-                    const newClass = CLASSES[item.status] || 'ribbon-pending';
-                    el.className = 'status-ribbon course-status-badge ' + newClass;
-                    el.textContent = LABELS[item.status] || item.status;
-                });
-            }).catch(() => {});
-    }, 8000);
+    // ==== SignalR: Teacher Courses realtime (thay thế polling) ====
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl('/hubs/data')
+        .withAutomaticReconnect()
+        .build();
+
+    const LABELS = { Published: '✓ Xuất bản', Pending: '⏳ Chờ duyệt', Rejected: '✕ Từ chối' };
+    const CLASSES = { Published: 'ribbon-published', Pending: 'ribbon-pending', Rejected: 'ribbon-rejected' };
+
+    function escHtml(str) {
+        return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function showToast(msg, type) {
+        const toast = document.createElement('div');
+        const cls = type === 'success' ? 'success' : type === 'danger' ? 'danger' : type === 'warning' ? 'warning' : 'info';
+        toast.className = 'alert alert-' + cls;
+        toast.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;min-width:300px;animation:fadeUp .3s ease forwards;max-width:420px;';
+        toast.textContent = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => { toast.style.opacity='0'; toast.style.transition='opacity .3s ease'; setTimeout(()=>toast.remove(),300); }, 4000);
+    }
+
+    // ---- CourseStatusChanged: Admin approve/reject → badge đổi màu ngay ----
+    connection.on('CourseStatusChanged', function (data) {
+        const badge = document.querySelector('[data-cid="' + data.courseId + '"]');
+        if (!badge) return;
+        const newClass = CLASSES[data.status] || 'ribbon-pending';
+        badge.className = 'status-ribbon course-status-badge ' + newClass;
+        badge.textContent = LABELS[data.status] || data.status;
+        // Flash animation
+        badge.style.transition = 'none';
+        badge.style.transform = 'scale(1.15)';
+        setTimeout(() => { badge.style.transition = 'transform .25s ease'; badge.style.transform = 'scale(1)'; }, 50);
+
+        const label = data.status === 'Published' ? 'đã được duyệt ✅' : 'bị từ chối ❌';
+        showToast('Khóa học đã ' + label + '. Trang đã được cập nhật.', data.status === 'Published' ? 'success' : 'danger');
+    });
+
+    // ---- CourseDeleted: card bị xóa ngay ----
+    connection.on('CourseDeleted', function (data) {
+        const card = document.getElementById('card-' + data.courseId);
+        if (!card) return;
+        card.style.transition = 'opacity .35s ease, transform .35s ease';
+        card.style.opacity = '0';
+        card.style.transform = 'scale(0.9)';
+        setTimeout(() => card.remove(), 350);
+        showToast('🗑️ Một khóa học đã bị xóa.', 'warning');
+    });
+
+    // ---- CourseUpdated: cập nhật title và meta ----
+    connection.on('CourseUpdated', function (data) {
+        const card = document.getElementById('card-' + data.courseId);
+        if (!card) return;
+        const titleEl = card.querySelector('.course-card-title');
+        if (titleEl && data.title) titleEl.textContent = data.title;
+        const priceEl = card.querySelector('.meta-price');
+        if (priceEl && data.price !== undefined) {
+            if (data.price === 0) { priceEl.textContent = 'Miễn phí'; priceEl.classList.add('free'); }
+            else { priceEl.textContent = Number(data.price).toLocaleString('vi-VN') + ' ₫'; priceEl.classList.remove('free'); }
+        }
+        // Flash card border
+        card.style.outline = '2px solid var(--color-blue)';
+        setTimeout(() => { card.style.transition = 'outline .4s ease'; card.style.outline = '2px solid transparent'; }, 800);
+    });
+
+    // ---- CourseCreated: thêm card mới (chỉ reload nếu là khóa học của teacher này) ----
+    connection.on('CourseCreated', function (data) {
+        // Nếu teacher đang xem trang của chính mình, toast thông báo
+        // Vì card mới cần đầy đủ markup, chỉ toast + đề nghị F5 (tránh duplicate logic phức tạp)
+        showToast('📚 Khóa học mới "' + escHtml(data.title) + '" vừa được tạo. Tải lại để xem.', 'info');
+        // Auto-reload sau 1.5s để đơn giản và chắc chắn
+        setTimeout(() => window.location.reload(), 1500);
+    });
+
+    connection.start().catch(err => console.warn('[SignalR DataHub] Teacher Courses connect error:', err));
 })();
 </script>
 }

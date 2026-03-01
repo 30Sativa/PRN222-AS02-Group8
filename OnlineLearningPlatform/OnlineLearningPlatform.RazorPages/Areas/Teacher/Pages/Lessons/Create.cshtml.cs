@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.SignalR;
 using OnlineLearningPlatform.Models.Entities;
+using OnlineLearningPlatform.RazorPages.Hubs;
 using OnlineLearningPlatform.Services.Interface;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
@@ -13,7 +15,8 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Lessons
         ISectionService sectionService,
         ICourseService courseService,
         ILessonService lessonService,
-        IWebHostEnvironment environment) : PageModel
+        IWebHostEnvironment environment,
+        IHubContext<DataHub> hub) : PageModel
     {
         private const long MaxVideoSizeBytes = 200L * 1024 * 1024;
         private static readonly string[] AllowedVideoExtensions = [".mp4", ".webm", ".ogg"];
@@ -200,6 +203,18 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Lessons
                 ModelState.AddModelError(string.Empty, result.Message);
                 return Page();
             }
+
+            // Broadcast realtime: bài học mới được thêm → Teacher Course Details tự append lesson row
+            await hub.Clients.All.SendAsync("LessonCreated", new
+            {
+                courseId = section.CourseId,
+                sectionId = SectionId,
+                lessonId = result.Lesson?.LessonId ?? 0,
+                title = Title,
+                lessonType = LessonType.ToString(),
+                orderIndex = OrderIndex <= 0 ? 1 : OrderIndex,
+                isPreview = IsPreview
+            });
 
             TempData["SuccessMessage"] = result.Message;
             return RedirectToPage("/Courses/Details", new { area = "Teacher", id = section.CourseId });

@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.SignalR;
 using OnlineLearningPlatform.Models.Entities;
+using OnlineLearningPlatform.RazorPages.Hubs;
 using OnlineLearningPlatform.Services.Interface;
 
 namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Categories
@@ -10,10 +12,12 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Categories
     public class DeleteModel : PageModel
     {
         private readonly ICategoryService _categoryService;
+        private readonly IHubContext<DataHub> _hub;
 
-        public DeleteModel(ICategoryService categoryService)
+        public DeleteModel(ICategoryService categoryService, IHubContext<DataHub> hub)
         {
             _categoryService = categoryService;
+            _hub = hub;
         }
 
         public Category Category { get; set; } = default!;
@@ -35,6 +39,9 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Categories
                 TempData["ErrorMessage"] = result.Message;
                 return RedirectToPage("/Categories/Index", new { area = "Teacher" });
             }
+
+            // Broadcast realtime: danh mục bị xóa → Teacher list tự remove row ngay
+            await _hub.Clients.All.SendAsync("CategoryDeleted", new { categoryId = id });
 
             TempData["SuccessMessage"] = "Danh mục đã được xóa thành công.";
             return RedirectToPage("/Categories/Index", new { area = "Teacher" });
