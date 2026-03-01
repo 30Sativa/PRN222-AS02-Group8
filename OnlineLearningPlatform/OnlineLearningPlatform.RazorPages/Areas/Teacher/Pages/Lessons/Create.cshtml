@@ -1,0 +1,81 @@
+@page
+@model OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Lessons.CreateModel
+@using OnlineLearningPlatform.Models.Entities
+@{
+    ViewData["Title"] = "Add Lesson";
+}
+
+<h2 class="mb-3">Add Lesson</h2>
+
+<form method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="SectionId" />
+
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label asp-for="LessonType" class="form-label"></label>
+            <select id="lessonTypeSelect" asp-for="LessonType" class="form-select" asp-items="Html.GetEnumSelectList<LessonType>()"></select>
+        </div>
+        <div class="col-md-4">
+            <label asp-for="OrderIndex" class="form-label">Order</label>
+            <input asp-for="OrderIndex" class="form-control" type="number" min="1" />
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+            <div class="form-check">
+                <input asp-for="IsPreview" class="form-check-input" />
+                <label asp-for="IsPreview" class="form-check-label"></label>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3 mb-3" id="videoUploadGroup">
+        <label asp-for="VideoFile" class="form-label">Video File</label>
+        <input asp-for="VideoFile" type="file" class="form-control" accept="video/mp4,video/webm,video/ogg" />
+        <span asp-validation-for="VideoFile" class="text-danger"></span>
+        <div class="form-text">Bắt buộc khi LessonType = Video. Tối đa 200MB.</div>
+    </div>
+
+    <div class="mt-3 mb-3" id="readingPdfUploadGroup">
+        <label asp-for="ReadingPdfFile" class="form-label">Reading PDF (optional)</label>
+        <input asp-for="ReadingPdfFile" type="file" class="form-control" accept="application/pdf,.pdf" />
+        <span asp-validation-for="ReadingPdfFile" class="text-danger"></span>
+        <div class="form-text">Không bắt buộc. Chỉ áp dụng khi LessonType = Reading. Tối đa 50MB.</div>
+    </div>
+
+    <div class="mt-3 mb-3">
+        <label asp-for="LessonContent" class="form-label">Content (for Reading/Text)</label>
+        <textarea asp-for="LessonContent" class="form-control" rows="5"></textarea>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Create Lesson</button>
+        <a class="btn btn-outline-secondary" asp-area="Teacher" asp-page="/Courses/Details" asp-route-id="@Model.CourseId">Back to Course</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const select = document.getElementById('lessonTypeSelect');
+            const videoGroup = document.getElementById('videoUploadGroup');
+            const readingPdfGroup = document.getElementById('readingPdfUploadGroup');
+
+            function toggleUploadInputs() {
+                const selected = select.options[select.selectedIndex].text;
+                videoGroup.style.display = selected === 'Video' ? 'block' : 'none';
+                readingPdfGroup.style.display = selected === 'Reading' ? 'block' : 'none';
+            }
+
+            select.addEventListener('change', toggleUploadInputs);
+            toggleUploadInputs();
+        })();
+    </script>
+}

@@ -1,0 +1,63 @@
+@page
+@model OnlineLearningPlatform.RazorPages.Areas.Student.Pages.EditProfileModel
+@{
+    ViewData["Title"] = "Chỉnh sửa hồ sơ";
+}
+
+<div class="page-head fade-up">
+    <h1>Chỉnh sửa hồ sơ</h1>
+    <div class="breadcrumb">
+        <a asp-area="Student" asp-page="/Dashboard">Dashboard</a>
+        <span class="breadcrumb-sep">/</span>
+        <a asp-area="Student" asp-page="/Profile">Hồ sơ</a>
+        <span class="breadcrumb-sep">/</span>
+        <span>Chỉnh sửa</span>
+    </div>
+</div>
+
+@if (Model.SuccessMessage != null)
+{
+    <div class="alert alert-success fade-up">@Model.SuccessMessage</div>
+}
+@if (Model.ErrorMessage != null)
+{
+    <div class="alert alert-danger fade-up">@Model.ErrorMessage</div>
+}
+
+<div class="card fade-up" style="max-width: 640px;">
+    <div class="card-header"><h2>Thông tin cá nhân</h2></div>
+    <div class="card-body">
+        <form method="post">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="text" class="form-control" value="@Model.CurrentEmail" disabled />
+                <span class="form-hint">Email không thể thay đổi.</span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Input.FullName">Họ và tên</label>
+                <input asp-for="Input.FullName" class="form-control" placeholder="Nhập họ và tên" />
+                <span asp-validation-for="Input.FullName" class="form-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Input.PhoneNumber">Số điện thoại</label>
+                <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Nhập số điện thoại" />
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Input.Bio">Giới thiệu bản thân</label>
+                <textarea asp-for="Input.Bio" class="form-control" placeholder="Viết vài dòng về bản thân bạn..."></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                <a asp-area="Student" asp-page="/Profile" class="btn btn-secondary">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

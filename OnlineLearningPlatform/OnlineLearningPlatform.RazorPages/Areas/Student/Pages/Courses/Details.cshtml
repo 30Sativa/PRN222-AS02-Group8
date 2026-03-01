@@ -1,0 +1,399 @@
+@page "{id:guid}"
+@model OnlineLearningPlatform.RazorPages.Areas.Student.Pages.Courses.DetailsModel
+@{
+    ViewData["Title"] = Model.Course.Title;
+}
+
+<style>
+    /* Typography & Core Variables */
+    :root {
+        --apple-bg: #fbfbfd;
+        --apple-text: #1d1d1f;
+        --apple-text-muted: #86868b;
+        --apple-blue: #0071e3;
+        --apple-card-bg: #ffffff;
+        --apple-radius: 24px;
+        --apple-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        --apple-border: rgba(0,0,0,0.05);
+    }
+
+    body {
+        background-color: var(--apple-bg);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        color: var(--apple-text);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    .page-container {
+        padding: 2rem 0;
+    }
+
+    /* Media Wrapper */
+    .media-wrapper {
+        border-radius: 16px;
+        overflow: hidden;
+        background-color: #000;
+        position: relative;
+        padding-top: 56.25%; /* 16:9 Aspect Ratio */
+        box-shadow: var(--apple-shadow);
+        margin-bottom: 2rem;
+    }
+
+    .media-wrapper img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Course Info */
+    .course-title {
+        font-weight: 800;
+        font-size: 2rem;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+        margin-bottom: 0.5rem;
+        color: var(--apple-text);
+    }
+
+    .course-meta {
+        font-size: 0.95rem;
+        color: var(--apple-text-muted);
+        margin-bottom: 1.5rem;
+    }
+
+    .prose-content {
+        font-size: 1.05rem;
+        line-height: 1.6;
+        color: #333336;
+        margin-bottom: 2rem;
+    }
+
+    /* Features Grid */
+    .feature-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        padding: 1.5rem 0;
+        border-top: 1px solid var(--apple-border);
+        border-bottom: 1px solid var(--apple-border);
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .feature-icon {
+        font-size: 1.5rem;
+        color: var(--apple-blue);
+    }
+
+    .feature-text .title {
+        font-size: 0.8rem;
+        color: var(--apple-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+        margin-bottom: 0.1rem;
+    }
+
+    .feature-text .value {
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--apple-text);
+    }
+
+    /* Pricing Info */
+    .pricing-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 24px;
+        padding: 2rem;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+        position: sticky;
+        top: 2rem;
+        transition: transform 0.3s ease;
+    }
+    
+    .pricing-card:hover {
+        transform: translateY(-4px);
+    }
+
+    .price-value {
+        font-size: 2.2rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1;
+        margin-bottom: 0.25rem;
+    }
+
+    .price-original {
+        font-size: 1rem;
+        color: var(--apple-text-muted);
+        text-decoration: line-through;
+        margin-left: 0.5rem;
+        font-weight: 400;
+    }
+
+    .action-btn {
+        width: 100%;
+        padding: 1rem;
+        border-radius: 14px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.2s ease;
+        border: none;
+        display: inline-block;
+        text-align: center;
+        text-decoration: none;
+        margin-top: 1.5rem;
+    }
+
+    .action-btn-primary {
+        background-color: var(--apple-blue);
+        color: #ffffff;
+    }
+
+    .action-btn-primary:hover {
+        background-color: var(--apple-blue-hover);
+        transform: translateY(-2px);
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+    }
+
+    .action-btn-enrolled {
+        background-color: rgba(52, 199, 89, 0.1);
+        color: #34c759;
+    }
+    .action-btn-enrolled:hover {
+        background-color: rgba(52, 199, 89, 0.15);
+        color: #34c759;
+    }
+
+    .guarantee-text {
+        font-size: 0.85rem;
+        color: var(--apple-text-muted);
+        text-align: center;
+        margin-top: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+    }
+
+    @@media (max-width: 991px) {
+        .pricing-card {
+            position: relative;
+            top: 0;
+            margin-top: 2rem;
+        }
+        .course-title {
+            font-size: 1.8rem;
+        }
+    }
+</style>
+
+<div class="page-container">
+    <div class="container container-xl">
+        
+        <!-- Back Link -->
+        <a asp-page="./Index" class="text-decoration-none mb-3 d-inline-block" style="color: var(--apple-text-muted); font-weight: 500;">
+            <i class="bi bi-arrow-left-short fs-5 align-middle"></i> Quay lại
+        </a>
+
+        <div class="row align-items-start">
+            
+            <!-- Left Info Column -->
+            <div class="col-lg-8 pe-lg-4">
+                
+                <!-- Media -->
+                <div class="media-wrapper">
+                    @if (!string.IsNullOrEmpty(Model.Course.ThumbnailUrl))
+                    {
+                        <img src="@Model.Course.ThumbnailUrl" alt="@Model.Course.Title" />
+                    }
+                    else
+                    {
+                        <div class="d-flex align-items-center justify-content-center w-100 h-100 position-absolute top-0 start-0">
+                            <i class="bi bi-play-circle text-muted opacity-25" style="font-size: 4rem;"></i>
+                        </div>
+                    }
+                </div>
+
+                <h1 class="course-title">@Model.Course.Title</h1>
+                <div class="course-meta">
+                    <span class="badge bg-primary bg-opacity-10 text-primary me-2 px-2 py-1 rounded-pill">@Model.Course.CategoryName</span>
+                    <span>Giảng viên: <strong>@Model.Course.TeacherName</strong></span>
+                </div>
+
+                <div class="prose-content">
+                    @if (!string.IsNullOrEmpty(Model.Course.Description))
+                    {
+                        @Html.Raw(Model.Course.Description)
+                    }
+                    else
+                    {
+                        <p class="text-muted fst-italic">Giảng viên chưa cập nhật mô tả cho khóa học này.</p>
+                    }
+                </div>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <i class="bi bi-globe2 feature-icon"></i>
+                        <div class="feature-text">
+                            <div class="title">Ngôn ngữ</div>
+                            <div class="value">@Model.Course.Language</div>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <i class="bi bi-bar-chart feature-icon"></i>
+                        <div class="feature-text">
+                            <div class="title">Trình độ</div>
+                            <div class="value">@Model.Course.Level</div>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <i class="bi bi-infinity feature-icon"></i>
+                        <div class="feature-text">
+                            <div class="title">Truy cập</div>
+                            <div class="value">Trọn đời</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reviews Section -->
+                <div class="reviews-section mt-5 pt-3 mb-5">
+                    <h2 class="course-title" style="font-size: 1.6rem;">Đánh giá của học viên</h2>
+                    
+                    <div class="d-flex align-items-center mb-4 mt-3">
+                        <div class="display-4 fw-bold me-3 text-dark">@Model.AverageRating.ToString("0.0")</div>
+                        <div>
+                            <div class="text-warning mb-1" style="font-size: 1.2rem;">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    if (i <= Math.Round(Model.AverageRating, 0, MidpointRounding.AwayFromZero))
+                                    {
+                                        <i class="bi bi-star-fill"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-star"></i>
+                                    }
+                                }
+                            </div>
+                            <div class="text-muted small">@Model.ReviewCount đánh giá</div>
+                        </div>
+                    </div>
+
+                    @if (Model.Course.IsEnrolled)
+                    {
+                        <div class="card border-0 shadow-sm rounded-4 mb-4" style="background: var(--apple-card-bg);">
+                            <div class="card-body p-4">
+                                <h5 class="fw-bold mb-3">@(Model.MyReview != null ? "Cập nhật đánh giá của bạn" : "Thêm đánh giá")</h5>
+                                <form method="post" asp-page-handler="SubmitReview" asp-route-id="@Model.Course.CourseId">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted small fw-semibold">Gắn sao</label>
+                                        <select asp-for="ReviewRating" class="form-select border-0 bg-light rounded-3" style="max-width: 150px;">
+                                            <option value="5" selected="@(Model.MyReview?.Rating == 5)">5 Sao (Tuyệt vời)</option>
+                                            <option value="4" selected="@(Model.MyReview?.Rating == 4)">4 Sao (Rất tốt)</option>
+                                            <option value="3" selected="@(Model.MyReview?.Rating == 3)">3 Sao (Tạm ổn)</option>
+                                            <option value="2" selected="@(Model.MyReview?.Rating == 2)">2 Sao (Kém)</option>
+                                            <option value="1" selected="@(Model.MyReview?.Rating == 1)">1 Sao (Rất tệ)</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted small fw-semibold">Nội dung đánh giá</label>
+                                        <textarea asp-for="ReviewComment" class="form-control border-0 bg-light rounded-3" rows="3" placeholder="Chia sẻ cảm nhận của bạn về khóa học này...">@(Model.MyReview?.Comment)</textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold" style="background-color: var(--apple-blue); border:none;">
+                                        Gửi Đánh Giá
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="review-list">
+                        @if (Model.Reviews != null && Model.Reviews.Any())
+                        {
+                            @foreach (var review in Model.Reviews)
+                            {
+                                <div class="review-item border-bottom py-4">
+                                    <div class="d-flex w-100 justify-content-between align-items-center mb-2">
+                                        <p class="mb-0 fw-bold">@review.UserName</p>
+                                        <span class="text-muted small">@review.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                    </div>
+                                    <div class="text-warning mb-2" style="font-size: 0.9rem;">
+                                        @for (var i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= review.Rating)
+                                            {
+                                                <i class="bi bi-star-fill"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-star"></i>
+                                            }
+                                        }
+                                    </div>
+                                    <p class="text-muted mb-0">@review.Comment</p>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <p class="text-muted fst-italic">Chưa có đánh giá nào cho khóa học này.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Pricing Column -->
+            <div class="col-lg-4">
+                <div class="pricing-card">
+                    <div class="mb-2">
+                        @if (Model.Course.DiscountPrice.HasValue && Model.Course.DiscountPrice < Model.Course.Price)
+                        {
+                            <div class="price-value">@Model.Course.DiscountPrice.Value.ToString("N0") <span class="fs-4">VNĐ</span></div>
+                            <div class="price-original">@Model.Course.Price.ToString("N0") VNĐ</div>
+                        }
+                        else if (Model.Course.Price == 0)
+                        {
+                            <div class="price-value text-success">Miễn phí</div>
+                        }
+                        else
+                        {
+                            <div class="price-value">@Model.Course.Price.ToString("N0") <span class="fs-4">VNĐ</span></div>
+                        }
+                    </div>
+
+                    @if (Model.Course.IsEnrolled)
+                    {
+                        <a asp-page="/LearnCourse" asp-route-courseId="@Model.Course.CourseId" class="action-btn action-btn-enrolled">
+                            <i class="bi bi-play-fill me-1"></i>Tiếp tục học
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-page="./Checkout" asp-route-id="@Model.Course.CourseId" class="action-btn action-btn-primary">
+                            Đăng ký học
+                        </a>
+                        if (Model.Course.Price > 0 || (Model.Course.DiscountPrice > 0))
+                        {
+                            <div class="guarantee-text">
+                                <i class="bi bi-shield-check"></i> Hoàn tiền trong 7 ngày
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

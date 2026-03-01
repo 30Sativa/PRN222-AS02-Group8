@@ -1,0 +1,66 @@
+@page
+@model OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Notifications.IndexModel
+@{
+    ViewData["Title"] = "Thông báo";
+}
+
+<div class="page-head" style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <div class="breadcrumb">
+            <a asp-area="Teacher" asp-page="/Dashboard">Dashboard</a>
+            <span class="breadcrumb-sep">/</span>
+            <span>Thông báo</span>
+        </div>
+        <h1>Thông báo của bạn</h1>
+    </div>
+    @if (Model.Notifications.Any(n => !n.IsRead))
+    {
+        <form method="post" asp-page-handler="MarkAllRead">
+            <button type="submit" class="btn btn-secondary">Đánh dấu tất cả đã đọc</button>
+        </form>
+    }
+</div>
+
+@if (!Model.Notifications.Any())
+{
+    <div class="card card-body" style="text-align: center; padding: 60px 20px;">
+        <h3 style="color: var(--color-label-2); margin-bottom: 16px;">Bạn không có thông báo nào</h3>
+    </div>
+}
+else
+{
+    <div class="card">
+        <div style="display: flex; flex-direction: column;">
+            @foreach (var n in Model.Notifications)
+            {
+                var bgClass = n.IsRead ? "" : "background: var(--color-blue-tint);";
+                var iconUrl = n.Type == "CertificateIssued" ? "🎓" : "🔔";
+                var title = n.Type == "CertificateIssued" ? "Chứng chỉ mới" : "Thông báo hệ thống";
+
+                <div style="display: flex; gap: 16px; padding: 20px; border-bottom: 1px solid var(--color-border); @bgClass transition: background var(--transition);">
+                    <div style="font-size: 24px; padding-top: 2px;">@iconUrl</div>
+                    <div style="flex: 1;">
+                        <h4 style="font-size: var(--text-md); font-weight: 600; margin-bottom: 4px; color: var(--color-label-1);">@title</h4>
+                        <p style="font-size: var(--text-base); color: var(--color-label-2); margin-bottom: 8px;">@n.Content</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: var(--text-sm); color: var(--color-label-3);">@n.TimeAgo</span>
+                            
+                            <div style="display: flex; gap: 12px;">
+                                @if (!string.IsNullOrEmpty(n.TargetUrl) && n.TargetUrl != "null")
+                                {
+                                    <a href="@n.TargetUrl" class="btn btn-primary btn-sm" style="padding: 4px 12px; font-size: 13px;">Xem chi tiết</a>
+                                }
+                                @if (!n.IsRead)
+                                {
+                                    <form method="post" asp-page-handler="MarkRead" asp-route-id="@n.NotificationId">
+                                        <button type="submit" class="btn btn-secondary btn-sm" style="padding: 4px 12px; font-size: 13px;">Đã đọc</button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}

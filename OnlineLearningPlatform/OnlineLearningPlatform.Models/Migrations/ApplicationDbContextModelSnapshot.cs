@@ -575,6 +575,9 @@ namespace OnlineLearningPlatform.Models.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("LastAccessedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int?>("OrderDetailId")
                         .HasColumnType("int");
 
@@ -590,7 +593,9 @@ namespace OnlineLearningPlatform.Models.Migrations
                         .IsUnique()
                         .HasFilter("[OrderDetailId] IS NOT NULL");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "CourseId")
+                        .IsUnique()
+                        .HasFilter("[IsActive] = 1");
 
                     b.ToTable("Enrollments");
                 });
@@ -771,6 +776,14 @@ namespace OnlineLearningPlatform.Models.Migrations
                     b.Property<int>("OrderIndex")
                         .HasColumnType("int");
 
+                    b.Property<string>("ReadingPdfOriginalFileName")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("ReadingPdfStoragePath")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<int>("SectionId")
                         .HasColumnType("int");
 
@@ -902,6 +915,9 @@ namespace OnlineLearningPlatform.Models.Migrations
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<decimal>("WalletUsed")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("OrderId");
 

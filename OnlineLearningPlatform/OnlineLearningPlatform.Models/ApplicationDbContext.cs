@@ -76,6 +76,12 @@ namespace OnlineLearningPlatform.Models
                 .HasIndex(c => c.CourseCode)
                 .IsUnique();
 
+            // Unique index: mỗi user chỉ enroll 1 lần cho mỗi course
+            builder.Entity<Enrollment>()
+                .HasIndex(e => new { e.UserId, e.CourseId })
+                .IsUnique()
+                .HasFilter("[IsActive] = 1");
+
             // Cấu hình precision cho các trường tiền tệ
             builder.Entity<Course>()
                 .Property(c => c.Price)
@@ -87,6 +93,10 @@ namespace OnlineLearningPlatform.Models
 
             builder.Entity<Order>()
                 .Property(o => o.TotalAmount)
+                .HasColumnType("decimal(18,2)");
+
+            builder.Entity<Order>()
+                .Property(o => o.WalletUsed)
                 .HasColumnType("decimal(18,2)");
 
             builder.Entity<OrderDetail>()
