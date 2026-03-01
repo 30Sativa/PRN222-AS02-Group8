@@ -1,11 +1,12 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Options;
 using OnlineLearningPlatform.Models.Entities.Identity;
 using OnlineLearningPlatform.Repository.Interface;
 using OnlineLearningPlatform.Services.DTOs.Auth.Request;
 using OnlineLearningPlatform.Services.DTOs.Auth.Response;
 using OnlineLearningPlatform.Services.Interface;
 using OnlineLearningPlatform.Services.Settings;
-using System.Net;
+using System.Text;
 
 namespace OnlineLearningPlatform.Services.Implement
 {
@@ -62,7 +63,7 @@ namespace OnlineLearningPlatform.Services.Implement
 
             // Generate email confirmation token
             var token = await _userRepo.GenerateEmailConfirmationTokenAsync(user);
-            var encodedToken = WebUtility.UrlEncode(token);
+            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
             var confirmationLink =
                 $"{_appSettings.BaseUrl}/Auth/ConfirmEmail?userId={user.Id}&token={encodedToken}";
@@ -93,7 +94,10 @@ namespace OnlineLearningPlatform.Services.Implement
                 };
             }
 
-            var result = await _userRepo.ConfirmEmailAsync(user, token);
+            // Decode token từ Base64Url
+            var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
+
+            var result = await _userRepo.ConfirmEmailAsync(user, decodedToken);
 
             if (!result.Succeeded)
             {

@@ -47,6 +47,7 @@ namespace OnlineLearningPlatform.RazorPages.Pages.Auth
                 UserName = email,
                 FullName = fullname,
                 Email = email,
+                EmailConfirmed = true, // Email đã được Google xác nhận
                 CreatedAt = DateTime.UtcNow,
             };
 
