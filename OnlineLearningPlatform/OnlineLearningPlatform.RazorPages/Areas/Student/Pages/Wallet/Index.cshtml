@@ -1,0 +1,176 @@
+@page
+@model OnlineLearningPlatform.RazorPages.Areas.Student.Pages.Wallet.IndexModel
+@{
+    ViewData["Title"] = "Ví của tôi";
+}
+
+<style>
+    /* Typography & Core Variables */
+    :root {
+        --apple-bg: #fbfbfd;
+        --apple-text: #1d1d1f;
+        --apple-text-muted: #86868b;
+        --apple-blue: #0071e3;
+        --apple-card-bg: #ffffff;
+        --apple-radius: 20px;
+        --apple-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        --apple-shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    .wallet-hero {
+        padding: 4rem 0 2rem;
+        text-align: center;
+    }
+
+    .balance-card {
+        background: var(--apple-card-bg);
+        border-radius: var(--apple-radius);
+        padding: 3rem 2rem;
+        box-shadow: var(--apple-shadow);
+        border: 1px solid rgba(0,0,0,0.05);
+        max-width: 500px;
+        margin: 0 auto 3rem;
+        text-align: center;
+    }
+
+    .balance-label {
+        font-size: 1.1rem;
+        color: var(--apple-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .balance-amount {
+        font-size: 3.5rem;
+        font-weight: 700;
+        letter-spacing: -0.04em;
+        color: var(--apple-text);
+        margin-bottom: 1.5rem;
+    }
+
+    .transactions-section {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: var(--apple-text);
+    }
+
+    .transaction-card {
+        background: var(--apple-card-bg);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--apple-shadow);
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid rgba(0,0,0,0.03);
+        transition: transform 0.2s ease;
+    }
+
+    .transaction-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--apple-shadow-hover);
+    }
+
+    .tx-info {
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+    }
+
+    .tx-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .tx-icon.deposit {
+        background-color: rgba(52, 199, 89, 0.1);
+        color: #34c759;
+    }
+
+    .tx-icon.withdraw {
+        background-color: rgba(255, 59, 48, 0.1);
+        color: #ff3b30;
+    }
+
+    .tx-details h5 {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .tx-date {
+        color: var(--apple-text-muted);
+        font-size: 0.9rem;
+    }
+
+    .tx-amount {
+        font-weight: 700;
+        font-size: 1.25rem;
+    }
+    .tx-amount.positive {
+        color: #34c759;
+    }
+    .tx-amount.negative {
+        color: var(--apple-text);
+    }
+</style>
+
+<div class="wallet-hero">
+    <h1 class="fw-bold" style="font-size: 2.5rem; letter-spacing: -0.03em;">Ví điện tử</h1>
+    <p class="text-muted" style="font-size: 1.1rem;">Quản lý số dư và lịch sử giao dịch của bạn.</p>
+</div>
+
+<div class="balance-card">
+    <div class="balance-label">Số dư hiện tại</div>
+    <div class="balance-amount">
+        @(Model.StudentWallet?.Balance.ToString("N0") ?? "0") <span style="font-size: 2rem; font-weight: 500; color: var(--apple-text-muted);">VNĐ</span>
+    </div>
+</div>
+
+<div class="transactions-section">
+    <h3 class="section-title">Lịch sử giao dịch</h3>
+    
+    @if (Model.Transactions.Any())
+    {
+        @foreach (var tx in Model.Transactions.OrderByDescending(t => t.CreatedAt))
+        {
+            var isCredit = tx.Type == OnlineLearningPlatform.Models.Entities.WalletTransactionType.TopUp || tx.Type == OnlineLearningPlatform.Models.Entities.WalletTransactionType.Refund;
+            
+            <div class="transaction-card">
+                <div class="tx-info">
+                    <div class="tx-icon @(isCredit ? "deposit" : "withdraw")">
+                        <i class="bi @(isCredit ? "bi-arrow-down-left" : "bi-arrow-up-right")"></i>
+                    </div>
+                    <div class="tx-details">
+                        <h5>@tx.Description</h5>
+                        <div class="tx-date">@tx.CreatedAt.ToString("dd/MM/yyyy HH:mm") • Giao dịch #@tx.WalletTransactionId</div>
+                    </div>
+                </div>
+                <div class="tx-amount @(isCredit ? "positive" : "negative")">
+                    @(isCredit ? "+" : "-")@tx.Amount.ToString("N0") VNĐ
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-receipt text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
+            <p class="text-muted mt-3">Chưa có giao dịch nào.</p>
+        </div>
+    }
+</div>

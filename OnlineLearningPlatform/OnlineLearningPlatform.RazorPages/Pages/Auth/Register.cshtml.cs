@@ -15,6 +15,7 @@ namespace OnlineLearningPlatform.RazorPages.Pages.Auth
             _authService = authService;
         }
 
+
         [BindProperty]
         public RegisterRequest RegisterRequest { get; set; }
         public async Task<IActionResult> OnPostAsync()
@@ -29,7 +30,7 @@ namespace OnlineLearningPlatform.RazorPages.Pages.Auth
                 ModelState.AddModelError(string.Empty, result.Message);
                 return Page();
             }
-            return RedirectToPage("/Auth/Login");
+            return RedirectToPage("/Auth/RegisterConfirmation", new {email = RegisterRequest.Email});
         }
     }
 }

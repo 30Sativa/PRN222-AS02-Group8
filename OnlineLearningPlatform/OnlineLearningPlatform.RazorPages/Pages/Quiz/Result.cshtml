@@ -1,0 +1,34 @@
+﻿@page
+@model OnlineLearningPlatform.RazorPages.Pages.Quiz.ResultModel
+@{
+    ViewData["Title"] = "Kết quả bài kiểm tra";
+}
+
+<div class="container text-center mt-5">
+    <div class="card shadow">
+        <div class="card-body">
+            @if (Model.Attempt != null)
+            {
+                <h1 class="@(Model.Attempt.IsPassed ? "text-success" : "text-danger")">
+                    @(Model.Attempt.IsPassed ? "CHÚC MỪNG! BẠN ĐÃ VƯỢT QUA" : "RẤT TIẾC! BẠN CHƯA ĐẠT")
+                </h1>
+                <hr />
+                <h3>Điểm của bạn: <span class="badge bg-primary">@Model.Attempt.Score %</span></h3>
+                <p>Thời gian nộp: @Model.Attempt.AttemptedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+
+                <div class="mt-4">
+                    <a asp-page="/Index" class="btn btn-outline-secondary">Quay lại trang chủ</a>
+
+                    @if (!Model.Attempt.IsPassed)
+                    {
+                        <a asp-page="./Take" asp-route-id="@Model.Attempt.QuizId" class="btn btn-warning">Thử lại</a>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-danger">Không tìm thấy dữ liệu kết quả làm bài.</div>
+            }
+        </div>
+    </div>
+</div>

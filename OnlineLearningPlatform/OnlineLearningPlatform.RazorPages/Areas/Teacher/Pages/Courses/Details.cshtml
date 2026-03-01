@@ -1,0 +1,593 @@
+@page "{id:guid}"
+@model OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses.DetailsModel
+@using OnlineLearningPlatform.Models.Entities
+@{
+    ViewData["Title"] = Model.Course != null ? $"Nội dung - {Model.Course.Title}" : "Chi tiết khóa học";
+}
+
+<style>
+/* ── Page layout ── */
+.course-detail-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: var(--space-6);
+    align-items: start;
+}
+@@media(max-width:860px) { .course-detail-layout { grid-template-columns: 1fr; } }
+
+/* ── Course info sidebar ── */
+.course-info-card { position: sticky; top: 72px; }
+.course-thumb {
+    width: 100%; aspect-ratio: 16/9; border-radius: var(--radius-lg);
+    object-fit: cover; background: var(--color-surface-2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 40px; color: var(--color-label-3);
+    margin-bottom: var(--space-4); overflow: hidden;
+}
+.course-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.course-meta-row { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2); font-size: var(--text-sm); }
+.course-meta-row svg { width: 14px; height: 14px; color: var(--color-label-2); flex-shrink: 0; }
+.course-status-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 10px; border-radius: var(--radius-full);
+    font-size: var(--text-xs); font-weight: 600;
+}
+.badge-pending  { background: var(--color-amber-tint); color: var(--color-amber); }
+.badge-published{ background: var(--color-green-tint);  color: var(--color-green); }
+.badge-rejected { background: var(--color-red-tint);    color: var(--color-red); }
+
+/* ── Content area ── */
+.content-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: var(--space-5); gap: var(--space-3); flex-wrap: wrap;
+}
+.content-header h2 { font-size: var(--text-lg); font-weight: 700; letter-spacing: -.025em; }
+
+/* ── Empty content state ── */
+.empty-content {
+    border: 2px dashed var(--color-border); border-radius: var(--radius-xl);
+    padding: var(--space-12) var(--space-8); text-align: center;
+}
+.empty-content-icon { font-size: 48px; margin-bottom: var(--space-4); }
+.empty-content h3 { font-size: var(--text-md); font-weight: 600; margin-bottom: var(--space-2); }
+.empty-content p { font-size: var(--text-sm); color: var(--color-label-2); margin-bottom: var(--space-6); max-width: 400px; margin-left: auto; margin-right: auto; }
+
+/* ── Section accordion ── */
+.section-block {
+    background: var(--color-surface); border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-xl); margin-bottom: var(--space-4); overflow: hidden;
+    transition: box-shadow var(--transition);
+}
+.section-block:hover { box-shadow: var(--shadow-sm); }
+.section-head {
+    display: flex; align-items: center; gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--color-border-light);
+    background: var(--color-surface-2);
+    cursor: pointer; user-select: none;
+}
+.section-head-chevron {
+    transition: transform .2s ease;
+    color: var(--color-label-2); flex-shrink: 0;
+}
+.section-block.collapsed .section-head-chevron { transform: rotate(-90deg); }
+.section-idx {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    background: var(--color-blue-tint); color: var(--color-blue);
+    font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+}
+.section-head-title { font-size: var(--text-sm); font-weight: 600; color: var(--color-label-1); flex: 1; }
+.section-head-meta { font-size: var(--text-xs); color: var(--color-label-2); }
+.section-head-actions { display: flex; gap: var(--space-2); flex-shrink: 0; }
+
+.section-body { padding: var(--space-4) var(--space-5); }
+.section-body.hidden { display: none; }
+
+/* ── Lesson table ── */
+.lesson-list { list-style: none; margin-bottom: var(--space-3); }
+.lesson-item {
+    display: flex; align-items: center; gap: var(--space-3);
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--color-border-light);
+}
+.lesson-item:last-child { border-bottom: none; }
+.lesson-type-dot {
+    width: 30px; height: 30px; border-radius: var(--radius-sm); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+}
+.dot-video   { background: #e8f0fb; }
+.dot-reading { background: var(--color-green-tint); }
+.dot-quiz    { background: var(--color-amber-tint); }
+.dot-video svg   { color: var(--color-blue); }
+.dot-reading svg { color: var(--color-green); }
+.dot-quiz svg    { color: var(--color-amber); }
+.lesson-info { flex: 1; min-width: 0; }
+.lesson-title { font-size: var(--text-sm); font-weight: 500; color: var(--color-label-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lesson-meta  { font-size: 11px; color: var(--color-label-2); margin-top: 1px; }
+.preview-tag {
+    font-size: 10px; font-weight: 600; padding: 2px 7px;
+    border-radius: var(--radius-full);
+    background: var(--color-blue-tint); color: var(--color-blue);
+    margin-left: var(--space-2);
+}
+.lesson-actions { display: flex; gap: var(--space-1); flex-shrink: 0; }
+.icon-btn {
+    width: 30px; height: 30px; border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--color-border-light); background: var(--color-surface);
+    cursor: pointer; color: var(--color-label-2);
+    transition: background var(--transition), color var(--transition);
+    text-decoration: none;
+}
+.icon-btn:hover { background: var(--color-surface-2); color: var(--color-label-1); opacity: 1; }
+.icon-btn.danger:hover { background: var(--color-red-tint); border-color: var(--color-red); color: var(--color-red); }
+
+.add-lesson-row {
+    display: flex; align-items: center; gap: var(--space-2);
+    padding: var(--space-3) 0 0;
+}
+</style>
+
+@if (TempData["SuccessMessage"] is string ok)
+{
+    <div class="alert alert-success fade-up">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        @ok
+    </div>
+}
+@if (TempData["ErrorMessage"] is string err)
+{
+    <div class="alert alert-danger fade-up">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        @err
+    </div>
+}
+
+@if (Model.Course is null)
+{
+    <div class="alert alert-danger">Không tìm thấy khóa học.</div>
+    return;
+}
+
+<div class="page-head fade-up">
+    <h1>@Model.Course.Title</h1>
+    <div class="breadcrumb">
+        <a asp-area="Teacher" asp-page="/Dashboard">Dashboard</a>
+        <span class="breadcrumb-sep">›</span>
+        <a asp-area="Teacher" asp-page="/Courses/Index">Khóa học</a>
+        <span class="breadcrumb-sep">›</span>
+        <span>Nội dung khóa học</span>
+    </div>
+</div>
+
+<div class="course-detail-layout fade-up">
+
+    <!-- ── LEFT: Content builder ── -->
+    <!-- ── LEFT: Content builder ── -->
+    <div class="main-content-tabs">
+        <ul class="nav nav-tabs mb-4 px-2 border-0" id="courseTabs" role="tablist">
+            <li class="nav-item border-0 mb-0" role="presentation">
+                <button class="nav-link border-0 text-dark fw-bold active rounded-pill px-4" id="content-tab" data-bs-toggle="tab" data-bs-target="#content" type="button" role="tab" style="background-color: transparent;">Chương trình học</button>
+            </li>
+            <li class="nav-item border-0 mb-0" role="presentation">
+                <button class="nav-link border-0 text-dark fw-bold rounded-pill px-4 ms-2" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" style="background-color: transparent;">Đánh giá (@Model.ReviewCount)</button>
+            </li>
+            <li class="nav-item border-0 mb-0" role="presentation">
+                <button class="nav-link border-0 text-dark fw-bold rounded-pill px-4 ms-2" id="discussions-tab" data-bs-toggle="tab" data-bs-target="#discussions" type="button" role="tab" style="background-color: transparent;">Thảo luận (@Model.Topics.Count)</button>
+            </li>
+            <li class="nav-item border-0 mb-0" role="presentation">
+                <button class="nav-link border-0 text-dark fw-bold rounded-pill px-4 ms-2" id="students-tab" data-bs-toggle="tab" data-bs-target="#students" type="button" role="tab" style="background-color: transparent;">Học viên (@Model.Enrollments.Count)</button>
+            </li>
+        </ul>
+
+        <style>
+            .nav-tabs .nav-link.active {
+                background-color: var(--color-blue) !important;
+                color: white !important;
+                box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+            }
+            .nav-tabs .nav-link:hover:not(.active) {
+                background-color: var(--color-surface-2);
+            }
+        </style>
+
+        <div class="tab-content" id="courseTabsContent">
+            <!-- TAB 1: CONTENT BUILDER -->
+            <div class="tab-pane fade show active" id="content" role="tabpanel">
+                <div class="content-header">
+                    <div>
+                        <h2>Chương trình học</h2>
+                        <p style="font-size:var(--text-sm);color:var(--color-label-2);margin-top:4px">
+                            @Model.Sections.Count phần học ·
+                            @(Model.LessonsBySection.Values.Sum(l => l.Count)) bài giảng
+                        </p>
+                    </div>
+                    <a asp-area="Teacher" asp-page="/Sections/Create" asp-route-courseId="@Model.Course.CourseId"
+                       class="btn btn-primary">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Thêm phần học
+                    </a>
+                </div>
+
+                @if (!Model.Sections.Any())
+                {
+                    <div class="empty-content">
+                        <div class="empty-content-icon">📚</div>
+                        <h3>Khóa học chưa có nội dung</h3>
+                        <p>Hãy tạo phần học (Section) đầu tiên để bắt đầu xây dựng chương trình giảng dạy cho học viên.</p>
+                        <a asp-area="Teacher" asp-page="/Sections/Create" asp-route-courseId="@Model.Course.CourseId"
+                           class="btn btn-primary">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Tạo phần học đầu tiên
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    @for (var i = 0; i < Model.Sections.Count; i++)
+                    {
+                        var sec = Model.Sections[i];
+                        var lessons = Model.LessonsBySection.ContainsKey(sec.SectionId)
+                            ? Model.LessonsBySection[sec.SectionId]
+                            : new List<Lesson>();
+
+                        <div class="section-block" id="sec-@sec.SectionId">
+                            <div class="section-head" onclick="toggleSection(@sec.SectionId)">
+                                <svg class="section-head-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" id="chev-@sec.SectionId"><polyline points="6 9 12 15 18 9"/></svg>
+                                <span class="section-idx">@(i + 1)</span>
+                                <span class="section-head-title">@sec.Title</span>
+                                <span class="section-head-meta">@lessons.Count bài</span>
+                                <div class="section-head-actions" onclick="event.stopPropagation()">
+                                    <a asp-area="Teacher" asp-page="/Sections/Edit" asp-route-id="@sec.SectionId"
+                                       class="icon-btn" title="Sửa phần học">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                    </a>
+                                    <form method="post" asp-page-handler="DeleteSection"
+                                          asp-route-id="@Model.Course.CourseId" asp-route-sectionId="@sec.SectionId"
+                                          onsubmit="return confirm('Xóa phần học này và toàn bộ bài giảng bên trong?')">
+                                        <button type="submit" class="icon-btn danger" title="Xóa phần học">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="section-body" id="body-@sec.SectionId">
+                                @if (!lessons.Any())
+                                {
+                                    <p style="font-size:var(--text-sm);color:var(--color-label-2);text-align:center;padding:var(--space-5) 0">
+                                        Chưa có bài giảng nào.
+                                    </p>
+                                }
+                                else
+                                {
+                                    <ul class="lesson-list">
+                                        @foreach (var lesson in lessons)
+                                        {
+                                            var dotClass = lesson.LessonType.ToString() switch {
+                                                "Video"   => "dot-video",
+                                                "Reading" => "dot-reading",
+                                                _         => "dot-quiz"
+                                            };
+                                            var typeIcon = lesson.LessonType.ToString() switch {
+                                                "Video"   => "<polygon points='5 3 19 12 5 21 5 3'/>",
+                                                "Reading" => "<path d='M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z'/><path d='M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'/>",
+                                                _         => "<circle cx='12' cy='12' r='10'/><line x1='12' y1='8' x2='12' y2='12'/><line x1='12' y1='16' x2='12.01' y2='16'/>"
+                                            };
+                                            <li class="lesson-item">
+                                                <div class="lesson-type-dot @dotClass">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">@Html.Raw(typeIcon)</svg>
+                                                </div>
+                                                <div class="lesson-info">
+                                                    <div class="lesson-title">
+                                                        @lesson.OrderIndex. @lesson.Title
+                                                        @if (lesson.IsPreview)
+                                                        {
+                                                            <span class="preview-tag">Demo</span>
+                                                        }
+                                                    </div>
+                                                    <div class="lesson-meta">@lesson.LessonType</div>
+                                                </div>
+                                                <div class="lesson-actions">
+                                                    <a asp-area="Teacher" asp-page="/Lessons/Edit" asp-route-id="@lesson.LessonId"
+                                                       class="icon-btn" title="Sửa bài giảng">
+                                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                                    </a>
+                                                    <form method="post" asp-page-handler="DeleteLesson"
+                                                          asp-route-id="@Model.Course.CourseId" asp-route-lessonId="@lesson.LessonId"
+                                                          onsubmit="return confirm('Xóa bài giảng này?')">
+                                                        <button type="submit" class="icon-btn danger" title="Xóa bài giảng">
+                                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </li>
+                                        }
+                                    </ul>
+                                }
+                                <div class="add-lesson-row">
+                                    <a asp-area="Teacher" asp-page="/Lessons/Create" asp-route-sectionId="@sec.SectionId"
+                                       class="btn btn-secondary btn-sm">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                        Thêm bài giảng
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div> <!-- End TAB 1 -->
+
+            <!-- TAB 2: REVIEWS -->
+            <div class="tab-pane fade" id="reviews" role="tabpanel">
+                <div class="d-flex align-items-center mb-4">
+                    <h2 class="m-0 me-3" style="font-size: 1.4rem; font-weight: 700;">Đánh giá của học viên</h2>
+                    <div class="d-flex align-items-center rounded-pill bg-light px-3 py-1">
+                        <span class="text-warning me-1">★</span>
+                        <strong class="fs-5 me-1">@Model.AverageRating.ToString("0.0")</strong>
+                        <span class="text-muted small">/ 5.0 (@Model.ReviewCount đánh giá)</span>
+                    </div>
+                </div>
+
+                @if (!Model.Reviews.Any())
+                {
+                    <div class="empty-content">
+                        <div class="empty-content-icon" style="filter: grayscale(1); opacity: 0.5;">⭐</div>
+                        <h3>Chưa có đánh giá nào</h3>
+                        <p>Học viên chưa để lại đánh giá nào cho khóa học này.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="row g-3">
+                        @foreach(var review in Model.Reviews)
+                        {
+                            <div class="col-12 col-md-6">
+                                <div class="card border-0 shadow-sm rounded-4 h-100" style="background: var(--color-surface);">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <div class="fw-bold">@review.UserName</div>
+                                            <div class="text-warning small">
+                                                @for(int i = 0; i < 5; i++)
+                                                {
+                                                    <span style="color: @(i < review.Rating ? "#ffc107" : "#e4e5e9")">★</span>
+                                                }
+                                            </div>
+                                        </div>
+                                        <p class="text-muted small mb-2">@review.CreatedAt.ToString("dd/MM/yyyy")</p>
+                                        <p class="mb-0 fs-6">@review.Comment</p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div> <!-- End TAB 2 -->
+
+            <!-- TAB 3: DISCUSSIONS -->
+            <div class="tab-pane fade" id="discussions" role="tabpanel">
+                <div class="d-flex align-items-center mb-4">
+                    <h2 class="m-0" style="font-size: 1.4rem; font-weight: 700;">Thảo luận chung</h2>
+                </div>
+
+                @if (!Model.Topics.Any())
+                {
+                    <div class="empty-content">
+                        <div class="empty-content-icon">💬</div>
+                        <h3>Chưa có thảo luận</h3>
+                        <p>Hãy truy cập màn hình xem trước để đăng câu hỏi đầu tiên.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="discussion-list">
+                        @foreach (var topic in Model.Topics)
+                        {
+                            <div class="card border-0 shadow-sm rounded-4 mb-3" style="background: var(--color-surface);">
+                                <div class="card-body p-4">
+                                    <div class="d-flex w-100 justify-content-between align-items-center mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <div class="fw-bold me-2">@topic.CreatorName</div>
+                                            @if (topic.CreatorRole == "Teacher" || topic.CreatorRole == "Admin")
+                                            {
+                                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2">Giảng viên</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2">Học viên</span>
+                                            }
+                                        </div>
+                                        <span class="text-muted small">@topic.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                    </div>
+                                    <p class="mb-3 fs-5">@topic.Title</p>
+
+                                    @if (topic.Replies != null && topic.Replies.Any())
+                                    {
+                                        <div class="ms-4 ps-3 border-start">
+                                            @foreach (var reply in topic.Replies)
+                                            {
+                                                <div class="mb-3">
+                                                    <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="fw-bold me-2" style="font-size: 0.95rem;">@reply.UserName</div>
+                                                            @if (reply.UserRole == "Teacher" || reply.UserRole == "Admin")
+                                                            {
+                                                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill" style="font-size:0.7rem;">Giảng viên</span>
+                                                            }
+                                                        </div>
+                                                        <span class="text-muted" style="font-size: 0.8rem;">@reply.CreatedAt.ToString("dd/MM HH:mm")</span>
+                                                    </div>
+                                                    <p class="mb-0 text-dark" style="font-size: 0.95rem;">@reply.Content</p>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    <div class="ms-4 ps-3 mt-3">
+                                        <a href="/Student/LearnCourse?courseId=@Model.Course.CourseId" class="btn btn-sm btn-light text-primary fw-bold px-3 rounded-pill bg-light" target="_blank">
+                                            Trả lời (Xem trước khóa học)
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div> <!-- End TAB 3 -->
+
+            <!-- TAB 4: STUDENTS -->
+            <div class="tab-pane fade" id="students" role="tabpanel">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h2 class="m-0" style="font-size: 1.4rem; font-weight: 700;">Danh sách học viên</h2>
+                    <div class="rounded-pill bg-primary bg-opacity-10 text-primary fw-bold px-3 py-1">
+                        @Model.Enrollments.Count học viên
+                    </div>
+                </div>
+
+                @if (!Model.Enrollments.Any())
+                {
+                    <div class="empty-content">
+                        <div class="empty-content-icon">👥</div>
+                        <h3>Chưa có học viên nào</h3>
+                        <p>Chưa có học viên nào đăng ký khóa học của bạn.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="card border-0 shadow-sm rounded-4" style="background: var(--color-surface); overflow: hidden;">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0 align-middle">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4 py-3 border-0">Học viên</th>
+                                        <th class="py-3 border-0">Email</th>
+                                        <th class="py-3 border-0">Ngày đăng ký</th>
+                                        <th class="pe-4 py-3 border-0 text-end">Hoạt động gần nhất</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach(var enrollment in Model.Enrollments)
+                                    {
+                                        <tr>
+                                            <td class="ps-4">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" style="width: 36px; height: 36px; font-weight: bold;">
+                                                        @((enrollment.User?.FullName ?? enrollment.User?.UserName ?? "?").Substring(0, 1).ToUpper())
+                                                    </div>
+                                                    <span class="fw-bold">@(enrollment.User?.FullName ?? enrollment.User?.UserName ?? "N/A")</span>
+                                                </div>
+                                            </td>
+                                            <td class="text-muted">@(enrollment.User?.Email ?? "N/A")</td>
+                                            <td>@enrollment.EnrolledAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td class="pe-4 text-end text-muted">
+                                                @(enrollment.LastAccessedAt?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa học")
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+            </div> <!-- End TAB 4 -->
+
+        </div> <!-- End Tabs content -->
+    </div>
+
+    <!-- ── RIGHT: Course info sidebar ── -->
+    <aside class="course-info-card">
+        <div class="card">
+            <div class="card-body">
+                <!-- Thumbnail -->
+                <div class="course-thumb">
+                    @if (!string.IsNullOrEmpty(Model.Course.ThumbnailUrl))
+                    {
+                        <img src="@Model.Course.ThumbnailUrl" alt="@Model.Course.Title" />
+                    }
+                    else
+                    {
+                        <span>📚</span>
+                    }
+                </div>
+
+                <!-- Status -->
+                @{
+                    var statusClass = Model.Course.Status switch {
+                        CourseStatus.Published => "badge-published",
+                        CourseStatus.Rejected  => "badge-rejected",
+                        _                      => "badge-pending"
+                    };
+                    var statusLabel = Model.Course.Status switch {
+                        CourseStatus.Published => "Đã xuất bản",
+                        CourseStatus.Rejected  => "Bị từ chối",
+                        _                      => "Chờ duyệt"
+                    };
+                }
+                <div style="margin-bottom:var(--space-4)">
+                    <span class="course-status-badge @statusClass">@statusLabel</span>
+                </div>
+
+                <!-- Meta rows -->
+                <div class="course-meta-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+                    <span style="color:var(--color-label-2)">Mã:</span>
+                    <strong>@Model.Course.CourseCode</strong>
+                </div>
+                @if (Model.Course.Category != null)
+                {
+                    <div class="course-meta-row">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                        <span style="color:var(--color-label-2)">Danh mục:</span>
+                        <strong>@Model.Course.Category.CategoryName</strong>
+                    </div>
+                }
+                <div class="course-meta-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    <span style="color:var(--color-label-2)">Trình độ:</span>
+                    <strong>@Model.Course.Level</strong>
+                </div>
+                <div class="course-meta-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <span style="color:var(--color-label-2)">Học phí:</span>
+                    <strong>@(Model.Course.Price == 0 ? "Miễn phí" : Model.Course.Price.ToString("N0") + " ₫")</strong>
+                </div>
+
+                <div style="margin-top:var(--space-5);display:flex;flex-direction:column;gap:var(--space-2)">
+                    <a asp-area="Teacher" asp-page="/Courses/Preview" asp-route-courseId="@Model.Course.CourseId"
+                       class="btn btn-primary" style="width:100%;justify-content:center;background-color: var(--color-blue);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        Xem trước khóa học
+                    </a>
+                    <a asp-area="Teacher" asp-page="/Courses/Edit" asp-route-id="@Model.Course.CourseId"
+                       class="btn btn-secondary" style="width:100%;justify-content:center">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        Sửa thông tin khóa học
+                    </a>
+                    <a asp-area="Teacher" asp-page="/Courses/Index" class="btn btn-secondary" style="width:100%;justify-content:center">
+                        ← Quay lại danh sách
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        @if (Model.Course.Status == CourseStatus.Rejected && !string.IsNullOrEmpty(Model.Course.RejectionReason))
+        {
+            <div class="alert alert-danger" style="margin-top:var(--space-4)">
+                <strong>Lý do từ chối:</strong> @Model.Course.RejectionReason
+            </div>
+        }
+    </aside>
+
+</div>
+
+@section Scripts {
+<script>
+function toggleSection(id) {
+    const block = document.getElementById('sec-' + id);
+    const body  = document.getElementById('body-' + id);
+    const chev  = document.getElementById('chev-' + id);
+    const collapsed = block.classList.toggle('collapsed');
+    body.classList.toggle('hidden', collapsed);
+}
+</script>
+}
