@@ -9,6 +9,33 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        /* Wallet balance chip in navbar */
+        .nav-wallet-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background: rgba(0, 113, 227, 0.08);
+            border: 1px solid rgba(0, 113, 227, 0.18);
+            color: #0071e3;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.2s ease, transform 0.15s ease;
+            white-space: nowrap;
+        }
+        .nav-wallet-chip:hover {
+            background: rgba(0, 113, 227, 0.14);
+            color: #0071e3;
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+        .nav-wallet-chip svg {
+            flex-shrink: 0;
+        }
+    </style>
 </head>
 <body>
 
@@ -46,7 +73,10 @@
             </ul>
 
             <div class="nav-user">
-
+                @if (User.IsInRole("Student"))
+                {
+                    @await Component.InvokeAsync("WalletBalance")
+                }
                 <div class="nav-avatar" style="margin-left: 16px;">
                     @(User.Identity?.Name?[0].ToString().ToUpper() ?? "U")
                 </div>
