@@ -12,8 +12,8 @@ using OnlineLearningPlatform.Models;
 namespace OnlineLearningPlatform.Models.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260301170319_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260302010634_DbLan5")]
+    partial class DbLan5
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
