@@ -300,13 +300,15 @@
                         <div class="field-group">
                             <label class="field-label" for="Input_Price">Giá gốc (VNĐ)</label>
                             <input asp-for="Input.Price" id="Input_Price" class="form-control"
-                                   type="number" min="0" step="1000" placeholder="VD: 299000" />
+                                   type="number" min="0" step="1000" placeholder="VD: 299000"
+                                   value="@(Model.Input.Price > 0 ? Model.Input.Price.ToString("0") : "")" />
                             <span asp-validation-for="Input.Price" class="form-error"></span>
                         </div>
                         <div class="field-group">
                             <label class="field-label" for="Input_DiscountPrice">Giá khuyến mãi (VNĐ)</label>
                             <input asp-for="Input.DiscountPrice" id="Input_DiscountPrice" class="form-control"
-                                   type="number" min="0" step="1000" placeholder="Để trống nếu không giảm" />
+                                   type="number" min="0" step="1000" placeholder="Để trống nếu không giảm"
+                                   value="@(Model.Input.DiscountPrice.HasValue && Model.Input.DiscountPrice > 0 ? Model.Input.DiscountPrice.Value.ToString("0") : "")" />
                             <span asp-validation-for="Input.DiscountPrice" class="form-error"></span>
                         </div>
                     </div>
