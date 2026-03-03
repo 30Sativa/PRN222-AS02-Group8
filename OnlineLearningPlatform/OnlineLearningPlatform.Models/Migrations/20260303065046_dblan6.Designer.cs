@@ -12,8 +12,8 @@ using OnlineLearningPlatform.Models;
 namespace OnlineLearningPlatform.Models.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260301170319_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260303065046_dblan6")]
+    partial class dblan6
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -405,6 +405,72 @@ namespace OnlineLearningPlatform.Models.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Certificates");
+                });
+
+            modelBuilder.Entity("OnlineLearningPlatform.Models.Entities.ChatConversation", b =>
+                {
+                    b.Property<Guid>("ConversationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("StudentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("TeacherId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ConversationId");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("TeacherId");
+
+                    b.ToTable("ChatConversations");
+                });
+
+            modelBuilder.Entity("OnlineLearningPlatform.Models.Entities.ChatMessage", b =>
+                {
+                    b.Property<Guid>("MessageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SenderId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("MessageId");
+
+                    b.HasIndex("ConversationId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("ChatMessages");
                 });
 
             modelBuilder.Entity("OnlineLearningPlatform.Models.Entities.Course", b =>
@@ -1409,6 +1475,52 @@ namespace OnlineLearningPlatform.Models.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("OnlineLearningPlatform.Models.Entities.ChatConversation", b =>
+                {
+                    b.HasOne("OnlineLearningPlatform.Models.Entities.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("OnlineLearningPlatform.Models.Entities.Identity.ApplicationUser", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("OnlineLearningPlatform.Models.Entities.Identity.ApplicationUser", "Teacher")
+                        .WithMany()
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Student");
+
+                    b.Navigation("Teacher");
+                });
+
+            modelBuilder.Entity("OnlineLearningPlatform.Models.Entities.ChatMessage", b =>
+                {
+                    b.HasOne("OnlineLearningPlatform.Models.Entities.ChatConversation", "Conversation")
+                        .WithMany("Messages")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("OnlineLearningPlatform.Models.Entities.Identity.ApplicationUser", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Conversation");
+
+                    b.Navigation("Sender");
+                });
+
             modelBuilder.Entity("OnlineLearningPlatform.Models.Entities.Course", b =>
                 {
                     b.HasOne("OnlineLearningPlatform.Models.Entities.Category", "Category")
@@ -1757,6 +1869,11 @@ namespace OnlineLearningPlatform.Models.Migrations
             modelBuilder.Entity("OnlineLearningPlatform.Models.Entities.Category", b =>
                 {
                     b.Navigation("Courses");
+                });
+
+            modelBuilder.Entity("OnlineLearningPlatform.Models.Entities.ChatConversation", b =>
+                {
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("OnlineLearningPlatform.Models.Entities.Course", b =>

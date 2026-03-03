@@ -247,13 +247,15 @@
                             <div class="field-group" style="margin-bottom:0">
                                 <label class="field-label" for="Input_Price">Giá gốc (VNĐ)</label>
                                 <input asp-for="Input.Price" id="Input_Price" class="form-control"
-                                       type="number" min="0" step="1000" oninput="onFieldChange()" />
+                                       type="number" min="0" step="1" oninput="onFieldChange()"
+                                       value="@Model.Input.Price.ToString("0")" />
                                 <span asp-validation-for="Input.Price" class="form-error"></span>
                             </div>
                             <div class="field-group" style="margin-bottom:0">
                                 <label class="field-label" for="Input_DiscountPrice">Giá khuyến mãi (VNĐ)</label>
                                 <input asp-for="Input.DiscountPrice" id="Input_DiscountPrice" class="form-control"
-                                       type="number" min="0" step="1000" oninput="onFieldChange()" />
+                                       type="number" min="0" step="1" oninput="onFieldChange()"
+                                       value="@(Model.Input.DiscountPrice.HasValue && Model.Input.DiscountPrice > 0 ? Model.Input.DiscountPrice.Value.ToString("0") : "")" />
                                 <span class="field-hint">Để trống nếu không có khuyến mãi.</span>
                                 <span asp-validation-for="Input.DiscountPrice" class="form-error"></span>
                             </div>
@@ -314,10 +316,14 @@
                         <span class="preview-tag" id="prevLang">@Model.Input.Language.ToUpper()</span>
                     </div>
                     <div style="margin-top:var(--space-4)">
+                        @{
+                            bool hasDisc = Model.Input.DiscountPrice.HasValue && Model.Input.DiscountPrice > 0;
+                            decimal displayPrice = hasDisc ? Model.Input.DiscountPrice!.Value : Model.Input.Price;
+                        }
                         <span class="preview-price @(Model.Input.Price == 0 ? "free" : "")" id="prevPrice">
-                            @(Model.Input.Price == 0 ? "Miễn phí" : Model.Input.Price.ToString("N0") + " ₫")
+                            @(Model.Input.Price == 0 ? "Miễn phí" : displayPrice.ToString("N0") + " ₫")
                         </span>
-                        @if (Model.Input.DiscountPrice.HasValue && Model.Input.DiscountPrice > 0)
+                        @if (hasDisc)
                         {
                             <span class="preview-price-disc" id="prevDisc">@Model.Input.Price.ToString("N0") ₫</span>
                         }
@@ -393,14 +399,17 @@
             priceEl.className = 'preview-price free';
             discEl.style.display = 'none';
         } else {
-            priceEl.textContent = price.toLocaleString('vi-VN') + ' ₫';
-            priceEl.className = 'preview-price';
             if (disc > 0) {
-                discEl.textContent = disc.toLocaleString('vi-VN') + ' ₫';
+                // disc = giá sau giảm (hiển thị to), price = giá gốc (gạch ngang)
+                priceEl.textContent = disc.toLocaleString('vi-VN') + ' ₫';
+                discEl.textContent  = price.toLocaleString('vi-VN') + ' ₫';
                 discEl.style.display = '';
             } else {
+                // Không có khuyến mãi — hiển thị giá gốc
+                priceEl.textContent = price.toLocaleString('vi-VN') + ' ₫';
                 discEl.style.display = 'none';
             }
+            priceEl.className = 'preview-price';
         }
     }
 

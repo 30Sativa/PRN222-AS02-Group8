@@ -20,6 +20,17 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses
         [BindProperty(SupportsGet = true)]
         public string? SearchTitle { get; set; }
 
+        // Chế độ xem: "mine" (mặc định) hoặc "all"
+        [BindProperty(SupportsGet = true)]
+        public string? ViewMode { get; set; }
+
+        // Id teacher hiện tại để view quyết định nút chỉnh sửa
+        public string? TeacherId { get; set; }
+
+        public bool IsMyCoursesView =>
+            string.IsNullOrWhiteSpace(ViewMode) ||
+            ViewMode.Equals("mine", StringComparison.OrdinalIgnoreCase);
+
         public List<Course> Courses { get; set; } = new();
 
         public async Task OnGetAsync()
@@ -31,14 +42,27 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses
                 return;
             }
 
-            var allCourses = await _courseService.GetMyCoursesAsync(teacherId);
+            TeacherId = teacherId;
 
-            if (!string.IsNullOrWhiteSpace(SearchTitle))
+            List<Course> allCourses;
+
+            if (IsMyCoursesView)
             {
-                var keyword = SearchTitle.Trim().ToLower();
-                allCourses = allCourses
-                    .Where(c => !string.IsNullOrWhiteSpace(c.Title) && c.Title.ToLower().Contains(keyword))
-                    .ToList();
+                // Chỉ khóa học do chính teacher này tạo
+                allCourses = await _courseService.GetMyCoursesAsync(teacherId);
+
+                if (!string.IsNullOrWhiteSpace(SearchTitle))
+                {
+                    var keyword = SearchTitle.Trim().ToLower();
+                    allCourses = allCourses
+                        .Where(c => !string.IsNullOrWhiteSpace(c.Title) && c.Title.ToLower().Contains(keyword))
+                        .ToList();
+                }
+            }
+            else
+            {
+                // Xem tất cả khóa học đã xuất bản (mọi teacher) – tìm kiếm xử lý dưới DB
+                allCourses = await _courseService.SearchPublishedCoursesAsync(SearchTitle);
             }
 
             Courses = allCourses

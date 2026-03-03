@@ -56,6 +56,9 @@ namespace OnlineLearningPlatform.Models
         public DbSet<AiMessage> AiMessages { get; set; } = default!;
         public DbSet<AiGeneratedExercise> AiGeneratedExercises { get; set; } = default!;
 
+        public DbSet<ChatConversation> ChatConversations { get; set; } = default!;
+        public DbSet<ChatMessage> ChatMessages { get; set; } = default!;
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -402,6 +405,37 @@ namespace OnlineLearningPlatform.Models
                 .HasOne(aige => aige.User)
                 .WithMany()
                 .HasForeignKey(aige => aige.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Chat relationships
+            builder.Entity<ChatConversation>()
+                .HasOne(cc => cc.Student)
+                .WithMany()
+                .HasForeignKey(cc => cc.StudentId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<ChatConversation>()
+                .HasOne(cc => cc.Teacher)
+                .WithMany()
+                .HasForeignKey(cc => cc.TeacherId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<ChatConversation>()
+                .HasOne(cc => cc.Course)
+                .WithMany()
+                .HasForeignKey(cc => cc.CourseId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<ChatMessage>()
+                .HasOne(cm => cm.Conversation)
+                .WithMany(cc => cc.Messages)
+                .HasForeignKey(cm => cm.ConversationId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<ChatMessage>()
+                .HasOne(cm => cm.Sender)
+                .WithMany()
+                .HasForeignKey(cm => cm.SenderId)
                 .OnDelete(DeleteBehavior.NoAction);
         }
     }

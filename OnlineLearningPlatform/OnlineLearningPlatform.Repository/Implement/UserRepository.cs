@@ -52,9 +52,9 @@ namespace OnlineLearningPlatform.Repository.Implement
             return await _userManager.FindByIdAsync(userId);
         }
 
-        public async Task<SignInResult> PasswordSignInAsync(string email, string password)
+        public async Task<SignInResult> PasswordSignInAsync(string email, string password, bool rememberMe)
         {
-            return await _signInManager.PasswordSignInAsync(email, password, isPersistent: false, lockoutOnFailure: false);
+            return await _signInManager.PasswordSignInAsync(email, password, isPersistent: rememberMe, lockoutOnFailure: false);
         }
 
         public async Task SignOutAsync()

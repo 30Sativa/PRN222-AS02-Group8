@@ -35,6 +35,11 @@ namespace OnlineLearningPlatform.Services.Implement
             return await _courseRepository.GetByIdAsync(courseId);
         }
 
+        public async Task<List<Course>> SearchPublishedCoursesAsync(string? keyword)
+        {
+            return await _courseRepository.SearchPublishedCoursesAsync(keyword);
+        }
+
         public async Task<CourseCommandResult> CreateAsync(string teacherId, CourseUpsertRequest request)
         {
             var validation = await ValidateRequestAsync(request, null);

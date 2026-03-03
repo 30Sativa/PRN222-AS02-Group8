@@ -15,5 +15,8 @@ namespace OnlineLearningPlatform.Services.DTOs.Auth.Request
 
         [Required]
         public string Password { get; set; } = default!;
+
+        // Ghi nhớ đăng nhập (cookie persistent)
+        public bool RememberMe { get; set; }
     }
 }

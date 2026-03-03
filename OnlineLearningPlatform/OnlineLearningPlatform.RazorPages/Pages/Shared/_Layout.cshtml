@@ -9,16 +9,137 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        /* Wallet balance chip */
+        .nav-wallet-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 5px 10px; border-radius: 20px;
+            background: rgba(0,113,227,0.08); border: 1px solid rgba(0,113,227,0.18);
+            color: #0071e3; font-size: 0.72rem; font-weight: 600;
+            text-decoration: none; transition: background 0.2s, transform 0.15s; white-space: nowrap;
+        }
+        .nav-wallet-chip:hover { background: rgba(0,113,227,0.14); color: #0071e3; text-decoration: none; transform: translateY(-1px); }
+        .nav-wallet-chip svg { flex-shrink: 0; }
+
+        /* ===== AI FLOATING WIDGET ===== */
+        #aiFloatBtn {
+            position: fixed; bottom: 28px; right: 28px;
+            width: 56px; height: 56px; border-radius: 50%;
+            background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 20px rgba(102,126,234,0.5);
+            z-index: 9999; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        #aiFloatBtn:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(102,126,234,0.6); }
+
+        .aif-online-dot {
+            position: absolute; top: -2px; right: -2px;
+            width: 14px; height: 14px;
+            background: #34a853; border-radius: 50%; border: 2px solid #fff;
+        }
+
+        #aiFloatPanel {
+            position: fixed; bottom: 96px; right: 28px;
+            width: 370px; height: 520px;
+            background: #fff; border-radius: 20px;
+            box-shadow: 0 12px 48px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08);
+            display: none; flex-direction: column;
+            z-index: 9998; overflow: hidden;
+        }
+        #aiFloatPanel.open { display: flex; animation: aifUp 0.25s ease; }
+        @@keyframes aifUp {
+            from { opacity:0; transform:translateY(14px) scale(0.97); }
+            to   { opacity:1; transform:translateY(0) scale(1); }
+        }
+
+        .aif-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 16px; flex-shrink: 0;
+            background: linear-gradient(135deg,#667eea 0%,#764ba2 100%); color: #fff;
+        }
+        .aif-header-left { display: flex; align-items: center; gap: 10px; }
+        .aif-avatar { font-size: 1.4rem; }
+        .aif-title { font-size: 0.88rem; font-weight: 700; }
+        .aif-subtitle { font-size: 0.68rem; opacity: 0.85; }
+        .aif-close {
+            background: rgba(255,255,255,0.2); border: none; color: #fff;
+            width: 28px; height: 28px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 1rem; transition: background 0.15s;
+        }
+        .aif-close:hover { background: rgba(255,255,255,0.35); }
+
+        .aif-messages {
+            flex: 1; overflow-y: auto; padding: 14px;
+            display: flex; flex-direction: column; gap: 10px;
+            background: #f8f9fb; scroll-behavior: smooth;
+        }
+        .aif-messages::-webkit-scrollbar { width: 3px; }
+        .aif-messages::-webkit-scrollbar-thumb { background: #d0d0d0; border-radius: 2px; }
+
+        .aif-welcome { text-align: center; padding: 20px 10px; color: #5f6368; }
+        .aif-welcome-icon { font-size: 2.2rem; margin-bottom: 8px; }
+        .aif-welcome p { font-size: 0.8rem; line-height: 1.5; margin: 0; }
+
+        .aif-row { display: flex; gap: 7px; align-items: flex-end; }
+        .aif-row.user { flex-direction: row-reverse; }
+        .aif-bav {
+            width: 26px; height: 26px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .aif-ai-av  { background: linear-gradient(135deg,#667eea,#764ba2); font-size: 0.85rem; }
+        .aif-usr-av { background: linear-gradient(135deg,#0071e3,#0055b3); color:#fff; font-weight:700; font-size:0.7rem; }
+
+        .aif-bubble { max-width: 78%; padding: 9px 13px; border-radius: 14px; font-size: 0.82rem; line-height: 1.55; }
+        .aif-ai-bub  { background:#fff; color:#1a1a2e; border-bottom-left-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.07); }
+        .aif-usr-bub { background:linear-gradient(135deg,#0071e3,#0055b3); color:#fff; border-bottom-right-radius:4px; }
+        .aif-ai-bub code { background:#f0f0f0; padding:1px 4px; border-radius:3px; font-size:0.78rem; }
+
+        .aif-typing { display:none; gap:7px; align-items:center; padding:0 14px 8px; flex-shrink:0; }
+        .aif-typing.show { display:flex; }
+        .aif-tdots { background:#fff; border-radius:14px 14px 14px 4px; padding:8px 12px; display:flex; gap:4px; box-shadow:0 1px 3px rgba(0,0,0,0.07); }
+        .aif-tdots span { width:6px; height:6px; border-radius:50%; background:#667eea; animation:aifD 1.1s infinite; }
+        .aif-tdots span:nth-child(2) { animation-delay:.18s; }
+        .aif-tdots span:nth-child(3) { animation-delay:.36s; }
+        @@keyframes aifD {
+            0%,100% { transform:translateY(0); opacity:.5; }
+            50% { transform:translateY(-4px); opacity:1; }
+        }
+
+        .aif-foot {
+            padding: 10px 12px; border-top:1px solid #ebebeb;
+            background:#fff; display:flex; gap:8px; align-items:flex-end; flex-shrink:0;
+        }
+        .aif-ta {
+            flex:1; border:1.5px solid #e0e0e0; border-radius:10px;
+            padding:8px 11px; font-size:0.82rem; font-family:inherit;
+            resize:none; outline:none; max-height:100px; overflow:hidden;
+            line-height:1.4; color:#1a1a2e; transition:border-color 0.2s;
+        }
+        .aif-ta:focus { border-color:#667eea; }
+        .aif-ta::placeholder { color:#9aa0a6; }
+        .aif-sbtn {
+            width:36px; height:36px; min-width:36px; border-radius:10px;
+            background:linear-gradient(135deg,#667eea,#764ba2);
+            border:none; color:#fff;
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer; transition:transform 0.15s, opacity 0.15s;
+            box-shadow:0 2px 8px rgba(102,126,234,0.35);
+        }
+        .aif-sbtn:hover { transform:scale(1.06); }
+        .aif-sbtn:disabled { opacity:.45; cursor:not-allowed; transform:none; }
+    </style>
 </head>
 <body>
 
 @if (User.Identity?.IsAuthenticated == true)
 {
-    <!-- NAV BAR — glassmorphism, 48px height -->
+    <!-- NAV BAR -->
     <nav class="nav-bar">
         <div class="container">
             <a asp-area="" asp-page="/Auth/Index" class="nav-brand">EduLearn</a>
-
             <ul class="nav-links">
                 @if (User.IsInRole("Admin"))
                 {
@@ -31,6 +152,7 @@
                     <li><a asp-area="Teacher" asp-page="/Dashboard">Dashboard</a></li>
                     <li><a asp-area="Teacher" asp-page="/Courses/Index">Khóa học</a></li>
                     <li><a asp-area="Teacher" asp-page="/Categories/Index">Danh mục</a></li>
+                    <li><a asp-area="Teacher" asp-page="/Chat">Tin nhắn</a></li>
                     <li><a asp-area="Teacher" asp-page="/Profile">Hồ sơ</a></li>
                 }
                 @if (User.IsInRole("Student"))
@@ -39,18 +161,20 @@
                     <li><a asp-area="Student" asp-page="/Courses/Index">Khám phá</a></li>
                     <li><a asp-area="Student" asp-page="/MyLearning">Khóa học của tôi</a></li>
                     <li><a asp-area="Student" asp-page="/Notifications/Index">Thông báo</a></li>
+                    <li><a asp-area="Student" asp-page="/Chat">Tin nhắn</a></li>
                     <li><a asp-area="Student" asp-page="/Certificates/Index">Chứng chỉ</a></li>
+                    <li><a asp-area="Student" asp-page="/Wallet/Index">Ví</a></li>
                     <li><a asp-area="Student" asp-page="/Profile">Hồ sơ</a></li>
                 }
             </ul>
-
             <div class="nav-user">
-
-                <div class="nav-avatar" style="margin-left: 16px;">
-                    @(User.Identity?.Name?[0].ToString().ToUpper() ?? "U")
-                </div>
-                <span class="nav-user-name" style="margin-left: 8px;">@User.Identity?.Name</span>
-                <form method="post" asp-page="/Auth/Logout" style="margin-left: 12px;">
+                @if (User.IsInRole("Student"))
+                {
+                    @await Component.InvokeAsync("WalletBalance")
+                }
+                <div class="nav-avatar" style="margin-left:16px;">@(User.Identity?.Name?[0].ToString().ToUpper() ?? "U")</div>
+                <span class="nav-user-name" style="margin-left:8px;">@User.Identity?.Name</span>
+                <form method="post" asp-page="/Auth/Logout" style="margin-left:12px;">
                     <button type="submit" class="btn-nav-logout">Đăng xuất</button>
                 </form>
             </div>
@@ -77,6 +201,112 @@
             </div>
         </div>
     </footer>
+}
+
+<!-- ===== AI FLOATING CHAT WIDGET ===== -->
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <button id="aiFloatBtn" title="AI Trợ Lý" onclick="toggleAiPanel()">
+        <span id="aiBtnIcon">🤖</span>
+        <div class="aif-online-dot"></div>
+    </button>
+
+    <div id="aiFloatPanel">
+        <!-- Header -->
+        <div class="aif-header">
+            <div class="aif-header-left">
+                <div class="aif-avatar">🤖</div>
+                <div>
+                    <div class="aif-title">EduLearn AI</div>
+                    <div class="aif-subtitle">Luôn sẵn sàng hỗ trợ</div>
+                </div>
+            </div>
+            <button class="aif-close" onclick="toggleAiPanel()">✕</button>
+        </div>
+
+        <!-- Messages -->
+        <div class="aif-messages" id="aifMessages">
+            <div class="aif-welcome" id="aifWelcome">
+                <div class="aif-welcome-icon">✨</div>
+                <p>Xin chào! Tôi có thể trả lời câu hỏi về khóa học, thống kê học tập, và nhiều hơn nữa.</p>
+            </div>
+        </div>
+
+        <!-- Typing -->
+        <div class="aif-typing" id="aifTyping">
+            <div class="aif-bav aif-ai-av">🤖</div>
+            <div class="aif-tdots"><span></span><span></span><span></span></div>
+        </div>
+
+        <!-- Input -->
+        <div class="aif-foot">
+            <textarea id="aifInput" class="aif-ta" placeholder="Nhập câu hỏi..." rows="1" maxlength="1000"></textarea>
+            <button class="aif-sbtn" id="aifSendBtn" onclick="aifSend()">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let aifConvId = null;
+        let aifOpen = false;
+        const aifInit = '@(User.Identity?.Name?[0].ToString().ToUpper() ?? "U")';
+
+        function toggleAiPanel() {
+            aifOpen = !aifOpen;
+            document.getElementById('aiFloatPanel').classList.toggle('open', aifOpen);
+            document.getElementById('aiBtnIcon').textContent = aifOpen ? '✕' : '🤖';
+            if (aifOpen) { setTimeout(() => document.getElementById('aifInput').focus(), 180); aifScroll(); }
+        }
+
+        const _ta = document.getElementById('aifInput');
+        _ta.addEventListener('input', function() { this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,100)+'px'; });
+        _ta.addEventListener('keydown', function(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();aifSend();} });
+
+        async function aifSend() {
+            const text = _ta.value.trim();
+            if (!text) return;
+            _ta.value = ''; _ta.style.height = 'auto';
+            const w = document.getElementById('aifWelcome'); if(w) w.remove();
+            aifAdd('user', text);
+            document.getElementById('aifTyping').classList.add('show');
+            document.getElementById('aifSendBtn').disabled = true;
+            aifScroll();
+            try {
+                const r = await fetch('/api/aichat/send', {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json','RequestVerificationToken':document.querySelector('input[name="__RequestVerificationToken"]')?.value||''},
+                    body: JSON.stringify({conversationId: aifConvId, message: text})
+                });
+                const d = await r.json();
+                document.getElementById('aifTyping').classList.remove('show');
+                if (d.success) { aifConvId = d.conversationId; aifAdd('assistant', d.assistantMessage); }
+                else aifAdd('assistant', '⚠️ Lỗi: ' + (d.error || 'Không rõ nguyên nhân'));
+            } catch { document.getElementById('aifTyping').classList.remove('show'); aifAdd('assistant','Không thể kết nối tới máy chủ.'); }
+            finally { document.getElementById('aifSendBtn').disabled=false; aifScroll(); }
+        }
+
+        function aifAdd(role, content) {
+            const c = document.getElementById('aifMessages');
+            const row = document.createElement('div');
+            row.className = 'aif-row' + (role==='user'?' user':'');
+            row.innerHTML = role==='user'
+                ? `<div class="aif-bav aif-usr-av">${esc(aifInit)}</div><div class="aif-bubble aif-usr-bub">${esc(content)}</div>`
+                : `<div class="aif-bav aif-ai-av">🤖</div><div class="aif-bubble aif-ai-bub">${fmt(content)}</div>`;
+            c.appendChild(row); aifScroll();
+        }
+
+        function fmt(t){ return t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\n/g,'<br>'); }
+        function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+        function aifScroll(){ const c=document.getElementById('aifMessages'); if(c) c.scrollTop=c.scrollHeight; }
+
+        document.addEventListener('click', e => {
+            const p=document.getElementById('aiFloatPanel'), b=document.getElementById('aiFloatBtn');
+            if(aifOpen && !p.contains(e.target) && !b.contains(e.target)) toggleAiPanel();
+        });
+    </script>
 }
 
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
