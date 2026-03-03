@@ -10,13 +10,15 @@ namespace OnlineLearningPlatform.Services.Implement
         private readonly ICourseRepository _courseRepo;
         private readonly IEnrollmentService _enrollmentService;
         private readonly IWalletService _walletService;
+        private readonly IProgressService _progressService;
 
-        public OrderService(IOrderRepository orderRepo, ICourseRepository courseRepo, IEnrollmentService enrollmentService, IWalletService walletService)
+        public OrderService(IOrderRepository orderRepo, ICourseRepository courseRepo, IEnrollmentService enrollmentService, IWalletService walletService, IProgressService progressService)
         {
             _orderRepo = orderRepo;
             _courseRepo = courseRepo;
             _enrollmentService = enrollmentService;
             _walletService = walletService;
+            _progressService = progressService;
         }
 
         public async Task<Order> CreateOrderAsync(string userId, Guid courseId, string paymentMethod, bool useWallet = false)
@@ -136,6 +138,13 @@ namespace OnlineLearningPlatform.Services.Implement
 
         public async Task<(bool Success, string Message)> RefundCourseToWalletAsync(string userId, Guid courseId)
         {
+            // Kiểm tra khóa học đã hoàn thành chưa — không cho phép hoàn tiền nếu đã học xong
+            var courseProgress = await _progressService.GetCourseProgressAsync(userId, courseId);
+            if (courseProgress != null && courseProgress.IsCompleted)
+            {
+                return (false, "Bạn đã hoàn thành khóa học này nên không thể yêu cầu hoàn tiền.");
+            }
+
             var myOrders = await _orderRepo.GetOrdersByUserIdAsync(userId);
             // Tìm đơn hàng thành công gần nhất cho course này
             var order = myOrders.OrderByDescending(o => o.CreatedAt)

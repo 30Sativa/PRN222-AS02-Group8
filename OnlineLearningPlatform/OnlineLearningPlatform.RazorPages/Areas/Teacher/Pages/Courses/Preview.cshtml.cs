@@ -39,18 +39,14 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Challenge();
 
-            // Admin có thể preview bất kỳ course nào, Teacher chỉ xem của chính mình
-            Course? course;
-            if (User.IsInRole("Admin"))
-            {
-                course = await _courseService.GetByIdForAdminAsync(courseId);
-            }
-            else
-            {
-                course = await _courseService.GetMyCourseByIdAsync(courseId, userId);
-            }
+            // Admin có thể preview bất kỳ course nào,
+            // Teacher: xem khóa của mình (mọi trạng thái) hoặc các khóa đã xuất bản của teacher khác
+            Course? course = await _courseService.GetByIdForAdminAsync(courseId);
 
-            if (course == null)
+            if (course == null ||
+                (!User.IsInRole("Admin") &&
+                 course.TeacherId != userId &&
+                 course.Status != CourseStatus.Published))
             {
                 TempData["ErrorMessage"] = "Không tìm thấy khóa học hoặc bạn không có quyền xem.";
                 return RedirectToPage("/Courses/Index", new { area = "Teacher" });

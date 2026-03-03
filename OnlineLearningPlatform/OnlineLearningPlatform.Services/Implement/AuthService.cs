@@ -138,7 +138,7 @@ namespace OnlineLearningPlatform.Services.Implement
                 };
             }
 
-            var signInResult = await _userRepo.PasswordSignInAsync(request.Email, request.Password);
+            var signInResult = await _userRepo.PasswordSignInAsync(request.Email, request.Password, request.RememberMe);
 
             if (!signInResult.Succeeded)
             {

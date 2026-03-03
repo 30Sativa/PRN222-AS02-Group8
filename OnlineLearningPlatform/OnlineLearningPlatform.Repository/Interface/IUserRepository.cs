@@ -11,7 +11,7 @@ namespace OnlineLearningPlatform.Repository.Interface
         Task<ApplicationUser?> GetUserByIdAsync(string userId);
         Task<ApplicationUser?> GetUserByEmailAsync(string email);
 
-        Task<SignInResult> PasswordSignInAsync(string email, string password);
+        Task<SignInResult> PasswordSignInAsync(string email, string password, bool rememberMe);
         Task<string> GenerateEmailConfirmationTokenAsync(ApplicationUser user);
         Task<IdentityResult> ConfirmEmailAsync(ApplicationUser user, string token);
         Task AddToRoleAsync(ApplicationUser user, string role);

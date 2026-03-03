@@ -21,13 +21,34 @@ namespace OnlineLearningPlatform.RazorPages.Pages.Auth
         [BindProperty]
         public LoginRequest LoginRequest { get; set; } = new();
 
-        public void OnGet()
+        public IActionResult OnGet()
         {
+            // Nếu đã đăng nhập rồi thì không cho vào trang Login nữa
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                if (User.IsInRole(Roles.Admin))
+                {
+                    return RedirectToPage("/Dashboard", new { area = "Admin" });
+                }
+
+                if (User.IsInRole(Roles.Teacher))
+                {
+                    return RedirectToPage("/Dashboard", new { area = "Teacher" });
+                }
+
+                if (User.IsInRole(Roles.Student))
+                {
+                    return RedirectToPage("/Dashboard", new { area = "Student" });
+                }
+            }
+
             // Hiển thị thông báo thành công nếu vừa xác nhận email
             if (TempData["EmailConfirmed"] != null && (bool)TempData["EmailConfirmed"])
             {
                 ViewData["EmailConfirmedMessage"] = "Email confirmed successfully! You can now log in.";
             }
+
+            return Page();
         }
 
 

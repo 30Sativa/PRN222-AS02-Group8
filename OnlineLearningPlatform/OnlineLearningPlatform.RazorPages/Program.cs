@@ -72,6 +72,7 @@ namespace OnlineLearningPlatform.RazorPages
             builder.Services.AddScoped<IDiscussionService, DiscussionService>();
             builder.Services.AddScoped<ICertificateService, CertificateService>();
             builder.Services.AddScoped<INotificationService, NotificationService>();
+            builder.Services.AddScoped<IChatService, ChatService>();
 
             builder.Services.AddScoped<IEmailService, EmailService>();
 
@@ -94,6 +95,7 @@ namespace OnlineLearningPlatform.RazorPages
             builder.Services.AddScoped<IDiscussionRepository, DiscussionRepository>();
             builder.Services.AddScoped<ICertificateRepository, CertificateRepository>();
             builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+            builder.Services.AddScoped<IChatRepository, ChatRepository>();
 
             // ================= EXTERNAL AUTH =================
             builder.Services.AddAuthentication()
@@ -163,6 +165,7 @@ namespace OnlineLearningPlatform.RazorPages
             app.MapHub<ProgressHub>("/hubs/progress");
             app.MapHub<NotificationHub>("/hubs/notification");
             app.MapHub<DataHub>("/hubs/data");
+            app.MapHub<ChatHub>("/hubs/chat");
 
             app.Run();
         }

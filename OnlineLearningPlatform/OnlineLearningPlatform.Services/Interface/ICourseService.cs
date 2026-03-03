@@ -12,6 +12,9 @@ namespace OnlineLearningPlatform.Services.Interface
         Task<List<Course>> GetAllForAdminAsync();
         Task<Course?> GetByIdForAdminAsync(Guid courseId);
 
+        // Tìm kiếm các khóa học đã xuất bản (dùng cho Teacher/Admin duyệt xem, không chỉnh sửa)
+        Task<List<Course>> SearchPublishedCoursesAsync(string? keyword);
+
         Task<CourseCommandResult> CreateAsync(string teacherId, CourseUpsertRequest request);
         Task<CourseCommandResult> UpdateAsync(string teacherId, CourseUpsertRequest request);
         Task<CourseCommandResult> DeleteAsync(Guid courseId, string teacherId);

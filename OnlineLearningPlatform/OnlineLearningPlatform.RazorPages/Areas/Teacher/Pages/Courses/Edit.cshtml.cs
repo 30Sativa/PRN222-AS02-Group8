@@ -93,6 +93,7 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses
                 courseId = id,
                 title = Input.Title,
                 price = Input.Price,
+                discountPrice = Input.DiscountPrice,
                 level = Input.Level.ToString(),
                 language = Input.Language,
                 thumbnailUrl = Input.ThumbnailUrl
