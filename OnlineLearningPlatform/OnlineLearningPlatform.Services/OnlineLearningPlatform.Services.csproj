@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.24" />
+    <PackageReference Include="Mscc.GenerativeAI" Version="1.9.4" />
   </ItemGroup>
 
   <ItemGroup>

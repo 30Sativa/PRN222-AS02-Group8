@@ -10,6 +10,7 @@ using OnlineLearningPlatform.Services.Implement;
 using OnlineLearningPlatform.Services.Implementations;
 using OnlineLearningPlatform.Services.Interface;
 using OnlineLearningPlatform.Services.Settings;
+using OnlineLearningPlatform.Services.Implement;
 
 namespace OnlineLearningPlatform.RazorPages
 {
@@ -45,6 +46,9 @@ namespace OnlineLearningPlatform.RazorPages
             builder.Services.Configure<AppSettings>(
                 builder.Configuration.GetSection("AppSettings"));
 
+            builder.Services.Configure<GeminiSettings>(
+                builder.Configuration.GetSection("GeminiSettings"));
+
             // ================= COOKIE CONFIG =================
             builder.Services.ConfigureApplicationCookie(options =>
             {
@@ -73,6 +77,7 @@ namespace OnlineLearningPlatform.RazorPages
             builder.Services.AddScoped<ICertificateService, CertificateService>();
             builder.Services.AddScoped<INotificationService, NotificationService>();
             builder.Services.AddScoped<IChatService, ChatService>();
+            builder.Services.AddScoped<IAiChatService, AiChatService>();
 
             builder.Services.AddScoped<IEmailService, EmailService>();
 
@@ -96,7 +101,8 @@ namespace OnlineLearningPlatform.RazorPages
             builder.Services.AddScoped<ICertificateRepository, CertificateRepository>();
             builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
             builder.Services.AddScoped<IChatRepository, ChatRepository>();
-
+            builder.Services.AddScoped<IDataQueryExecutor, DataQueryExecutor>();
+            builder.Services.AddScoped<IAiChatService, AiChatService>();
             // ================= EXTERNAL AUTH =================
             builder.Services.AddAuthentication()
                 .AddGoogle(options =>

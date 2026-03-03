@@ -29,4 +29,24 @@ namespace OnlineLearningPlatform.Services.DTOs.Chat
         public string TeacherId { get; set; } = default!;
         public Guid CourseId { get; set; }
     }
+
+
+    // DTO cho ý định truy vấn từ AI
+    public class QueryIntent
+    {
+        public string Intent { get; set; } // "list_courses", "count_courses", "get_enrollments", ...
+        public Dictionary<string, object> Parameters { get; set; } = new();
+        public int? Limit { get; set; }
+        public string? OrderBy { get; set; }
+        public bool OrderDescending { get; set; }
+    }
+
+    // DTO cho kết quả truy vấn (dạng bảng đơn giản)
+    public class QueryResult
+    {
+        public List<string> Columns { get; set; } = new();
+        public List<List<string>> Rows { get; set; } = new();
+        public string? ErrorMessage { get; set; }
+        public bool IsEmpty => Rows.Count == 0 && string.IsNullOrEmpty(ErrorMessage);
+    }
 }

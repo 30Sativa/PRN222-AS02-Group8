@@ -1,0 +1,281 @@
+@page
+@model OnlineLearningPlatform.RazorPages.Areas.Student.Pages.AiChatModel
+@{
+    ViewData["Title"] = "AI Trợ Lý";
+}
+
+<link rel="stylesheet" href="~/css/ai-chat.css" asp-append-version="true" />
+
+<div class="ai-chat-layout">
+    <!-- SIDEBAR: danh sách hội thoại -->
+    <aside class="ai-chat-sidebar" id="aiChatSidebar">
+        <div class="sidebar-header">
+            <span class="sidebar-title">🤖 AI Trợ Lý</span>
+            <button class="btn-new-chat" id="btnNewChat" title="Cuộc hội thoại mới">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+            </button>
+        </div>
+        <div class="conversations-list" id="conversationsList">
+            @foreach (var conv in Model.Conversations)
+            {
+                <div class="conv-item @(conv.ConversationId == Model.CurrentConversationId ? "active" : "")"
+                     data-id="@conv.ConversationId"
+                     onclick="loadConversation('@conv.ConversationId')">
+                    <div class="conv-icon">💬</div>
+                    <div class="conv-info">
+                        <div class="conv-preview">@(conv.LastMessage ?? "Cuộc hội thoại mới")</div>
+                        <div class="conv-time">@conv.CreatedAt.ToString("dd/MM HH:mm")</div>
+                    </div>
+                </div>
+            }
+        </div>
+    </aside>
+
+    <!-- MAIN CHAT AREA -->
+    <main class="ai-chat-main">
+        <!-- Header -->
+        <div class="ai-chat-header">
+            <div class="ai-header-info">
+                <div class="ai-avatar-ring">
+                    <div class="ai-avatar-icon">🤖</div>
+                </div>
+                <div>
+                    <div class="ai-name">EduLearn AI</div>
+                    <div class="ai-status">
+                        <span class="status-dot"></span>Luôn sẵn sàng hỗ trợ
+                    </div>
+                </div>
+            </div>
+            <div class="ai-header-badge">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                Text-to-SQL
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="ai-messages-container" id="messagesContainer">
+            @if (!Model.Messages.Any())
+            {
+                <div class="ai-welcome" id="welcomeScreen">
+                    <div class="welcome-icon">🤖</div>
+                    <h2 class="welcome-title">Xin chào! Tôi là EduLearn AI</h2>
+                    <p class="welcome-sub">Tôi có thể trả lời câu hỏi về khóa học, thống kê, và phân tích dữ liệu học tập của bạn.</p>
+                    <div class="quick-questions">
+                        <div class="quick-title">Gợi ý câu hỏi:</div>
+                        <div class="quick-grid">
+                            <button class="quick-btn" onclick="sendQuickMessage('Tôi đã enroll bao nhiêu khóa học?')">📚 Khóa học của tôi</button>
+                            <button class="quick-btn" onclick="sendQuickMessage('Có bao nhiêu khóa học đang được bán?')">🛒 Số lượng khóa học</button>
+                            <button class="quick-btn" onclick="sendQuickMessage('Top 5 khóa học được đánh giá cao nhất?')">⭐ Top khóa học</button>
+                            <button class="quick-btn" onclick="sendQuickMessage('Tổng số học viên trên nền tảng là bao nhiêu?')">👥 Số học viên</button>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                foreach (var msg in Model.Messages)
+                {
+                    if (msg.Role == "user")
+                    {
+                        <div class="message-row user-row">
+                            <div class="msg-bubble user-bubble">@msg.Content</div>
+                            <div class="msg-avatar user-msg-avatar">U</div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="message-row ai-row">
+                            <div class="msg-avatar ai-msg-avatar">🤖</div>
+                            <div class="msg-bubble ai-bubble">@msg.Content</div>
+                        </div>
+                    }
+                }
+            }
+        </div>
+
+        <!-- Typing indicator -->
+        <div class="typing-indicator" id="typingIndicator" style="display:none;">
+            <div class="msg-avatar ai-msg-avatar">🤖</div>
+            <div class="typing-bubble">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="ai-input-area">
+            <div class="input-box-wrapper">
+                <textarea
+                    id="userInput"
+                    class="ai-input-box"
+                    placeholder="Nhập câu hỏi của bạn... (Enter để gửi, Shift+Enter để xuống dòng)"
+                    rows="1"
+                    maxlength="2000"></textarea>
+                <button class="ai-send-btn" id="sendBtn" onclick="sendMessage()">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="input-hint">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
+                </svg>
+                AI có thể truy vấn dữ liệu thực từ database để trả lời chính xác
+            </div>
+        </div>
+    </main>
+</div>
+
+@section Scripts {
+<script>
+    let currentConversationId = '@(Model.CurrentConversationId?.ToString() ?? "")';
+    const antiForgeryToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value
+        || '@Html.AntiForgeryToken()'.match(/value="([^"]+)"/)?.[1] || '';
+
+    // Auto-resize textarea
+    const textarea = document.getElementById('userInput');
+    textarea.addEventListener('input', function () {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 160) + 'px';
+    });
+
+    // Enter to send
+    textarea.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    async function sendMessage() {
+        const input = document.getElementById('userInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        input.value = '';
+        input.style.height = 'auto';
+
+        // Ẩn welcome screen
+        const welcome = document.getElementById('welcomeScreen');
+        if (welcome) welcome.style.display = 'none';
+
+        // Hiển thị tin nhắn user
+        appendMessage('user', text);
+
+        // Hiện typing
+        document.getElementById('typingIndicator').style.display = 'flex';
+        document.getElementById('sendBtn').disabled = true;
+        scrollToBottom();
+
+        try {
+            const res = await fetch('/api/aichat/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': getCsrfToken()
+                },
+                body: JSON.stringify({
+                    conversationId: currentConversationId || null,
+                    message: text
+                })
+            });
+
+            const data = await res.json();
+            document.getElementById('typingIndicator').style.display = 'none';
+
+            if (data.success) {
+                currentConversationId = data.conversationId;
+                appendMessage('assistant', data.assistantMessage);
+                updateSidebarConversation(data.conversationId, text);
+            } else {
+                appendMessage('assistant', 'Xin lỗi, có lỗi xảy ra: ' + (data.error || 'Unknown error'));
+            }
+        } catch (err) {
+            document.getElementById('typingIndicator').style.display = 'none';
+            appendMessage('assistant', 'Xin lỗi, không thể kết nối tới máy chủ.');
+        } finally {
+            document.getElementById('sendBtn').disabled = false;
+            scrollToBottom();
+        }
+    }
+
+    function appendMessage(role, content) {
+        const container = document.getElementById('messagesContainer');
+        const row = document.createElement('div');
+        row.className = `message-row ${role === 'user' ? 'user-row' : 'ai-row'}`;
+
+        if (role === 'user') {
+            row.innerHTML = `<div class="msg-bubble user-bubble">${escHtml(content)}</div>
+                             <div class="msg-avatar user-msg-avatar">U</div>`;
+        } else {
+            row.innerHTML = `<div class="msg-avatar ai-msg-avatar">🤖</div>
+                             <div class="msg-bubble ai-bubble">${formatMarkdown(content)}</div>`;
+        }
+        container.appendChild(row);
+        scrollToBottom();
+    }
+
+    function formatMarkdown(text) {
+        return text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/`([^`]+)`/g, '<code>$1</code>')
+            .replace(/\n/g, '<br>');
+    }
+
+    function escHtml(s) {
+        return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function sendQuickMessage(msg) {
+        document.getElementById('userInput').value = msg;
+        sendMessage();
+    }
+
+    function scrollToBottom() {
+        const c = document.getElementById('messagesContainer');
+        c.scrollTop = c.scrollHeight;
+    }
+
+    function getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]')?.content
+            || document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+    }
+
+    function updateSidebarConversation(id, lastMsg) {
+        let existing = document.querySelector(`.conv-item[data-id="${id}"]`);
+        if (!existing) {
+            const list = document.getElementById('conversationsList');
+            const item = document.createElement('div');
+            item.className = 'conv-item active';
+            item.dataset.id = id;
+            item.onclick = () => loadConversation(id);
+            item.innerHTML = `<div class="conv-icon">💬</div>
+                <div class="conv-info">
+                    <div class="conv-preview">${escHtml(lastMsg.substring(0, 60))}</div>
+                    <div class="conv-time">Vừa xong</div>
+                </div>`;
+            list.prepend(item);
+        }
+        document.querySelectorAll('.conv-item').forEach(i => i.classList.remove('active'));
+        (existing || document.querySelector(`.conv-item[data-id="${id}"]`))?.classList.add('active');
+    }
+
+    function loadConversation(id) {
+        window.location.href = `?conversationId=${id}`;
+    }
+
+    async function newChat() {
+        currentConversationId = '';
+        window.location.href = '/Student/AiChat';
+    }
+
+    document.getElementById('btnNewChat').addEventListener('click', newChat);
+
+    scrollToBottom();
+</script>
+}
