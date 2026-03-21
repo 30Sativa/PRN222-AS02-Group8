@@ -1,105 +1,148 @@
 @page
 @model OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Coupons.IndexModel
+@using OnlineLearningPlatform.Models.Entities
 @{
     ViewData["Title"] = "Mã khuyến mãi";
 }
 
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="mb-1 fw-bold">Mã khuyến mãi</h2>
-            <p class="text-muted mb-0">Quản lý mã giảm giá cho khóa học của bạn.</p>
-        </div>
-        <div class="d-flex gap-2">
-            <a class="btn btn-outline-secondary" asp-area="Teacher" asp-page="/Dashboard">
-                <i class="bi bi-arrow-left me-1"></i> Quay lại
-            </a>
-            <a class="btn btn-primary" asp-area="Teacher" asp-page="/Coupons/Create">
-                <i class="bi bi-plus-circle me-1"></i> Tạo mã mới
-            </a>
+<div class="ud-page">
+    <div class="ud-page-head ud-fade-up">
+        <div class="coupon-page-head-row">
+            <div>
+                <h1 class="ud-fw-800">Mã khuyến mãi</h1>
+                <p class="ud-text-muted" style="font-size: 14px; margin-top: 6px; max-width: 520px;">
+                    Quản lý mã giảm giá cho khóa học của bạn.
+                </p>
+            </div>
+            <div class="coupon-page-actions">
+                <a class="btn btn-outline" asp-area="Teacher" asp-page="/Dashboard" style="border-radius: 10px; text-decoration: none;">
+                    <i class="bi bi-arrow-left me-1"></i> Quay lại
+                </a>
+                <a class="btn btn-primary" asp-area="Teacher" asp-page="/Coupons/Create" style="border-radius: 999px; text-decoration: none;">
+                    <i class="bi bi-plus-circle me-1"></i> Tạo mã mới
+                </a>
+            </div>
         </div>
     </div>
 
     @if (TempData["SuccessMessage"] is string msg)
     {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @msg <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <div class="alert ud-fade-up" style="background: rgba(16, 185, 129, 0.1); border: 1px solid var(--ud-green); color: #059669; padding: 12px 16px; border-radius: 12px; display: flex; align-items: center; gap: 8px; margin-bottom: var(--ud-sp5);">
+            <i class="bi bi-check-circle"></i>
+            @msg
         </div>
     }
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
+    <div class="ud-card ud-fade-up" style="padding: 0; overflow: hidden; border-radius: var(--ud-radius-lg);">
+        <div class="ud-table-wrap">
+            <table class="ud-table coupon-table">
+                <thead>
+                    <tr>
+                        <th>Mã</th>
+                        <th>Mô tả</th>
+                        <th>Khóa học</th>
+                        <th>Giá trị</th>
+                        <th>Hiệu lực</th>
+                        <th>Đã dùng</th>
+                        <th class="ud-th-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Coupons.Count == 0)
+                    {
                         <tr>
-                            <th>Mã</th>
-                            <th>Mô tả</th>
-                            <th>Khóa học</th>
-                            <th>Giá trị</th>
-                            <th>Hiệu lực</th>
-                            <th>Đã dùng</th>
-                            <th class="text-end">Thao tác</th>
+                            <td colspan="7">
+                                <div class="ud-empty" style="margin: var(--ud-sp6); border-radius: var(--ud-radius-lg);">
+                                    <i class="bi bi-ticket-perforated" style="font-size: 2.25rem; color: var(--ud-text-muted); display: block; margin-bottom: var(--ud-sp3);"></i>
+                                    <h3 style="font-size: 1rem; font-weight: 800; color: var(--ud-text); margin-bottom: .35rem;">Chưa có mã khuyến mãi</h3>
+                                    <p class="ud-text-muted" style="font-size: 0.88rem; margin-bottom: var(--ud-sp4);">Tạo mã để học viên áp dụng khi mua khóa học.</p>
+                                    <a class="btn btn-primary" asp-area="Teacher" asp-page="/Coupons/Create" style="border-radius: 999px; text-decoration: none;">
+                                        <i class="bi bi-plus-lg me-1"></i> Tạo mã đầu tiên
+                                    </a>
+                                </div>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @if (Model.Coupons.Count == 0)
+                    }
+                    else
+                    {
+                        foreach (var c in Model.Coupons)
                         {
+                            var isExpired = c.EndDate < DateTime.UtcNow;
+                            var discountDisplay = c.DiscountType == CouponDiscountType.Percentage
+                                ? $"{c.DiscountValue}%" + (c.MaxDiscountAmount.HasValue ? $" (max {c.MaxDiscountAmount.Value:N0}đ)" : "")
+                                : $"{c.DiscountValue:N0} đ";
                             <tr>
-                                <td colspan="7" class="text-center text-muted py-4">
-                                    Bạn chưa tạo mã khuyến mãi nào.
+                                <td><code class="coupon-code-pill">@c.Code</code></td>
+                                <td>@(string.IsNullOrEmpty(c.Description) ? "—" : c.Description)</td>
+                                <td>
+                                    @if (c.IsCourseSpecific && c.Course != null)
+                                    {
+                                        <span>@c.Course.Title</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="ud-text-muted">Tất cả khóa</span>
+                                    }
+                                </td>
+                                <td>@discountDisplay</td>
+                                <td>
+                                    <small class="ud-text-muted">
+                                        @c.StartDate.ToString("dd/MM/yy") → @c.EndDate.ToString("dd/MM/yy")
+                                    </small>
+                                </td>
+                                <td>
+                                    @(c.UsageLimit.HasValue ? $"{c.UsedCount} / {c.UsageLimit}" : $"{c.UsedCount} (∞)")
+                                </td>
+                                <td class="ud-td-end">
+                                    @if (c.IsActive && !isExpired)
+                                    {
+                                        <form method="post" asp-page-handler="Deactivate" asp-route-couponId="@c.CouponId" style="display: inline;"
+                                              onsubmit="return confirm('Vô hiệu hóa mã @c.Code?')">
+                                            <button type="submit" class="btn btn-sm btn-outline" style="border-radius: 10px; color: #dc2626; border-color: rgba(220,38,38,.35);">
+                                                <i class="bi bi-x-circle"></i> Tắt
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (!c.IsActive)
+                                    {
+                                        <span class="badge badge-muted" style="font-size: 0.72rem; padding: 4px 10px; border-radius: 999px;">Tắt</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge" style="font-size: 0.72rem; padding: 4px 10px; border-radius: 999px; background: rgba(239,68,68,.12); color: #dc2626;">Hết hạn</span>
+                                    }
                                 </td>
                             </tr>
                         }
-                        else
-                        {
-                            foreach (var c in Model.Coupons)
-                            {
-                                var isExpired = c.EndDate < DateTime.UtcNow;
-                                var statusClass = !c.IsActive ? "bg-secondary" : isExpired ? "bg-danger" : "bg-success";
-                                var statusText = !c.IsActive ? "Tắt" : isExpired ? "Hết hạn" : "Hoạt động";
-                                var discountDisplay = c.DiscountType == CouponDiscountType.Percentage
-                                    ? $"{c.DiscountValue}%" + (c.MaxDiscountAmount.HasValue ? $" (max {c.MaxDiscountAmount.Value:N0}đ)" : "")
-                                    : $"{c.DiscountValue:N0} đ";
-                                <tr>
-                                    <td><code>@c.Code</code></td>
-                                    <td>@(string.IsNullOrEmpty(c.Description) ? "—" : c.Description)</td>
-                                    <td>
-                                        @if (c.IsCourseSpecific && c.Course != null)
-                                        {
-                                            <span>@c.Course.Title</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted">Tất cả khóa</span>
-                                        }
-                                    </td>
-                                    <td>@discountDisplay</td>
-                                    <td>
-                                        <small>
-                                            @c.StartDate.ToString("dd/MM/yy") → @c.EndDate.ToString("dd/MM/yy")
-                                        </small>
-                                    </td>
-                                    <td>
-                                        @(c.UsageLimit.HasValue ? $"{c.UsedCount} / {c.UsageLimit}" : $"{c.UsedCount} (∞)")
-                                    </td>
-                                    <td class="text-end">
-                                        @if (c.IsActive && !isExpired)
-                                        {
-                                            <form method="post" asp-page-handler="Deactivate" asp-route-couponId="@c.CouponId" class="d-inline"
-                                                  onsubmit="return confirm('Vô hiệu hóa mã @c.Code?')">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                    <i class="bi bi-x-circle"></i> Tắt
-                                                </button>
-                                            </form>
-                                        }
-                                    </td>
-                                </tr>
-                            }
-                        }
-                    </tbody>
-                </table>
-            </div>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
+
+<style>
+    .coupon-page-head-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem 1.5rem;
+    }
+    .coupon-page-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+    }
+    .coupon-table th { white-space: nowrap; }
+    .ud-th-end, .ud-td-end { text-align: right; }
+    .coupon-code-pill {
+        font-size: 0.82rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 8px;
+        background: var(--ud-surface);
+        border: 1px solid var(--ud-border);
+    }
+</style>

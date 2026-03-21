@@ -72,6 +72,12 @@ namespace OnlineLearningPlatform.Services.Implement
             await _notifRepo.BulkCreateAsync(notifications);
         }
 
+        public async Task<IReadOnlyList<Notification>> GetRecentSystemBroadcastsForAdminAsync(int maxDistinct = 50)
+        {
+            var list = await _notifRepo.GetRecentSystemBroadcastsForAdminAsync(maxDistinct);
+            return list;
+        }
+
         private static NotificationDto ToDto(Notification n) => new()
         {
             NotificationId = n.NotificationId,

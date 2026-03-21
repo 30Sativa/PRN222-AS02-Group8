@@ -4,200 +4,327 @@
     ViewData["Title"] = "Người dùng";
 }
 
-<div class="page-head fade-up">
-    <h1>Người dùng</h1>
-    <div class="breadcrumb">
-        <a asp-area="Admin" asp-page="/Dashboard">Dashboard</a>
-        <span class="breadcrumb-sep">/</span>
-        <span>Danh sách</span>
-    </div>
-</div>
-
-@if (Model.SuccessMessage != null)
-{
-    <div class="alert alert-success fade-up">@Model.SuccessMessage</div>
-}
-@if (Model.ErrorMessage != null)
-{
-    <div class="alert alert-danger fade-up">@Model.ErrorMessage</div>
-}
-
-<div class="card fade-up">
-
-    <!-- Filter bar -->
-    <form method="get" class="filter-bar">
-        <div class="search-input-wrap">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            <input type="text" name="keyword" value="@Model.Keyword" placeholder="Tìm tên, email, số điện thoại..." />
-        </div>
-
-        <select name="role" class="filter-select" onchange="this.form.submit()">
-            <option value="">Tất cả roles</option>
-            <option value="Admin"   selected="@(Model.Role == "Admin")">Admin</option>
-            <option value="Teacher" selected="@(Model.Role == "Teacher")">Giảng viên</option>
-            <option value="Student" selected="@(Model.Role == "Student")">Học viên</option>
-        </select>
-
-        <button type="submit" class="btn btn-primary btn-sm">Tìm kiếm</button>
-
-        @if (!string.IsNullOrWhiteSpace(Model.Keyword) || !string.IsNullOrWhiteSpace(Model.Role))
-        {
-            <a asp-page="/Users/Index" class="btn btn-secondary btn-sm">Xóa bộ lọc</a>
-        }
-    </form>
-
-    <!-- Table -->
-    <div class="card-header" style="border-top: 1px solid var(--color-border-light);">
-        <h2>@Model.TotalCount kết quả</h2>
+<div class="ud-page-wide">
+    <div class="ud-page-head ud-fade-up">
+        <h1>Người dùng</h1>
+        <p style="font-size:0.9rem;color:var(--ud-text-muted);margin:0;">
+            <a asp-area="Admin" asp-page="/Dashboard" style="color:var(--ud-text-muted);">Dashboard</a>
+            <span style="margin:0 6px;color:var(--ud-border);">/</span>
+            <span>Danh sách người dùng</span>
+        </p>
     </div>
 
-    @if (Model.Users.Any())
+    @if (Model.SuccessMessage != null)
     {
-        <div class="table-wrap">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Người dùng</th>
-                        <th>Số điện thoại</th>
-                        <th>Role</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var user in Model.Users)
-                    {
-                        var avClass = user.Role switch { "Admin" => "u-avatar-admin", "Teacher" => "u-avatar-teacher", _ => "u-avatar-student" };
-                        var roleClass = user.Role switch { "Admin" => "role-admin", "Teacher" => "role-teacher", _ => "role-student" };
-                        var roleLabel = user.Role switch { "Teacher" => "Giảng viên", "Student" => "Học viên", _ => user.Role };
-
-                        <tr id="user-row-@user.Id">
-                            <td>
-                                <div class="user-cell">
-                                    <div class="u-avatar @avClass">
-                                        @(user.FullName?[0].ToString().ToUpper() ?? "U")
-                                    </div>
-                                    <div>
-                                        <div class="u-name">@user.FullName</div>
-                                        <div class="u-email">@user.Email</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="text-muted">@(user.PhoneNumber ?? "—")</td>
-                            <td><span class="role-pill @roleClass">@roleLabel</span></td>
-                            <td>
-                                <div class="btn-group">
-                                    <a asp-page="/Users/Detail" asp-area="Admin" asp-route-id="@user.Id"
-                                       class="btn btn-secondary btn-sm">Xem</a>
-                                    <a asp-page="/Users/Edit" asp-area="Admin" asp-route-id="@user.Id"
-                                       class="btn btn-secondary btn-sm">Sửa</a>
-                                    <form method="post" asp-page-handler="Delete" asp-route-id="@user.Id"
-                                          onsubmit="return confirm('Xóa người dùng này?');">
-                                        <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+        <div class="alert alert-success ud-fade-up" style="margin-bottom:var(--ud-sp5);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+                <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            @Model.SuccessMessage
         </div>
+    }
+    @if (Model.ErrorMessage != null)
+    {
+        <div class="alert alert-danger ud-fade-up" style="margin-bottom:var(--ud-sp5);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            @Model.ErrorMessage
+        </div>
+    }
 
-        @* Pagination *@
+    <div class="ud-card ud-fade-up">
+        <form method="get" class="ud-search" style="padding:var(--ud-sp5) var(--ud-sp6);border-bottom:1px solid var(--ud-border-light, #e8e8ed);margin:0;flex-wrap:wrap;gap:var(--ud-sp3);">
+            <div class="ud-search-wrap" style="flex:1;min-width:200px;max-width:420px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" name="keyword" value="@Model.Keyword" placeholder="Tìm tên, email, số điện thoại..." />
+            </div>
 
-        @if (Model.TotalPages > 1)
+            <select name="role" class="form-control" style="width:auto;min-width:160px;" onchange="this.form.submit()">
+                <option value="">Tất cả vai trò</option>
+                <option value="Admin" selected="@(Model.Role == "Admin")">Admin</option>
+                <option value="Teacher" selected="@(Model.Role == "Teacher")">Giảng viên</option>
+                <option value="Student" selected="@(Model.Role == "Student")">Học viên</option>
+            </select>
+
+            <button type="submit" class="btn btn-primary btn-sm">
+                @Html.Raw("<i class=\"bi bi-search\"></i>")
+                Tìm kiếm
+            </button>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Keyword) || !string.IsNullOrWhiteSpace(Model.Role))
+            {
+                <a asp-page="/Users/Index" asp-area="Admin" class="btn btn-outline btn-sm">
+                    @Html.Raw("<i class=\"bi bi-x-lg\"></i>")
+                    Xóa bộ lọc
+                </a>
+            }
+        </form>
+
+        @if (Model.Users.Any())
         {
-            <div class="pagination">
-                @if (Model.PageNumber > 1)
-                {
-                    <a asp-page="/Users/Index" asp-area="Admin"
-                       asp-route-keyword="@Model.Keyword" asp-route-role="@Model.Role"
-                       asp-route-pageNumber="@(Model.PageNumber - 1)"
-                       class="page-btn">←</a>
-                }
-                else
-                {
-                    <span class="page-btn disabled">←</span>
-                }
+            <div style="padding:var(--ud-sp4) var(--ud-sp6);border-bottom:1px solid var(--ud-border-light, #e8e8ed);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--ud-sp3);">
+                <span class="ud-text-muted" style="font-size:0.82rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">
+                    @Model.TotalCount kết quả
+                </span>
+            </div>
 
-                @for (int i = 1; i <= Model.TotalPages; i++)
-                {
-                    if (i == Model.PageNumber)
-                    {
-                        <span class="page-btn active">@i</span>
-                    }
-                    else
-                    {
-                        <a asp-page="/Users/Index" asp-area="Admin"
-                           asp-route-keyword="@Model.Keyword" asp-route-role="@Model.Role"
-                           asp-route-pageNumber="@i"
-                           class="page-btn">@i</a>
-                    }
-                }
+            <div class="ud-table-wrap">
+                <table class="ud-table">
+                    <thead>
+                        <tr>
+                            <th>Người dùng</th>
+                            <th>Số điện thoại</th>
+                            <th>Vai trò</th>
+                            <th style="text-align:right;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model.Users)
+                        {
+                            var roleLabel = user.Role switch
+                            {
+                                "Admin" => "Admin",
+                                "Teacher" => "Giảng viên",
+                                "Student" => "Học viên",
+                                _ => user.Role ?? ""
+                            };
+                            var roleBadgeClass = user.Role switch
+                            {
+                                "Admin" => "badge-purple",
+                                "Teacher" => "badge badge-purple",
+                                "Student" => "badge badge-muted",
+                                _ => "badge badge-muted"
+                            };
+                            var avatarColor = user.Role switch
+                            {
+                                "Admin" => "ud-avatar-blue",
+                                "Teacher" => "ud-avatar-green",
+                                _ => ""
+                            };
+                            var initial = !string.IsNullOrEmpty(user.FullName)
+                                ? user.FullName[0].ToString().ToUpper()
+                                : "U";
 
-                @if (Model.PageNumber < Model.TotalPages)
+                            <tr id="user-row-@user.Id">
+                                <td>
+                                    <div style="display:flex;align-items:center;gap:var(--ud-sp3);">
+                                        <div class="ud-avatar @avatarColor" style="width:36px;height:36px;font-size:0.8rem;font-weight:800;">
+                                            @initial
+                                        </div>
+                                        <div>
+                                            <div style="font-weight:700;font-size:0.875rem;color:var(--ud-text);">@user.FullName</div>
+                                            <div style="font-size:0.78rem;color:var(--ud-text-muted);">@user.Email</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="color:var(--ud-text-muted);font-size:0.875rem;">
+                                    @(user.PhoneNumber ?? "—")
+                                </td>
+                                <td>
+                                    <span class="@roleBadgeClass">@roleLabel</span>
+                                </td>
+                                <td>
+                                    <div style="display:flex;align-items:center;justify-content:flex-end;gap:var(--ud-sp2);flex-wrap:wrap;">
+                                        <a asp-page="/Users/Detail" asp-area="Admin" asp-route-id="@user.Id"
+                                           class="btn btn-ghost btn-sm" style="font-size:0.78rem;padding:6px 10px;">
+                                            @Html.Raw("<i class=\"bi bi-eye\"></i>")
+                                            Xem
+                                        </a>
+                                        <a asp-page="/Users/Edit" asp-area="Admin" asp-route-id="@user.Id"
+                                           class="btn btn-outline btn-sm" style="font-size:0.78rem;padding:6px 10px;">
+                                            @Html.Raw("<i class=\"bi bi-pencil\"></i>")
+                                            Sửa
+                                        </a>
+                                        <form method="post" asp-page-handler="Delete" asp-route-id="@user.Id" style="display:inline;">
+                                            <button type="submit" class="btn btn-sm"
+                                                    style="font-size:0.78rem;padding:6px 10px;background:transparent;border:1px solid var(--ud-red);color:var(--ud-red);"
+                                                    onclick="return confirm('Bạn có chắc muốn xóa người dùng này?');">
+                                                @Html.Raw("<i class=\"bi bi-trash\"></i>")
+                                                Xóa
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (Model.TotalPages > 1)
+            {
+                <div class="ud-pagination" style="padding:var(--ud-sp5) var(--ud-sp6);border-top:1px solid var(--ud-border-light, #e8e8ed);margin:0;">
+                    <ul style="display:flex;flex-wrap:wrap;gap:var(--ud-sp1);list-style:none;padding:0;margin:0;justify-content:center;">
+                        @if (Model.PageNumber > 1)
+                        {
+                            <li>
+                                <a asp-page="/Users/Index" asp-area="Admin"
+                                   asp-route-keyword="@Model.Keyword" asp-route-role="@Model.Role"
+                                   asp-route-pageNumber="@(Model.PageNumber - 1)"
+                                   style="display:inline-flex;align-items:center;justify-content:center;min-width:38px;height:38px;padding:0 10px;border:1px solid var(--ud-border);border-radius:var(--ud-radius);font-size:0.85rem;font-weight:700;color:var(--ud-text);text-decoration:none !important;background:var(--ud-white);transition:background var(--ud-ease),border-color var(--ud-ease);">
+                                    @Html.Raw("<i class=\"bi bi-chevron-left\"></i>")
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li>
+                                <span style="display:inline-flex;align-items:center;justify-content:center;min-width:38px;height:38px;padding:0 10px;border:1px solid var(--ud-border);border-radius:var(--ud-radius);font-size:0.85rem;font-weight:700;color:var(--ud-text-muted);background:var(--ud-surface);opacity:0.45;cursor:not-allowed;">
+                                    @Html.Raw("<i class=\"bi bi-chevron-left\"></i>")
+                                </span>
+                            </li>
+                        }
+
+                        @{
+                            var startPage = Math.Max(1, Model.PageNumber - 2);
+                            var endPage = Math.Min(Model.TotalPages, Model.PageNumber + 2);
+                            if (startPage > 1)
+                            {
+                                <li>
+                                    <a asp-page="/Users/Index" asp-area="Admin"
+                                       asp-route-keyword="@Model.Keyword" asp-route-role="@Model.Role"
+                                       asp-route-pageNumber="1"
+                                       style="display:inline-flex;align-items:center;justify-content:center;min-width:38px;height:38px;padding:0 10px;border:1px solid var(--ud-border);border-radius:var(--ud-radius);font-size:0.85rem;font-weight:700;color:var(--ud-text);text-decoration:none !important;background:var(--ud-white);">
+                                        1
+                                    </a>
+                                </li>
+                                if (startPage > 2)
+                                {
+                                    <li><span style="display:inline-flex;align-items:center;justify-content:center;min-width:38px;height:38px;color:var(--ud-text-muted);">...</span></li>
+                                }
+                            }
+                            for (int i = startPage; i <= endPage; i++)
+                            {
+                                if (i == Model.PageNumber)
+                                {
+                                    <li>
+                                        <span style="display:inline-flex;align-items:center;justify-content:center;min-width:38px;height:38px;padding:0 10px;border:1px solid var(--ud-black);border-radius:var(--ud-radius);font-size:0.85rem;font-weight:700;color:#fff;background:var(--ud-black);pointer-events:none;">
+                                            @i
+                                        </span>
+                                    </li>
+                                }
+                                else
+                                {
+                                    <li>
+                                        <a asp-page="/Users/Index" asp-area="Admin"
+                                           asp-route-keyword="@Model.Keyword" asp-route-role="@Model.Role"
+                                           asp-route-pageNumber="@i"
+                                           style="display:inline-flex;align-items:center;justify-content:center;min-width:38px;height:38px;padding:0 10px;border:1px solid var(--ud-border);border-radius:var(--ud-radius);font-size:0.85rem;font-weight:700;color:var(--ud-text);text-decoration:none !important;background:var(--ud-white);transition:background var(--ud-ease),border-color var(--ud-ease);">
+                                            @i
+                                        </a>
+                                    </li>
+                                }
+                            }
+                            if (endPage < Model.TotalPages)
+                            {
+                                if (endPage < Model.TotalPages - 1)
+                                {
+                                    <li><span style="display:inline-flex;align-items:center;justify-content:center;min-width:38px;height:38px;color:var(--ud-text-muted);">...</span></li>
+                                }
+                                <li>
+                                    <a asp-page="/Users/Index" asp-area="Admin"
+                                       asp-route-keyword="@Model.Keyword" asp-route-role="@Model.Role"
+                                       asp-route-pageNumber="@Model.TotalPages"
+                                       style="display:inline-flex;align-items:center;justify-content:center;min-width:38px;height:38px;padding:0 10px;border:1px solid var(--ud-border);border-radius:var(--ud-radius);font-size:0.85rem;font-weight:700;color:var(--ud-text);text-decoration:none !important;background:var(--ud-white);">
+                                        @Model.TotalPages
+                                    </a>
+                                </li>
+                            }
+                        }
+
+                        @if (Model.PageNumber < Model.TotalPages)
+                        {
+                            <li>
+                                <a asp-page="/Users/Index" asp-area="Admin"
+                                   asp-route-keyword="@Model.Keyword" asp-route-role="@Model.Role"
+                                   asp-route-pageNumber="@(Model.PageNumber + 1)"
+                                   style="display:inline-flex;align-items:center;justify-content:center;min-width:38px;height:38px;padding:0 10px;border:1px solid var(--ud-border);border-radius:var(--ud-radius);font-size:0.85rem;font-weight:700;color:var(--ud-text);text-decoration:none !important;background:var(--ud-white);transition:background var(--ud-ease),border-color var(--ud-ease);">
+                                    @Html.Raw("<i class=\"bi bi-chevron-right\"></i>")
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li>
+                                <span style="display:inline-flex;align-items:center;justify-content:center;min-width:38px;height:38px;padding:0 10px;border:1px solid var(--ud-border);border-radius:var(--ud-radius);font-size:0.85rem;font-weight:700;color:var(--ud-text-muted);background:var(--ud-surface);opacity:0.45;cursor:not-allowed;">
+                                    @Html.Raw("<i class=\"bi bi-chevron-right\"></i>")
+                                </span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="ud-empty">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <h3>Không tìm thấy người dùng</h3>
+                <p>Thử tìm kiếm với từ khóa hoặc bộ lọc khác.</p>
+                @if (!string.IsNullOrWhiteSpace(Model.Keyword) || !string.IsNullOrWhiteSpace(Model.Role))
                 {
-                    <a asp-page="/Users/Index" asp-area="Admin"
-                       asp-route-keyword="@Model.Keyword" asp-route-role="@Model.Role"
-                       asp-route-pageNumber="@(Model.PageNumber + 1)"
-                       class="page-btn">→</a>
-                }
-                else
-                {
-                    <span class="page-btn disabled">→</span>
+                    <div style="margin-top:var(--ud-sp4);">
+                        <a asp-page="/Users/Index" asp-area="Admin" class="btn btn-outline btn-sm">
+                            @Html.Raw("<i class=\"bi bi-x-lg\"></i>")
+                            Xóa bộ lọc
+                        </a>
+                    </div>
                 }
             </div>
         }
-    }
-    else
-    {
-        <div class="empty-state">
-            <h3>Không tìm thấy người dùng</h3>
-            <p>Thử tìm kiếm với từ khóa hoặc bộ lọc khác.</p>
-        </div>
-    }
+    </div>
 </div>
 
 @section Scripts {
-<script src="~/lib/microsoft-signalr/signalr.min.js"></script>
-<script>
-(function () {
-    // ==== SignalR: Admin Users realtime ====
-    const connection = new signalR.HubConnectionBuilder()
-        .withUrl('/hubs/data')
-        .withAutomaticReconnect()
-        .build();
+    <script src="~/lib/microsoft-signalr/signalr.min.js"></script>
+    <script>
+    (function () {
+        var connection = new signalR.HubConnectionBuilder()
+            .withUrl('/hubs/data')
+            .withAutomaticReconnect()
+            .build();
 
-    function showToast(msg, type) {
-        const toast = document.createElement('div');
-        toast.className = 'alert alert-' + (type || 'info');
-        toast.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;min-width:280px;animation:fadeUp .3s ease forwards;';
-        toast.textContent = msg;
-        document.body.appendChild(toast);
-        setTimeout(() => { toast.style.opacity='0'; toast.style.transition='opacity .3s ease'; setTimeout(()=>toast.remove(),300); }, 4000);
-    }
+        function showToast(msg, type) {
+            var toast = document.createElement('div');
+            var bg = type === 'success' ? 'var(--ud-green-bg)' : type === 'danger' ? 'var(--ud-red-bg)' : 'var(--ud-amber-bg)';
+            var color = type === 'success' ? 'var(--ud-green)' : type === 'danger' ? 'var(--ud-red)' : 'var(--ud-amber)';
+            var border = type === 'success' ? 'rgba(21,115,71,.2)' : type === 'danger' ? 'rgba(192,57,43,.2)' : 'rgba(146,97,10,.2)';
+            toast.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;min-width:280px;padding:12px 16px;border-radius:var(--ud-radius);font-size:0.875rem;font-weight:600;background:' + bg + ';border:1px solid ' + border + ';color:' + color + ';animation:udFadeUp .3s ease forwards;display:flex;align-items:center;gap:8px;';
+            toast.innerHTML = '<i class="bi bi-bell" style="font-size:1rem;"></i> ' + msg;
+            document.body.appendChild(toast);
+            setTimeout(function () {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity .3s ease';
+                setTimeout(function () { toast.remove(); }, 300);
+            }, 4000);
+        }
 
-    // Khi Admin xóa user (ở tab/cửa sổ khác) → xóa row trên trang này
-    connection.on('UserDeleted', function (data) {
-        const row = document.getElementById('user-row-' + data.userId);
-        if (!row) return;
-        row.style.transition = 'opacity .35s ease, transform .35s ease';
-        row.style.opacity = '0';
-        row.style.transform = 'translateX(20px)';
-        setTimeout(() => {
-            row.remove();
-            // Cập nhật count header
-            const countEl = document.querySelector('.card-header h2');
-            if (countEl) {
-                const n = parseInt(countEl.textContent) - 1;
-                countEl.textContent = Math.max(0, n) + ' kết quả';
-            }
-        }, 350);
-        showToast('🗑️ Người dùng đã bị xóa khỏi hệ thống.', 'warning');
-    });
+        connection.on('UserDeleted', function (data) {
+            var row = document.getElementById('user-row-' + data.userId);
+            if (!row) return;
+            row.style.transition = 'opacity .35s ease, transform .35s ease';
+            row.style.opacity = '0';
+            row.style.transform = 'translateX(20px)';
+            setTimeout(function () {
+                row.remove();
+                var countEl = document.querySelector('.ud-text-muted');
+                if (countEl) {
+                    var n = parseInt(countEl.textContent) - 1;
+                    countEl.textContent = Math.max(0, n) + ' kết quả';
+                }
+            }, 350);
+            showToast('Người dùng đã bị xóa khỏi hệ thống.', 'warning');
+        });
 
-    connection.start().catch(err => console.warn('[SignalR DataHub] Admin Users connect error:', err));
-})();
-</script>
+        connection.start().catch(function (err) { console.warn('[SignalR DataHub] Admin Users connect error:', err); });
+    })();
+    </script>
 }

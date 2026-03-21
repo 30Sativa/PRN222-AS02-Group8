@@ -5,206 +5,194 @@
 }
 
 <style>
-    /* Typography & Core Variables */
-    :root {
-        --apple-bg: #fbfbfd;
-        --apple-text: #1d1d1f;
-        --apple-text-muted: #86868b;
-        --apple-blue: #0071e3;
-        --apple-card-bg: #ffffff;
-        --apple-radius: 20px;
-        --apple-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
-        --apple-shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.08);
-    }
-
-    .wallet-hero {
-        padding: 4rem 0 2rem;
-        text-align: center;
-    }
-
-    .balance-card {
-        background: var(--apple-card-bg);
-        border-radius: var(--apple-radius);
-        padding: 3rem 2rem;
-        box-shadow: var(--apple-shadow);
-        border: 1px solid rgba(0,0,0,0.05);
-        max-width: 500px;
-        margin: 0 auto 3rem;
-        text-align: center;
-    }
-
-    .balance-label {
-        font-size: 1.1rem;
-        color: var(--apple-text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-    }
-
-    .balance-amount {
-        font-size: 3.5rem;
-        font-weight: 700;
-        letter-spacing: -0.04em;
-        color: var(--apple-text);
-        margin-bottom: 1.5rem;
-    }
-
-    .transactions-section {
-        max-width: 800px;
+    .wallet-shell {
+        max-width: 880px;
         margin: 0 auto;
+        padding: var(--ud-sp6) var(--ud-sp4) var(--ud-sp10);
+        box-sizing: border-box;
     }
-
-    .section-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin-bottom: 1.5rem;
-        color: var(--apple-text);
-    }
-
-    .transaction-card {
-        background: var(--apple-card-bg);
+    .wallet-balance-card {
+        background: linear-gradient(135deg, var(--ud-purple) 0%, var(--ud-magenta) 100%);
         border-radius: 16px;
-        padding: 1.5rem;
-        box-shadow: var(--apple-shadow);
-        margin-bottom: 1rem;
+        padding: var(--ud-sp6) var(--ud-sp6);
+        margin-bottom: var(--ud-sp6);
+        color: #fff;
         display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
         justify-content: space-between;
+        gap: var(--ud-sp5);
+        box-shadow: var(--ud-shadow-lg);
+    }
+    .wallet-balance-card .balance-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        opacity: 0.85;
+        margin-bottom: var(--ud-sp2);
+    }
+    .wallet-balance-card .balance-amount {
+        font-size: clamp(1.75rem, 4vw, 2.35rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+    }
+    .wallet-balance-card .balance-amount small {
+        font-size: 1rem;
+        font-weight: 600;
+        opacity: 0.85;
+        margin-left: 6px;
+    }
+    .wallet-balance-card .btn-topup {
+        display: inline-flex;
         align-items: center;
-        border: 1px solid rgba(0,0,0,0.03);
-        transition: transform 0.2s ease;
+        gap: 8px;
+        padding: 10px 20px;
+        border-radius: var(--ud-radius-pill);
+        font-weight: 700;
+        font-size: 0.875rem;
+        background: #fff;
+        color: var(--ud-purple) !important;
+        border: none;
+        text-decoration: none !important;
+        box-shadow: 0 2px 12px rgba(0,0,0,.12);
+        transition: transform var(--ud-ease), box-shadow var(--ud-ease);
     }
-
-    .transaction-card:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--apple-shadow-hover);
+    .wallet-balance-card .btn-topup:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(0,0,0,.15);
+        color: var(--ud-magenta-dk) !important;
     }
-
-    .tx-info {
-        display: flex;
-        align-items: center;
-        gap: 1.25rem;
+    .wallet-tx-card .ud-card-header h2 {
+        font-size: 1rem;
+        font-weight: 800;
+        margin: 0;
     }
-
-    .tx-icon {
-        width: 48px;
-        height: 48px;
+    .tx-icon-wrap {
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.5rem;
+        flex-shrink: 0;
+        font-size: 1rem;
     }
-
-    .tx-icon.deposit {
-        background-color: rgba(52, 199, 89, 0.1);
-        color: #34c759;
+    .tx-icon-wrap.deposit {
+        background: var(--ud-green-bg);
+        color: var(--ud-green);
     }
-
-    .tx-icon.withdraw {
-        background-color: rgba(255, 59, 48, 0.1);
-        color: #ff3b30;
+    .tx-icon-wrap.withdraw {
+        background: var(--ud-red-bg);
+        color: var(--ud-red);
     }
-
-    .tx-details h5 {
-        font-weight: 600;
-        font-size: 1.1rem;
-        margin-bottom: 0.25rem;
-    }
-
-    .tx-date {
-        color: var(--apple-text-muted);
-        font-size: 0.9rem;
-    }
-
-    .tx-amount {
-        font-weight: 700;
-        font-size: 1.25rem;
-    }
-    .tx-amount.positive {
-        color: #34c759;
-    }
-    .tx-amount.negative {
-        color: var(--apple-text);
-    }
-
-    .topup-action {
-        margin-top: 1.5rem;
-        text-align: center;
-    }
-
-    .topup-btn-link {
-        display: inline-flex;
+    .tx-row {
+        display: flex;
         align-items: center;
-        gap: 0.5rem;
-        padding: 14px 28px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 14px;
-        text-decoration: none;
-        font-weight: 700;
-        font-size: 1.05rem;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        gap: var(--ud-sp4);
     }
-
-    .topup-btn-link:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    .tx-row:hover {
+        background: var(--ud-surface);
     }
+    .tx-amount-pos { color: var(--ud-green); font-weight: 700; }
+    .tx-amount-neg { color: var(--ud-text); font-weight: 700; }
 </style>
 
-<div class="wallet-hero">
-    <h1 class="fw-bold" style="font-size: 2.5rem; letter-spacing: -0.03em;">Ví điện tử</h1>
-    <p class="text-muted" style="font-size: 1.1rem;">Quản lý số dư và lịch sử giao dịch của bạn.</p>
-</div>
-
-<div class="balance-card">
-    <div class="balance-label">Số dư hiện tại</div>
-    <div class="balance-amount">
-        @(Model.StudentWallet?.Balance.ToString("N0") ?? "0") <span style="font-size: 2rem; font-weight: 500; color: var(--apple-text-muted);">VNĐ</span>
+<div class="wallet-shell">
+    <div class="ud-page-head" style="margin-bottom: var(--ud-sp6);">
+        <h1>Ví của tôi</h1>
+        <p>Quản lý số dư và xem lịch sử giao dịch.</p>
     </div>
 
-    <div class="topup-action">
-        <a href="/Student/Wallet/TopUp" class="topup-btn-link">
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-            </svg>
-            Nạp tiền vào ví
+    <div class="wallet-balance-card">
+        <div>
+            <div class="balance-label">Số dư hiện tại</div>
+            <div class="balance-amount">
+                @((Model.StudentWallet?.Balance ?? 0).ToString("N0"))<small>VNĐ</small>
+            </div>
+        </div>
+        <a href="/Student/Wallet/TopUp" class="btn-topup">
+            <i class="bi bi-plus-lg"></i>
+            Nạp tiền
         </a>
     </div>
-</div>
 
-<div class="transactions-section">
-    <h3 class="section-title">Lịch sử giao dịch</h3>
-    
-    @if (Model.Transactions.Any())
-    {
-        @foreach (var tx in Model.Transactions.OrderByDescending(t => t.CreatedAt))
+    <div class="ud-card wallet-tx-card">
+        <div class="ud-card-header" style="padding: var(--ud-sp5) var(--ud-sp6); border-bottom: 1px solid var(--ud-border);">
+            <h2>Lịch sử giao dịch</h2>
+        </div>
+
+        @if (Model.Transactions.Any())
         {
-            var isCredit = tx.Type == OnlineLearningPlatform.Models.Entities.WalletTransactionType.TopUp || tx.Type == OnlineLearningPlatform.Models.Entities.WalletTransactionType.Refund;
-            
-            <div class="transaction-card">
-                <div class="tx-info">
-                    <div class="tx-icon @(isCredit ? "deposit" : "withdraw")">
-                        <i class="bi @(isCredit ? "bi-arrow-down-left" : "bi-arrow-up-right")"></i>
-                    </div>
-                    <div class="tx-details">
-                        <h5>@tx.Description</h5>
-                        <div class="tx-date">@tx.CreatedAt.ToString("dd/MM/yyyy HH:mm") • Giao dịch #@tx.WalletTransactionId</div>
-                    </div>
-                </div>
-                <div class="tx-amount @(isCredit ? "positive" : "negative")">
-                    @(isCredit ? "+" : "-")@tx.Amount.ToString("N0") VNĐ
-                </div>
+            <div class="ud-table-wrap">
+                <table class="ud-table">
+                    <thead>
+                        <tr>
+                            <th>Giao dịch</th>
+                            <th>Thời gian</th>
+                            <th style="text-align:right;">Số tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var tx in Model.Transactions.OrderByDescending(t => t.CreatedAt))
+                        {
+                            var isCredit = tx.Type == OnlineLearningPlatform.Models.Entities.WalletTransactionType.TopUp
+                                           || tx.Type == OnlineLearningPlatform.Models.Entities.WalletTransactionType.Refund;
+                            <tr>
+                                <td>
+                                    <div class="tx-row">
+                                        <div class="tx-icon-wrap @(isCredit ? "deposit" : "withdraw")">
+                                            @if (isCredit)
+                                            {
+                                                <i class="bi bi-arrow-down-left"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-arrow-up-right"></i>
+                                            }
+                                        </div>
+                                        <div>
+                                            <div style="font-weight: 700; font-size: 0.875rem;">@tx.Description</div>
+                                            <div class="ud-text-muted" style="font-size: 0.75rem; margin-top: 2px;">
+                                                #@tx.WalletTransactionId
+                                                @if (isCredit)
+                                                {
+                                                    <span class="badge badge-green" style="margin-left: 6px;">Ghi có</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-muted" style="margin-left: 6px;">Ghi nợ</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="font-size: 0.8rem; color: var(--ud-text-muted); white-space: nowrap;">
+                                    @tx.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                </td>
+                                <td style="text-align:right; white-space:nowrap;">
+                                    <span class="@(isCredit ? "tx-amount-pos" : "tx-amount-neg")">
+                                        @(isCredit ? "+" : "-")@tx.Amount.ToString("N0") VNĐ
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
         }
-    }
-    else
-    {
-        <div class="text-center py-5">
-            <i class="bi bi-receipt text-muted" style="font-size: 3rem; opacity: 0.3;"></i>
-            <p class="text-muted mt-3">Chưa có giao dịch nào.</p>
-        </div>
-    }
+        else
+        {
+            <div class="ud-empty">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 9m18 0V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v3"/></svg>
+                <h3>Chưa có giao dịch</h3>
+                <p>Nạp tiền vào ví để mua khóa học và thanh toán nhanh hơn.</p>
+                <a href="/Student/Wallet/TopUp" class="btn btn-primary" style="margin-top: var(--ud-sp4);">
+                    <i class="bi bi-plus-lg"></i>
+                    Nạp tiền
+                </a>
+            </div>
+        }
+    </div>
 </div>

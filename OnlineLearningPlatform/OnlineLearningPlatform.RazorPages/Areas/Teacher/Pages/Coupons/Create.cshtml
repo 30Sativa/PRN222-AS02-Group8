@@ -4,128 +4,165 @@
     ViewData["Title"] = "Tạo mã khuyến mãi";
 }
 
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="mb-1 fw-bold">Tạo mã khuyến mãi</h2>
-            <p class="text-muted mb-0">Tạo mã giảm giá cho khóa học của bạn.</p>
+<div class="ud-page coupon-create-page">
+    <div class="ud-page-head ud-fade-up">
+        <div class="coupon-create-head">
+            <div>
+                <h1 class="ud-fw-800">Tạo mã khuyến mãi</h1>
+                <p class="ud-text-muted" style="font-size: 14px; margin-top: 6px;">
+                    Tạo mã giảm giá cho khóa học của bạn.
+                </p>
+            </div>
+            <a class="btn btn-outline" asp-area="Teacher" asp-page="/Coupons/Index" style="border-radius: 10px; text-decoration: none; flex-shrink: 0;">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại
+            </a>
         </div>
-        <a class="btn btn-outline-secondary" asp-area="Teacher" asp-page="/Coupons/Index">
-            <i class="bi bi-arrow-left me-1"></i> Quay lại
-        </a>
     </div>
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-4">
-            <form method="post">
-                <div class="row g-4">
-                    <!-- Mã coupon -->
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Mã coupon <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" asp-for="Code" placeholder="VD: PYTHON30" maxlength="50" />
-                        <small class="text-muted">Mã sẽ được tự động viết hoa.</small>
-                        <span class="text-danger small" asp-validation-for="Code"></span>
-                    </div>
-
-                    <!-- Mô tả -->
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Mô tả</label>
-                        <input type="text" class="form-control" asp-for="Description" placeholder="VD: Giảm 30% cho khóa Python" maxlength="255" />
-                    </div>
-
-                    <!-- Loại giảm -->
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">Loại giảm giá <span class="text-danger">*</span></label>
-                        <select class="form-select" asp-for="DiscountType" id="discountTypeSelect">
-                            <option value="Percentage">Phần trăm (%)</option>
-                            <option value="FixedAmount">Số tiền cố định (VNĐ)</option>
-                        </select>
-                    </div>
-
-                    <!-- Giá trị giảm -->
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">Giá trị giảm <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" asp-for="DiscountValue" min="1" step="any" />
-                        <small class="text-muted d-block" id="discountValueHint"></small>
-                    </div>
-
-                    <div class="col-md-4" id="percentageCapBlock">
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" asp-for="LimitMaxDiscount" id="limitMaxDiscountCb" />
-                            <label class="form-check-label fw-semibold" for="limitMaxDiscountCb">Giới hạn mức giảm tối đa</label>
-                        </div>
-                        <div id="maxDiscountAmountWrapper">
-                            <label class="form-label fw-semibold">Mức trần (VNĐ) <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" asp-for="MaxDiscountAmount" min="1" step="1" placeholder="VD: 50000" />
-                            <span class="text-danger small" asp-validation-for="MaxDiscountAmount"></span>
-                        </div>
-                        <small class="text-muted">Tuỳ chọn khi giảm %: ví dụ 50% nhưng tối đa 50.000đ.</small>
-                    </div>
-
-                    <!-- Khóa học áp dụng -->
-                    <div class="col-12">
-                        <label class="form-label fw-semibold">Áp dụng cho khóa học <span class="text-danger">*</span></label>
-                        <select class="form-select" asp-for="CourseId">
-                            <option value="">— Chọn khóa học —</option>
-                            @foreach (var course in Model.MyCourses)
-                            {
-                                <option value="@course.CourseId">@course.Title</option>
-                            }
-                        </select>
-                        <small class="text-muted">Chỉ áp dụng cho khóa học được chọn.</small>
-                    </div>
-
-                    <!-- Ngày bắt đầu -->
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Ngày bắt đầu <span class="text-danger">*</span></label>
-                        <input type="datetime-local" class="form-control" asp-for="StartDate" />
-                    </div>
-
-                    <!-- Ngày kết thúc -->
-                    <div class="col-md-6">
-                        <label class="form-label fw-semibold">Ngày kết thúc <span class="text-danger">*</span></label>
-                        <input type="datetime-local" class="form-control" asp-for="EndDate" />
-                    </div>
-
-                    <!-- Số lần sử dụng tối đa -->
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">Giới hạn sử dụng</label>
-                        <input type="number" class="form-control" asp-for="UsageLimit" min="1" placeholder="Để trống = không giới hạn" />
-                    </div>
-
-                    <!-- Số lần mỗi user -->
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">Mỗi user dùng tối đa</label>
-                        <input type="number" class="form-control" asp-for="MaxUsagePerUser" min="1" value="1" />
-                    </div>
-
-                    <!-- Đơn hàng tối thiểu -->
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">Đơn hàng tối thiểu (VNĐ)</label>
-                        <input type="number" class="form-control" asp-for="MinOrderAmount" min="0" placeholder="VD: 100000" />
-                    </div>
+    <div class="ud-card ud-fade-up coupon-create-card">
+        <form method="post" class="coupon-form">
+            <div class="coupon-form-grid">
+                <div class="form-group">
+                    <label class="form-label" asp-for="Code">Mã coupon <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" asp-for="Code" placeholder="VD: PYTHON30" maxlength="50" />
+                    <small class="ud-text-muted" style="font-size: 0.78rem; display: block; margin-top: 6px;">Mã sẽ được tự động viết hoa.</small>
+                    <span class="form-error" asp-validation-for="Code"></span>
                 </div>
 
-                @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
-                {
-                    <div class="alert alert-danger mt-4">
-                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                <div class="form-group">
+                    <label class="form-label" asp-for="Description">Mô tả</label>
+                    <input type="text" class="form-control" asp-for="Description" placeholder="VD: Giảm 30% cho khóa Python" maxlength="255" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" asp-for="DiscountType">Loại giảm giá <span class="text-danger">*</span></label>
+                    <select class="form-select" asp-for="DiscountType" id="discountTypeSelect">
+                        <option value="Percentage">Phần trăm (%)</option>
+                        <option value="FixedAmount">Số tiền cố định (VNĐ)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" asp-for="DiscountValue">Giá trị giảm <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" asp-for="DiscountValue" min="1" step="any" />
+                    <small class="ud-text-muted" style="font-size: 0.78rem; display: block; margin-top: 6px;" id="discountValueHint"></small>
+                </div>
+
+                <div class="form-group coupon-span-2" id="percentageCapBlock">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" asp-for="LimitMaxDiscount" id="limitMaxDiscountCb" />
+                        <label class="form-check-label" for="limitMaxDiscountCb" style="font-weight: 600;">Giới hạn mức giảm tối đa</label>
+                    </div>
+                    <div id="maxDiscountAmountWrapper">
+                        <label class="form-label" asp-for="MaxDiscountAmount">Mức trần (VNĐ) <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" asp-for="MaxDiscountAmount" min="1" step="1" placeholder="VD: 50000" />
+                        <span class="form-error" asp-validation-for="MaxDiscountAmount"></span>
+                    </div>
+                    <small class="ud-text-muted" style="font-size: 0.78rem;">Tuỳ chọn khi giảm %: ví dụ 50% nhưng tối đa 50.000đ.</small>
+                </div>
+
+                <div class="form-group coupon-span-2">
+                    <label class="form-label" asp-for="CourseId">Áp dụng cho khóa học <span class="text-danger">*</span></label>
+                    <select class="form-select" asp-for="CourseId">
+                        <option value="">— Chọn khóa học —</option>
+                        @foreach (var course in Model.MyCourses)
                         {
-                            <div>@error.ErrorMessage</div>
+                            <option value="@course.CourseId">@course.Title</option>
                         }
-                    </div>
-                }
-
-                <div class="mt-4 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary px-4">
-                        <i class="bi bi-check-circle me-1"></i> Tạo mã
-                    </button>
-                    <a class="btn btn-outline-secondary" asp-area="Teacher" asp-page="/Coupons/Index">Hủy</a>
+                    </select>
+                    <small class="ud-text-muted" style="font-size: 0.78rem; display: block; margin-top: 6px;">Chỉ áp dụng cho khóa học được chọn.</small>
                 </div>
-            </form>
-        </div>
+
+                <div class="form-group">
+                    <label class="form-label" asp-for="StartDate">Ngày bắt đầu <span class="text-danger">*</span></label>
+                    <input type="datetime-local" class="form-control" asp-for="StartDate" step="60" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" asp-for="EndDate">Ngày kết thúc <span class="text-danger">*</span></label>
+                    <input type="datetime-local" class="form-control" asp-for="EndDate" step="60" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" asp-for="UsageLimit">Giới hạn sử dụng</label>
+                    <input type="number" class="form-control" asp-for="UsageLimit" min="1" placeholder="Để trống = không giới hạn" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" asp-for="MaxUsagePerUser">Mỗi user dùng tối đa</label>
+                    <input type="number" class="form-control" asp-for="MaxUsagePerUser" min="1" value="1" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" asp-for="MinOrderAmount">Đơn hàng tối thiểu (VNĐ)</label>
+                    <input type="number" class="form-control" asp-for="MinOrderAmount" min="0" placeholder="VD: 100000" />
+                </div>
+            </div>
+
+            @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
+            {
+                <div class="alert alert-danger" style="margin-top: var(--ud-sp5); border-radius: 12px; flex-direction: column; align-items: stretch;">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <div>@error.ErrorMessage</div>
+                    }
+                </div>
+            }
+
+            <div class="coupon-form-actions">
+                <button type="submit" class="btn btn-primary px-4" style="border-radius: 999px;">
+                    <i class="bi bi-check-circle me-1"></i> Tạo mã
+                </button>
+                <a class="btn btn-outline" asp-area="Teacher" asp-page="/Coupons/Index" style="border-radius: 999px; text-decoration: none;">Hủy</a>
+            </div>
+        </form>
     </div>
 </div>
+
+<style>
+    .coupon-create-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem 1.5rem;
+    }
+    .coupon-create-card {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: var(--ud-sp6) var(--ud-sp8);
+        border-radius: var(--ud-radius-lg);
+    }
+    .coupon-form .form-label {
+        text-transform: none;
+        letter-spacing: 0;
+        font-weight: 600;
+        font-size: 0.88rem;
+        color: var(--ud-text);
+    }
+    .coupon-form .form-control,
+    .coupon-form .form-select {
+        border-radius: 10px;
+    }
+    .coupon-form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.15rem 1.35rem;
+    }
+    .coupon-span-2 { grid-column: 1 / -1; }
+    .coupon-form-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: var(--ud-sp6);
+        padding-top: var(--ud-sp5);
+        border-top: 1px solid var(--ud-border);
+    }
+    @@media (max-width: 640px) {
+        .coupon-form-grid { grid-template-columns: 1fr; }
+        .coupon-span-2 { grid-column: 1; }
+    }
+</style>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

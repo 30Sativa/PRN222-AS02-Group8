@@ -112,6 +112,95 @@ namespace OnlineLearningPlatform.Services.Implement
             return createdOrder;
         }
 
+        public async Task<Order> CreateCartOrderAsync(string userId, IReadOnlyList<Guid> courseIds, bool useWallet = false)
+        {
+            ArgumentNullException.ThrowIfNull(courseIds);
+            var ids = courseIds.Distinct().ToList();
+            if (ids.Count == 0)
+                throw new InvalidOperationException("Giỏ hàng trống.");
+
+            var orderDetails = new List<OrderDetail>();
+
+            foreach (var courseId in ids)
+            {
+                if (await _enrollmentService.IsEnrolledAsync(userId, courseId))
+                    continue;
+
+                var course = await _courseRepo.GetByIdAsync(courseId);
+                if (course == null)
+                    continue;
+
+                decimal linePrice = (course.DiscountPrice != null && course.DiscountPrice > 0)
+                    ? course.DiscountPrice.Value
+                    : course.Price;
+
+                orderDetails.Add(new OrderDetail
+                {
+                    CourseId = courseId,
+                    Price = linePrice,
+                    DiscountApplied = 0
+                });
+            }
+
+            if (orderDetails.Count == 0)
+                throw new InvalidOperationException("Không còn khóa học hợp lệ trong giỏ (đã đăng ký hoặc không tồn tại).");
+
+            decimal total = orderDetails.Sum(d => d.Price - (d.DiscountApplied ?? 0));
+
+            decimal walletUsed = 0;
+            if (useWallet && total > 0)
+            {
+                var wallet = await _walletService.GetOrCreateWalletAsync(userId);
+                if (wallet.Balance > 0)
+                    walletUsed = Math.Min(wallet.Balance, total);
+            }
+
+            var order = new Order
+            {
+                UserId = userId,
+                TotalAmount = total,
+                WalletUsed = walletUsed,
+                PaymentMethod = "VNPAY",
+                Status = OrderStatus.Pending,
+                CreatedAt = DateTime.UtcNow,
+                OrderDetails = orderDetails
+            };
+
+            var created = await _orderRepo.CreateOrderAsync(order);
+
+            if (walletUsed > 0)
+            {
+                await _walletService.DeductFundsAsync(
+                    userId,
+                    walletUsed,
+                    $"Thanh toán giỏ hàng ({orderDetails.Count} khóa)",
+                    created.OrderId);
+            }
+
+            if (total <= 0)
+            {
+                created.Status = OrderStatus.Completed;
+                created.PaymentMethod = "FREE";
+                created.CompletedAt = DateTime.UtcNow;
+                await _orderRepo.UpdateOrderAsync(created);
+                foreach (var d in created.OrderDetails!)
+                    await _enrollmentService.EnrollAsync(userId, d.CourseId, true);
+                return created;
+            }
+
+            if (walletUsed >= total)
+            {
+                created.Status = OrderStatus.Completed;
+                created.PaymentMethod = "WALLET";
+                created.CompletedAt = DateTime.UtcNow;
+                await _orderRepo.UpdateOrderAsync(created);
+                foreach (var d in created.OrderDetails!)
+                    await _enrollmentService.EnrollAsync(userId, d.CourseId, true);
+            }
+
+            return created;
+        }
+
         public async Task<Order?> GetOrderByIdAsync(int orderId)
         {
             return await _orderRepo.GetOrderByIdAsync(orderId);
@@ -133,14 +222,10 @@ namespace OnlineLearningPlatform.Services.Implement
             order.CompletedAt = DateTime.UtcNow;
 
             var result = await _orderRepo.UpdateOrderAsync(order);
-            if (result)
+            if (result && order.OrderDetails != null)
             {
-                // Gọi với forceEnroll = true để bypass check giá tiền
-                // Assuming an order detail always exists and we enroll for the first course in the order
-                if (order.OrderDetails != null && order.OrderDetails.Any())
-                {
-                    await _enrollmentService.EnrollAsync(order.UserId, order.OrderDetails.First().CourseId, true);
-                }
+                foreach (var d in order.OrderDetails)
+                    await _enrollmentService.EnrollAsync(order.UserId, d.CourseId, true);
             }
 
             return result;

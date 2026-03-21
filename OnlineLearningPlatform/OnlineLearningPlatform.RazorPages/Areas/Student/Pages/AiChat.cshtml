@@ -4,74 +4,534 @@
     ViewData["Title"] = "AI Trợ Lý";
 }
 
-<link rel="stylesheet" href="~/css/ai-chat.css" asp-append-version="true" />
+<style>
+    .ud-aichat-layout {
+        display: flex;
+        height: calc(100vh - 56px);
+        margin: 0;
+        overflow: hidden;
+    }
 
-<div class="ai-chat-layout">
-    <!-- SIDEBAR: danh sách hội thoại -->
-    <aside class="ai-chat-sidebar" id="aiChatSidebar">
-        <div class="sidebar-header">
-            <span class="sidebar-title">🤖 AI Trợ Lý</span>
-            <button class="btn-new-chat" id="btnNewChat" title="Cuộc hội thoại mới">
-                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M12 5v14M5 12h14"/>
-                </svg>
+    .ud-aichat-sidebar {
+        width: 280px;
+        min-width: 240px;
+        background: var(--ud-white);
+        border-right: 1px solid var(--ud-border);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .ud-aichat-sidebar-head {
+        padding: var(--ud-sp4);
+        border-bottom: 1px solid var(--ud-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .ud-aichat-sidebar-head h2 {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--ud-text);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: var(--ud-sp2);
+    }
+
+    .ud-aichat-new-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: var(--ud-radius);
+        background: var(--ud-magenta);
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background var(--ud-ease), transform var(--ud-ease);
+    }
+
+    .ud-aichat-new-btn:hover {
+        background: var(--ud-magenta-dk);
+        transform: scale(1.05);
+    }
+
+    .ud-aichat-conv-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: var(--ud-sp2) 0;
+    }
+
+    .ud-aichat-conv-item {
+        display: flex;
+        align-items: center;
+        gap: var(--ud-sp3);
+        padding: var(--ud-sp3) var(--ud-sp4);
+        cursor: pointer;
+        text-decoration: none;
+        border-left: 3px solid transparent;
+        transition: background var(--ud-ease);
+    }
+
+    .ud-aichat-conv-item:hover {
+        background: var(--ud-surface);
+        text-decoration: none;
+    }
+
+    .ud-aichat-conv-item.active {
+        background: rgba(164, 53, 240, 0.06);
+        border-left-color: var(--ud-magenta);
+    }
+
+    .ud-aichat-conv-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--ud-radius);
+        background: linear-gradient(135deg, var(--ud-purple), var(--ud-magenta));
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        flex-shrink: 0;
+    }
+
+    .ud-aichat-conv-info {
+        flex: 1;
+        overflow: hidden;
+    }
+
+    .ud-aichat-conv-preview {
+        font-size: 0.8rem;
+        color: var(--ud-text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 2px;
+    }
+
+    .ud-aichat-conv-time {
+        font-size: 0.7rem;
+        color: var(--ud-text-muted);
+    }
+
+    .ud-aichat-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: var(--ud-surface);
+        overflow: hidden;
+    }
+
+    .ud-aichat-header {
+        padding: var(--ud-sp4) var(--ud-sp6);
+        border-bottom: 1px solid var(--ud-border);
+        background: var(--ud-white);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .ud-aichat-header-info {
+        display: flex;
+        align-items: center;
+        gap: var(--ud-sp4);
+    }
+
+    .ud-aichat-avatar-ring {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--ud-purple), var(--ud-magenta));
+        padding: 3px;
+        flex-shrink: 0;
+    }
+
+    .ud-aichat-avatar-icon {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: var(--ud-white);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    .ud-aichat-name {
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: var(--ud-text);
+        margin-bottom: 2px;
+    }
+
+    .ud-aichat-status {
+        display: flex;
+        align-items: center;
+        gap: var(--ud-sp2);
+        font-size: 0.75rem;
+        color: var(--ud-green);
+    }
+
+    .ud-aichat-status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--ud-green);
+    }
+
+    .ud-aichat-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--ud-sp2);
+        padding: var(--ud-sp2) var(--ud-sp3);
+        border-radius: var(--ud-radius);
+        background: rgba(164, 53, 240, 0.08);
+        border: 1px solid rgba(164, 53, 240, 0.15);
+        color: var(--ud-magenta);
+        font-size: 0.7rem;
+        font-weight: 700;
+    }
+
+    .ud-aichat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: var(--ud-sp6) var(--ud-sp8);
+        display: flex;
+        flex-direction: column;
+        gap: var(--ud-sp5);
+    }
+
+    .ud-aichat-welcome {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: var(--ud-sp8);
+        text-align: center;
+    }
+
+    .ud-aichat-welcome-icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--ud-purple), var(--ud-magenta));
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        margin-bottom: var(--ud-sp5);
+    }
+
+    .ud-aichat-welcome h2 {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--ud-text);
+        margin-bottom: var(--ud-sp3);
+    }
+
+    .ud-aichat-welcome p {
+        font-size: 0.875rem;
+        color: var(--ud-text-muted);
+        max-width: 380px;
+        margin-bottom: var(--ud-sp6);
+    }
+
+    .ud-aichat-quick-title {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--ud-text-muted);
+        margin-bottom: var(--ud-sp3);
+    }
+
+    .ud-aichat-quick-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--ud-sp3);
+        max-width: 480px;
+    }
+
+    .ud-aichat-quick-btn {
+        display: flex;
+        align-items: center;
+        gap: var(--ud-sp2);
+        padding: var(--ud-sp3) var(--ud-sp4);
+        border-radius: var(--ud-radius);
+        border: 1px solid var(--ud-border);
+        background: var(--ud-white);
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--ud-text);
+        cursor: pointer;
+        text-align: left;
+        transition: border-color var(--ud-ease), background var(--ud-ease), transform var(--ud-ease);
+    }
+
+    .ud-aichat-quick-btn:hover {
+        border-color: var(--ud-magenta);
+        background: rgba(164, 53, 240, 0.04);
+        transform: translateY(-1px);
+    }
+
+    .ud-aichat-message-row {
+        display: flex;
+        align-items: flex-end;
+        gap: var(--ud-sp3);
+        max-width: 75%;
+    }
+
+    .ud-aichat-message-row.user {
+        flex-direction: row-reverse;
+        margin-left: auto;
+    }
+
+    .ud-aichat-msg-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--ud-surface);
+        border: 1px solid var(--ud-border);
+        color: var(--ud-text-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+
+    .ud-aichat-msg-avatar.ai {
+        background: linear-gradient(135deg, var(--ud-purple), var(--ud-magenta));
+        color: #fff;
+        border: none;
+    }
+
+    .ud-aichat-msg-avatar.user {
+        background: var(--ud-black);
+        color: #fff;
+        border: none;
+    }
+
+    .ud-aichat-msg-bubble {
+        padding: var(--ud-sp3) var(--ud-sp4);
+        border-radius: var(--ud-radius-lg);
+        font-size: 0.875rem;
+        line-height: 1.55;
+        word-break: break-word;
+    }
+
+    .ud-aichat-msg-bubble.user {
+        background: var(--ud-black);
+        color: #fff;
+        border-bottom-right-radius: var(--ud-radius);
+    }
+
+    .ud-aichat-msg-bubble.ai {
+        background: var(--ud-white);
+        border: 1px solid var(--ud-border);
+        border-bottom-left-radius: var(--ud-radius);
+        color: var(--ud-text);
+    }
+
+    .ud-aichat-typing {
+        display: flex;
+        align-items: flex-end;
+        gap: var(--ud-sp3);
+        max-width: 75%;
+    }
+
+    .ud-aichat-typing-bubble {
+        display: flex;
+        gap: 4px;
+        padding: var(--ud-sp3) var(--ud-sp4);
+        background: var(--ud-white);
+        border: 1px solid var(--ud-border);
+        border-radius: var(--ud-radius-lg);
+        border-bottom-left-radius: var(--ud-radius);
+    }
+
+    .ud-aichat-typing-bubble span {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--ud-text-muted);
+        animation: udTypingDot 1.4s infinite ease-in-out;
+    }
+
+    .ud-aichat-typing-bubble span:nth-child(1) { animation-delay: 0s; }
+    .ud-aichat-typing-bubble span:nth-child(2) { animation-delay: 0.2s; }
+    .ud-aichat-typing-bubble span:nth-child(3) { animation-delay: 0.4s; }
+
+    @@keyframes udTypingDot {
+        0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+        40% { transform: scale(1.2); opacity: 1; }
+    }
+
+    .ud-aichat-input-area {
+        padding: var(--ud-sp4) var(--ud-sp6) var(--ud-sp5);
+        background: var(--ud-white);
+        border-top: 1px solid var(--ud-border);
+    }
+
+    .ud-aichat-input-wrap {
+        display: flex;
+        gap: var(--ud-sp3);
+        align-items: flex-end;
+    }
+
+    .ud-aichat-input {
+        flex: 1;
+        border: 1.5px solid var(--ud-border);
+        border-radius: var(--ud-radius-lg);
+        padding: var(--ud-sp3) var(--ud-sp4);
+        font-size: 0.875rem;
+        font-family: inherit;
+        background: var(--ud-white);
+        color: var(--ud-text);
+        resize: none;
+        outline: none;
+        line-height: 1.5;
+        max-height: 160px;
+        transition: border-color var(--ud-ease), box-shadow var(--ud-ease);
+    }
+
+    .ud-aichat-input:focus {
+        border-color: var(--ud-magenta);
+        box-shadow: 0 0 0 3px rgba(164, 53, 240, 0.12);
+    }
+
+    .ud-aichat-input::placeholder {
+        color: var(--ud-text-faint);
+    }
+
+    .ud-aichat-send-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: var(--ud-radius-lg);
+        background: var(--ud-magenta);
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: background var(--ud-ease), transform var(--ud-ease);
+    }
+
+    .ud-aichat-send-btn:hover {
+        background: var(--ud-magenta-dk);
+        transform: scale(1.05);
+    }
+
+    .ud-aichat-send-btn:disabled {
+        opacity: 0.45;
+        cursor: default;
+        transform: none;
+    }
+
+    .ud-aichat-hint {
+        display: flex;
+        align-items: center;
+        gap: var(--ud-sp2);
+        margin-top: var(--ud-sp3);
+        font-size: 0.7rem;
+        color: var(--ud-text-muted);
+    }
+
+    .ud-aichat-hint svg {
+        flex-shrink: 0;
+    }
+</style>
+
+<div class="ud-aichat-layout">
+
+    <aside class="ud-aichat-sidebar">
+        <div class="ud-aichat-sidebar-head">
+            <h2>
+                @Html.Raw("<i class=\"bi bi-robot\"></i>")
+                AI Trợ Lý
+            </h2>
+            <button class="ud-aichat-new-btn" id="btnNewChat" title="Cuộc hội thoại mới">
+                @Html.Raw("<i class=\"bi bi-plus\"></i>")
             </button>
         </div>
-        <div class="conversations-list" id="conversationsList">
+
+        <div class="ud-aichat-conv-list" id="conversationsList">
             @foreach (var conv in Model.Conversations)
             {
-                <div class="conv-item @(conv.ConversationId == Model.CurrentConversationId ? "active" : "")"
+                <div class="ud-aichat-conv-item @(conv.ConversationId == Model.CurrentConversationId ? "active" : "")"
                      data-id="@conv.ConversationId"
                      onclick="loadConversation('@conv.ConversationId')">
-                    <div class="conv-icon">💬</div>
-                    <div class="conv-info">
-                        <div class="conv-preview">@(conv.LastMessage ?? "Cuộc hội thoại mới")</div>
-                        <div class="conv-time">@conv.CreatedAt.ToString("dd/MM HH:mm")</div>
+                    <div class="ud-aichat-conv-icon">
+                        @Html.Raw("<i class=\"bi bi-chat-dots\"></i>")
+                    </div>
+                    <div class="ud-aichat-conv-info">
+                        <div class="ud-aichat-conv-preview">@(conv.LastMessage ?? "Cuộc hội thoại mới")</div>
+                        <div class="ud-aichat-conv-time">@conv.CreatedAt.ToString("dd/MM HH:mm")</div>
                     </div>
                 </div>
             }
         </div>
     </aside>
 
-    <!-- MAIN CHAT AREA -->
-    <main class="ai-chat-main">
-        <!-- Header -->
-        <div class="ai-chat-header">
-            <div class="ai-header-info">
-                <div class="ai-avatar-ring">
-                    <div class="ai-avatar-icon">🤖</div>
+    <main class="ud-aichat-main">
+        <div class="ud-aichat-header">
+            <div class="ud-aichat-header-info">
+                <div class="ud-aichat-avatar-ring">
+                    <div class="ud-aichat-avatar-icon">
+                        @Html.Raw("<i class=\"bi bi-robot\" style=\"color: var(--ud-magenta);\"></i>")
+                    </div>
                 </div>
                 <div>
-                    <div class="ai-name">EduLearn AI</div>
-                    <div class="ai-status">
-                        <span class="status-dot"></span>Luôn sẵn sàng hỗ trợ
+                    <div class="ud-aichat-name">EduLearn AI</div>
+                    <div class="ud-aichat-status">
+                        <span class="ud-aichat-status-dot"></span>
+                        Luôn sẵn sàng hỗ trợ
                     </div>
                 </div>
             </div>
-            <div class="ai-header-badge">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
+            <div class="ud-aichat-badge">
+                @Html.Raw("<i class=\"bi bi-database\"></i>")
                 Text-to-SQL
             </div>
         </div>
 
-        <!-- Messages -->
-        <div class="ai-messages-container" id="messagesContainer">
+        <div class="ud-aichat-messages" id="messagesContainer">
             @if (!Model.Messages.Any())
             {
-                <div class="ai-welcome" id="welcomeScreen">
-                    <div class="welcome-icon">🤖</div>
-                    <h2 class="welcome-title">Xin chào! Tôi là EduLearn AI</h2>
-                    <p class="welcome-sub">Tôi có thể trả lời câu hỏi về khóa học, thống kê, và phân tích dữ liệu học tập của bạn.</p>
-                    <div class="quick-questions">
-                        <div class="quick-title">Gợi ý câu hỏi:</div>
-                        <div class="quick-grid">
-                            <button class="quick-btn" onclick="sendQuickMessage('Tôi đã enroll bao nhiêu khóa học?')">📚 Khóa học của tôi</button>
-                            <button class="quick-btn" onclick="sendQuickMessage('Có bao nhiêu khóa học đang được bán?')">🛒 Số lượng khóa học</button>
-                            <button class="quick-btn" onclick="sendQuickMessage('Top 5 khóa học được đánh giá cao nhất?')">⭐ Top khóa học</button>
-                            <button class="quick-btn" onclick="sendQuickMessage('Tổng số học viên trên nền tảng là bao nhiêu?')">👥 Số học viên</button>
-                        </div>
+                <div class="ud-aichat-welcome" id="welcomeScreen">
+                    <div class="ud-aichat-welcome-icon">
+                        @Html.Raw("<i class=\"bi bi-robot\"></i>")
+                    </div>
+                    <h2>Xin chào! Tôi là EduLearn AI</h2>
+                    <p>Tôi có thể trả lời câu hỏi về khóa học, thống kê, và phân tích dữ liệu học tập của bạn.</p>
+
+                    <div class="ud-aichat-quick-title">Gợi ý câu hỏi:</div>
+                    <div class="ud-aichat-quick-grid">
+                        <button class="ud-aichat-quick-btn" onclick="sendQuickMessage('Tôi đã enroll bao nhiêu khóa học?')">
+                            @Html.Raw("<i class=\"bi bi-book\"></i>")
+                            Khóa học của tôi
+                        </button>
+                        <button class="ud-aichat-quick-btn" onclick="sendQuickMessage('Có bao nhiêu khóa học đang được bán?')">
+                            @Html.Raw("<i class=\"bi bi-bag\"></i>")
+                            Số lượng khóa học
+                        </button>
+                        <button class="ud-aichat-quick-btn" onclick="sendQuickMessage('Top 5 khóa học được đánh giá cao nhất?')">
+                            @Html.Raw("<i class=\"bi bi-star\"></i>")
+                            Top khóa học
+                        </button>
+                        <button class="ud-aichat-quick-btn" onclick="sendQuickMessage('Tổng số học viên trên nền tảng là bao nhiêu?')">
+                            @Html.Raw("<i class=\"bi bi-people\"></i>")
+                            Số học viên
+                        </button>
                     </div>
                 </div>
             }
@@ -81,49 +541,47 @@
                 {
                     if (msg.Role == "user")
                     {
-                        <div class="message-row user-row">
-                            <div class="msg-bubble user-bubble">@msg.Content</div>
-                            <div class="msg-avatar user-msg-avatar">U</div>
+                        <div class="ud-aichat-message-row user">
+                            <div class="ud-aichat-msg-avatar user">U</div>
+                            <div class="ud-aichat-msg-bubble user">@msg.Content</div>
                         </div>
                     }
                     else
                     {
-                        <div class="message-row ai-row">
-                            <div class="msg-avatar ai-msg-avatar">🤖</div>
-                            <div class="msg-bubble ai-bubble">@msg.Content</div>
+                        <div class="ud-aichat-message-row">
+                            <div class="ud-aichat-msg-avatar ai">
+                                @Html.Raw("<i class=\"bi bi-robot\"></i>")
+                            </div>
+                            <div class="ud-aichat-msg-bubble ai">@Html.Raw(msg.Content.Replace("\n", "<br>"))</div>
                         </div>
                     }
                 }
             }
         </div>
 
-        <!-- Typing indicator -->
-        <div class="typing-indicator" id="typingIndicator" style="display:none;">
-            <div class="msg-avatar ai-msg-avatar">🤖</div>
-            <div class="typing-bubble">
+        <div class="ud-aichat-typing" id="typingIndicator" style="display:none;">
+            <div class="ud-aichat-msg-avatar ai">
+                @Html.Raw("<i class=\"bi bi-robot\"></i>")
+            </div>
+            <div class="ud-aichat-typing-bubble">
                 <span></span><span></span><span></span>
             </div>
         </div>
 
-        <!-- Input Area -->
-        <div class="ai-input-area">
-            <div class="input-box-wrapper">
+        <div class="ud-aichat-input-area">
+            <div class="ud-aichat-input-wrap">
                 <textarea
                     id="userInput"
-                    class="ai-input-box"
+                    class="ud-aichat-input"
                     placeholder="Nhập câu hỏi của bạn... (Enter để gửi, Shift+Enter để xuống dòng)"
                     rows="1"
                     maxlength="2000"></textarea>
-                <button class="ai-send-btn" id="sendBtn" onclick="sendMessage()">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                        <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/>
-                    </svg>
+                <button class="ud-aichat-send-btn" id="sendBtn" onclick="sendMessage()">
+                    @Html.Raw("<i class=\"bi bi-send\"></i>")
                 </button>
             </div>
-            <div class="input-hint">
-                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
-                </svg>
+            <div class="ud-aichat-hint">
+                @Html.Raw("<svg width=\"12\" height=\"12\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 8v4M12 16h.01\"/></svg>")
                 AI có thể truy vấn dữ liệu thực từ database để trả lời chính xác
             </div>
         </div>
@@ -133,17 +591,13 @@
 @section Scripts {
 <script>
     let currentConversationId = '@(Model.CurrentConversationId?.ToString() ?? "")';
-    const antiForgeryToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value
-        || '@Html.AntiForgeryToken()'.match(/value="([^"]+)"/)?.[1] || '';
 
-    // Auto-resize textarea
     const textarea = document.getElementById('userInput');
     textarea.addEventListener('input', function () {
         this.style.height = 'auto';
         this.style.height = Math.min(this.scrollHeight, 160) + 'px';
     });
 
-    // Enter to send
     textarea.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -159,14 +613,11 @@
         input.value = '';
         input.style.height = 'auto';
 
-        // Ẩn welcome screen
         const welcome = document.getElementById('welcomeScreen');
         if (welcome) welcome.style.display = 'none';
 
-        // Hiển thị tin nhắn user
         appendMessage('user', text);
 
-        // Hiện typing
         document.getElementById('typingIndicator').style.display = 'flex';
         document.getElementById('sendBtn').disabled = true;
         scrollToBottom();
@@ -206,14 +657,14 @@
     function appendMessage(role, content) {
         const container = document.getElementById('messagesContainer');
         const row = document.createElement('div');
-        row.className = `message-row ${role === 'user' ? 'user-row' : 'ai-row'}`;
+        row.className = `ud-aichat-message-row ${role === 'user' ? 'user' : ''}`;
 
         if (role === 'user') {
-            row.innerHTML = `<div class="msg-bubble user-bubble">${escHtml(content)}</div>
-                             <div class="msg-avatar user-msg-avatar">U</div>`;
+            row.innerHTML = `<div class="ud-aichat-msg-avatar user">U</div>
+                             <div class="ud-aichat-msg-bubble user">${escHtml(content)}</div>`;
         } else {
-            row.innerHTML = `<div class="msg-avatar ai-msg-avatar">🤖</div>
-                             <div class="msg-bubble ai-bubble">${formatMarkdown(content)}</div>`;
+            row.innerHTML = '<div class="ud-aichat-msg-avatar ai"><i class="bi bi-robot"></i></div>' +
+                '<div class="ud-aichat-msg-bubble ai">' + formatMarkdown(content) + '</div>';
         }
         container.appendChild(row);
         scrollToBottom();
@@ -247,22 +698,22 @@
     }
 
     function updateSidebarConversation(id, lastMsg) {
-        let existing = document.querySelector(`.conv-item[data-id="${id}"]`);
+        let existing = document.querySelector(`.ud-aichat-conv-item[data-id="${id}"]`);
         if (!existing) {
             const list = document.getElementById('conversationsList');
             const item = document.createElement('div');
-            item.className = 'conv-item active';
+            item.className = 'ud-aichat-conv-item active';
             item.dataset.id = id;
             item.onclick = () => loadConversation(id);
-            item.innerHTML = `<div class="conv-icon">💬</div>
-                <div class="conv-info">
-                    <div class="conv-preview">${escHtml(lastMsg.substring(0, 60))}</div>
-                    <div class="conv-time">Vừa xong</div>
+            item.innerHTML = `<div class="ud-aichat-conv-icon"><i class="bi bi-chat-dots"></i></div>
+                <div class="ud-aichat-conv-info">
+                    <div class="ud-aichat-conv-preview">${escHtml(lastMsg.substring(0, 60))}</div>
+                    <div class="ud-aichat-conv-time">Vừa xong</div>
                 </div>`;
             list.prepend(item);
         }
-        document.querySelectorAll('.conv-item').forEach(i => i.classList.remove('active'));
-        (existing || document.querySelector(`.conv-item[data-id="${id}"]`))?.classList.add('active');
+        document.querySelectorAll('.ud-aichat-conv-item').forEach(i => i.classList.remove('active'));
+        (existing || document.querySelector(`.ud-aichat-conv-item[data-id="${id}"]`))?.classList.add('active');
     }
 
     function loadConversation(id) {

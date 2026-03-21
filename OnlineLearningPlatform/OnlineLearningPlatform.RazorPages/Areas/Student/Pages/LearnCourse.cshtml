@@ -6,7 +6,6 @@
 }
 
 <style>
-    /* ===== LearnCourse — 2-column layout ===== */
     .learn-wrapper {
         display: flex;
         gap: 0;
@@ -14,79 +13,76 @@
         margin: -24px -32px;
     }
 
-    /* --- Sidebar: danh sách bài học --- */
     .learn-sidebar {
         width: 340px;
         min-width: 300px;
-        background: var(--color-surface);
-        border-right: 1px solid var(--color-border-light);
+        background: var(--ud-white);
+        border-right: 1px solid var(--ud-border);
         overflow-y: auto;
         display: flex;
         flex-direction: column;
     }
 
     .learn-sidebar-header {
-        padding: 20px 20px 16px;
-        border-bottom: 1px solid var(--color-border-light);
+        padding: var(--ud-sp5);
+        border-bottom: 1px solid var(--ud-border);
     }
 
     .learn-sidebar-header h2 {
-        font-size: 16px;
-        font-weight: 700;
-        color: var(--color-label-1);
-        margin: 0 0 12px;
-        line-height: 1.3;
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--ud-text);
+        margin: 0 0 var(--ud-sp3);
+        line-height: 1.35;
     }
 
-    /* --- Progress bar (4.8) --- */
     .progress-bar-container {
-        background: var(--color-surface-2);
-        border-radius: var(--radius-full);
-        height: 8px;
+        background: var(--ud-border);
+        border-radius: var(--ud-radius-pill);
+        height: 6px;
         overflow: hidden;
-        margin-bottom: 6px;
+        margin-bottom: var(--ud-sp2);
     }
 
     .progress-bar-fill {
-        background: var(--color-blue);
+        background: linear-gradient(90deg, var(--ud-purple), var(--ud-magenta));
         height: 100%;
-        border-radius: var(--radius-full);
+        border-radius: var(--ud-radius-pill);
         transition: width 0.5s ease;
     }
 
     .progress-text {
         font-size: 12px;
-        color: var(--color-label-2);
-        font-weight: 500;
+        color: var(--ud-text-muted);
+        font-weight: 600;
     }
 
-    /* --- Section & Lesson list --- */
     .learn-sections {
         flex: 1;
         overflow-y: auto;
-        padding: 8px 0;
+        padding: var(--ud-sp2) 0;
     }
 
     .learn-section {
-        margin-bottom: 4px;
+        margin-bottom: var(--ud-sp1);
     }
 
     .learn-section-title {
         display: flex;
         align-items: center;
-        gap: 8px;
-        padding: 10px 20px;
-        font-size: 13px;
+        gap: var(--ud-sp2);
+        padding: var(--ud-sp3) var(--ud-sp5);
+        font-size: 12px;
         font-weight: 700;
-        color: var(--color-label-2);
+        color: var(--ud-text-muted);
         text-transform: uppercase;
-        letter-spacing: 0.3px;
+        letter-spacing: 0.5px;
         cursor: pointer;
         user-select: none;
     }
 
     .learn-section-title:hover {
-        color: var(--color-label-1);
+        color: var(--ud-text);
     }
 
     .learn-section-title .chevron {
@@ -111,10 +107,10 @@
     .learn-lesson-item {
         display: flex;
         align-items: center;
-        gap: 10px;
-        padding: 10px 20px 10px 32px;
-        font-size: 14px;
-        color: var(--color-label-1);
+        gap: var(--ud-sp3);
+        padding: var(--ud-sp3) var(--ud-sp5) var(--ud-sp3) var(--ud-sp8);
+        font-size: 13px;
+        color: var(--ud-text);
         cursor: pointer;
         text-decoration: none;
         transition: background 0.15s;
@@ -122,13 +118,15 @@
     }
 
     .learn-lesson-item:hover {
-        background: var(--color-surface-2);
+        background: var(--ud-surface);
+        text-decoration: none;
+        color: var(--ud-text);
     }
 
     .learn-lesson-item.active {
-        background: var(--color-blue-tint);
-        border-left-color: var(--color-blue);
-        font-weight: 600;
+        background: rgba(164, 53, 240, 0.08);
+        border-left-color: var(--ud-magenta);
+        font-weight: 700;
     }
 
     .learn-lesson-item .lesson-icon {
@@ -143,14 +141,14 @@
     }
 
     .lesson-icon.completed {
-        background: var(--color-green);
+        background: var(--ud-green);
         color: #fff;
     }
 
     .lesson-icon.incomplete {
-        border: 2px solid var(--color-border);
+        border: 2px solid var(--ud-border);
         background: transparent;
-        color: var(--color-label-3);
+        color: var(--ud-text-muted);
     }
 
     .learn-lesson-item .lesson-title {
@@ -163,19 +161,19 @@
     .lesson-type-badge {
         font-size: 10px;
         padding: 2px 6px;
-        border-radius: var(--radius-full);
-        background: var(--color-surface-2);
-        color: var(--color-label-2);
-        font-weight: 500;
+        border-radius: var(--ud-radius);
+        background: var(--ud-surface);
+        color: var(--ud-text-muted);
+        font-weight: 700;
         flex-shrink: 0;
+        border: 1px solid var(--ud-border);
     }
 
-    /* --- Main content area --- */
     .learn-content {
         flex: 1;
         display: flex;
         flex-direction: column;
-        background: var(--color-bg);
+        background: var(--ud-surface);
         overflow-y: auto;
     }
 
@@ -183,38 +181,84 @@
         max-width: 900px;
         width: 100%;
         margin: 0 auto;
-        padding: 32px 40px;
+        padding: var(--ud-sp8) var(--ud-sp10);
+    }
+
+    .lesson-tabs {
+        display: flex;
+        gap: var(--ud-sp2);
+        margin-bottom: var(--ud-sp6);
+        border-bottom: none;
+    }
+
+    .lesson-tab {
+        display: inline-flex;
+        align-items: center;
+        padding: var(--ud-sp2) var(--ud-sp5);
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--ud-text-muted);
+        background: transparent;
+        border: none;
+        border-radius: var(--ud-radius-pill);
+        cursor: pointer;
+        transition: background 0.18s, color 0.18s;
+    }
+
+    .lesson-tab:hover:not(.active) {
+        background: rgba(0,0,0,0.06);
+        color: var(--ud-text);
+    }
+
+    .lesson-tab.active {
+        background: var(--ud-black);
+        color: white;
+    }
+
+    .lesson-tab.highlight {
+        color: var(--ud-star);
+    }
+
+    .tab-content {
+        display: block;
+    }
+
+    .tab-pane {
+        display: none;
+    }
+
+    .tab-pane.active {
+        display: block;
     }
 
     .lesson-header {
-        margin-bottom: 24px;
+        margin-bottom: var(--ud-sp6);
     }
 
     .lesson-header h1 {
-        font-size: 24px;
-        font-weight: 700;
-        color: var(--color-label-1);
-        margin: 0 0 8px;
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--ud-text);
+        margin: 0 0 var(--ud-sp2);
     }
 
     .lesson-meta {
         font-size: 13px;
-        color: var(--color-label-2);
+        color: var(--ud-text-muted);
         display: flex;
-        gap: 16px;
+        gap: var(--ud-sp4);
         align-items: center;
     }
 
-    /* --- Video player --- */
     .video-container {
         position: relative;
         padding-bottom: 56.25%;
         height: 0;
         overflow: hidden;
-        border-radius: var(--radius);
+        border-radius: var(--ud-radius);
         background: #000;
-        margin-bottom: 24px;
-        box-shadow: var(--shadow-md);
+        margin-bottom: var(--ud-sp6);
+        box-shadow: var(--ud-shadow-lg);
     }
 
     .video-container video {
@@ -226,117 +270,120 @@
         object-fit: contain;
     }
 
-    /* --- Reading content --- */
     .reading-content {
-        background: var(--color-surface);
-        border-radius: var(--radius);
-        padding: 32px;
-        box-shadow: var(--shadow-sm);
+        background: var(--ud-white);
+        border: 1px solid var(--ud-border);
+        border-radius: var(--ud-radius);
+        padding: var(--ud-sp8);
+        box-shadow: var(--ud-shadow-sm);
         line-height: 1.8;
         font-size: 15px;
-        color: var(--color-label-1);
+        color: var(--ud-text);
     }
 
-    .reading-content h1,
     .reading-content h2,
     .reading-content h3 {
-        margin-top: 24px;
+        margin-top: var(--ud-sp6);
+        margin-bottom: var(--ud-sp3);
     }
 
     .reading-content pre {
-        background: var(--color-surface-2);
-        padding: 16px;
-        border-radius: var(--radius-sm);
+        background: var(--ud-surface);
+        padding: var(--ud-sp4);
+        border-radius: var(--ud-radius-md);
         overflow-x: auto;
+        border: 1px solid var(--ud-border);
     }
 
-    /* --- Mark complete button --- */
     .lesson-actions {
         display: flex;
         align-items: center;
-        gap: 12px;
-        margin-top: 24px;
-        padding-top: 20px;
-        border-top: 1px solid var(--color-border-light);
+        gap: var(--ud-sp3);
+        margin-top: var(--ud-sp6);
+        padding-top: var(--ud-sp5);
+        border-top: 1px solid var(--ud-border);
     }
 
     .btn-mark-complete {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        padding: 10px 24px;
-        border-radius: var(--radius-full);
-        font-size: 14px;
-        font-weight: 600;
+        gap: var(--ud-sp2);
+        padding: 10px 20px;
+        border-radius: var(--ud-radius);
+        font-size: 13px;
+        font-weight: 700;
         border: none;
         cursor: pointer;
         transition: all 0.2s;
     }
 
     .btn-mark-complete.incomplete {
-        background: var(--color-blue);
+        background: var(--ud-green);
         color: #fff;
     }
 
     .btn-mark-complete.incomplete:hover {
-        background: var(--color-blue-hover);
-        transform: scale(1.02);
+        background: #0e5a38;
     }
 
     .btn-mark-complete.completed {
-        background: var(--color-green-tint);
-        color: var(--color-green);
+        background: var(--ud-green-bg);
+        color: var(--ud-green);
         cursor: default;
     }
 
     .btn-next-lesson {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        padding: 10px 20px;
-        border-radius: var(--radius-full);
-        font-size: 14px;
-        font-weight: 500;
-        border: 1px solid var(--color-border);
-        background: var(--color-surface);
-        color: var(--color-label-1);
+        gap: var(--ud-sp2);
+        padding: 10px 18px;
+        border-radius: var(--ud-radius);
+        font-size: 13px;
+        font-weight: 600;
+        border: 1px solid var(--ud-border);
+        background: var(--ud-white);
+        color: var(--ud-text);
         cursor: pointer;
         text-decoration: none;
         transition: all 0.2s;
     }
 
     .btn-next-lesson:hover {
-        background: var(--color-surface-2);
+        background: var(--ud-surface);
+        text-decoration: none;
+        color: var(--ud-text);
     }
 
-    /* --- Empty state --- */
     .no-lesson {
         text-align: center;
-        padding: 80px 20px;
-        color: var(--color-label-2);
+        padding: var(--ud-sp10) var(--ud-sp6);
     }
 
     .no-lesson h2 {
-        font-size: 20px;
-        margin-bottom: 8px;
-        color: var(--color-label-1);
+        font-size: 18px;
+        margin-bottom: var(--ud-sp2);
+        color: var(--ud-text);
     }
 
-    /* --- Toast --- */
+    .no-lesson p {
+        font-size: 14px;
+        color: var(--ud-text-muted);
+    }
+
     .toast-notification {
         position: fixed;
-        bottom: 24px;
-        right: 24px;
-        padding: 14px 24px;
-        border-radius: var(--radius);
-        font-size: 14px;
-        font-weight: 500;
+        bottom: var(--ud-sp6);
+        right: var(--ud-sp6);
+        padding: var(--ud-sp3) var(--ud-sp6);
+        border-radius: var(--ud-radius);
+        font-size: 13px;
+        font-weight: 700;
         color: #fff;
         z-index: 9999;
         transform: translateY(100px);
         opacity: 0;
         transition: all 0.3s ease;
-        box-shadow: var(--shadow-lg);
+        box-shadow: var(--ud-shadow-lg);
     }
 
     .toast-notification.show {
@@ -345,14 +392,220 @@
     }
 
     .toast-notification.success {
-        background: var(--color-green);
+        background: var(--ud-green);
     }
 
     .toast-notification.error {
-        background: var(--color-red);
+        background: var(--ud-red);
     }
 
-    /* --- Responsive --- */
+    .discussion-section {
+        margin-top: var(--ud-sp6);
+    }
+
+    .discussion-section h3 {
+        font-size: 18px;
+        font-weight: 800;
+        margin-bottom: var(--ud-sp5);
+    }
+
+    .discussion-form {
+        background: var(--ud-white);
+        border: 1px solid var(--ud-border);
+        border-radius: var(--ud-radius);
+        padding: var(--ud-sp5);
+        margin-bottom: var(--ud-sp5);
+        box-shadow: var(--ud-shadow-sm);
+    }
+
+    .discussion-form textarea {
+        width: 100%;
+        font-family: inherit;
+        font-size: 14px;
+        color: var(--ud-text);
+        background: var(--ud-surface);
+        border: 1px solid var(--ud-border);
+        border-radius: var(--ud-radius);
+        padding: var(--ud-sp3) var(--ud-sp4);
+        outline: none;
+        resize: vertical;
+        min-height: 80px;
+        margin-bottom: var(--ud-sp3);
+    }
+
+    .discussion-form textarea:focus {
+        border-color: var(--ud-magenta);
+        box-shadow: 0 0 0 3px rgba(164,53,240,.14);
+    }
+
+    .discussion-item {
+        background: var(--ud-white);
+        border: 1px solid var(--ud-border);
+        border-radius: var(--ud-radius);
+        padding: var(--ud-sp5);
+        margin-bottom: var(--ud-sp4);
+        box-shadow: var(--ud-shadow-sm);
+    }
+
+    .discussion-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: var(--ud-sp3);
+    }
+
+    .discussion-author {
+        display: flex;
+        align-items: center;
+        gap: var(--ud-sp2);
+    }
+
+    .discussion-author-name {
+        font-weight: 700;
+        font-size: 14px;
+        color: var(--ud-text);
+    }
+
+    .discussion-date {
+        font-size: 12px;
+        color: var(--ud-text-muted);
+    }
+
+    .discussion-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--ud-text);
+        margin-bottom: var(--ud-sp3);
+    }
+
+    .discussion-replies {
+        margin-left: var(--ud-sp6);
+        padding-left: var(--ud-sp4);
+        border-left: 2px solid var(--ud-border);
+    }
+
+    .reply-item {
+        margin-bottom: var(--ud-sp4);
+    }
+
+    .reply-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .reply-header {
+        display: flex;
+        align-items: center;
+        gap: var(--ud-sp2);
+        margin-bottom: var(--ud-sp1);
+    }
+
+    .reply-author {
+        font-weight: 700;
+        font-size: 13px;
+        color: var(--ud-text);
+    }
+
+    .reply-date {
+        font-size: 11px;
+        color: var(--ud-text-muted);
+    }
+
+    .reply-content {
+        font-size: 14px;
+        color: var(--ud-text);
+        margin: 0;
+    }
+
+    .reply-form {
+        display: flex;
+        gap: var(--ud-sp2);
+        margin-top: var(--ud-sp3);
+        margin-left: var(--ud-sp6);
+    }
+
+    .reply-form input {
+        flex: 1;
+        font-family: inherit;
+        font-size: 13px;
+        color: var(--ud-text);
+        background: var(--ud-surface);
+        border: 1px solid var(--ud-border);
+        border-radius: var(--ud-radius);
+        padding: var(--ud-sp2) var(--ud-sp4);
+        outline: none;
+    }
+
+    .reply-form input:focus {
+        border-color: var(--ud-magenta);
+        box-shadow: 0 0 0 3px rgba(164,53,240,.14);
+    }
+
+    .review-section {
+        text-align: center;
+        padding: var(--ud-sp6) 0;
+    }
+
+    .review-section h2 {
+        font-size: 22px;
+        font-weight: 800;
+        margin-bottom: var(--ud-sp2);
+    }
+
+    .review-section p {
+        font-size: 15px;
+        color: var(--ud-text-muted);
+        margin-bottom: var(--ud-sp6);
+    }
+
+    .review-form {
+        background: var(--ud-white);
+        border: 1px solid var(--ud-border);
+        border-radius: var(--ud-radius);
+        padding: var(--ud-sp6);
+        max-width: 560px;
+        margin: 0 auto;
+        text-align: left;
+        box-shadow: var(--ud-shadow);
+    }
+
+    .review-form .form-group {
+        margin-bottom: var(--ud-sp5);
+    }
+
+    .review-form label {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--ud-text-muted);
+        margin-bottom: var(--ud-sp2);
+    }
+
+    .review-form select,
+    .review-form textarea {
+        width: 100%;
+        font-family: inherit;
+        font-size: 14px;
+        color: var(--ud-text);
+        background: var(--ud-surface);
+        border: 1px solid var(--ud-border);
+        border-radius: var(--ud-radius);
+        padding: var(--ud-sp3) var(--ud-sp4);
+        outline: none;
+    }
+
+    .review-form select:focus,
+    .review-form textarea:focus {
+        border-color: var(--ud-magenta);
+        box-shadow: 0 0 0 3px rgba(164,53,240,.14);
+    }
+
+    .review-form textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
     @@media (max-width: 768px) {
         .learn-wrapper {
             flex-direction: column;
@@ -363,22 +616,27 @@
             min-width: unset;
             max-height: 300px;
             border-right: none;
-            border-bottom: 1px solid var(--color-border-light);
+            border-bottom: 1px solid var(--ud-border);
         }
 
         .learn-content-inner {
-            padding: 20px 16px;
+            padding: var(--ud-sp5) var(--ud-sp4);
+        }
+
+        .lesson-tabs {
+            flex-wrap: wrap;
+        }
+
+        .lesson-actions {
+            flex-wrap: wrap;
         }
     }
 </style>
 
 <div class="learn-wrapper">
-    <!-- ===== SIDEBAR: Curriculum + Progress ===== -->
     <aside class="learn-sidebar">
         <div class="learn-sidebar-header">
             <h2>@(Model.Course?.Title ?? "")</h2>
-
-            <!-- Progress bar (4.8) -->
             <div class="progress-bar-container">
                 <div class="progress-bar-fill" id="progressBar"
                      style="width: @Model.Progress.PercentComplete%"></div>
@@ -401,7 +659,7 @@
 
                 <div class="learn-section">
                     <div class="learn-section-title" onclick="toggleSection(this)">
-                        <span class="chevron">▼</span>
+                        <span class="chevron">@Html.Raw("<i class=\"bi bi-chevron-down\"></i>")</span>
                         @(section.Title)
                     </div>
                     <ul class="learn-lesson-list">
@@ -412,9 +670,9 @@
                             var typeLabel = lesson.LessonType switch
                             {
                                 LessonType.Video => "Video",
-                                LessonType.Reading => "Đọc",
+                                LessonType.Reading => "Doc",
                                 LessonType.Quiz => "Quiz",
-                                LessonType.Assignment => "Bài tập",
+                                LessonType.Assignment => "BT",
                                 _ => ""
                             };
 
@@ -422,7 +680,10 @@
                                 <a class="learn-lesson-item @(isActive ? "active" : "")"
                                    href="/Student/LearnCourse?courseId=@Model.Course.CourseId&lessonId=@lesson.LessonId">
                                     <span class="lesson-icon @(isCompleted ? "completed" : "incomplete")">
-                                        @(isCompleted ? "✓" : "")
+                                        @if (isCompleted)
+                                        {
+                                            @Html.Raw("<i class=\"bi bi-check\"></i>")
+                                        }
                                     </span>
                                     <span class="lesson-title">@lesson.Title</span>
                                     <span class="lesson-type-badge">@typeLabel</span>
@@ -435,7 +696,6 @@
         </div>
     </aside>
 
-    <!-- ===== MAIN CONTENT: Video / Reading ===== -->
     <main class="learn-content">
         @if (Model.CurrentLesson != null)
         {
@@ -443,94 +703,64 @@
             var isCompleted = Model.CompletedLessonIds.Contains(lesson.LessonId);
 
             <div class="learn-content-inner">
-                <!-- Nav tabs -->
-                <ul class="nav nav-tabs mb-4 px-2 border-0" id="lessonTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="content-tab" data-bs-toggle="tab" data-bs-target="#content" type="button" role="tab">Nội dung bài học</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="discuss-tab" data-bs-toggle="tab" data-bs-target="#discuss" type="button" role="tab">Thảo luận chung</button>
-                    </li>
+                <div class="lesson-tabs">
+                    <button class="lesson-tab active" data-tab="content" onclick="switchTab('content')">
+                        @Html.Raw("<i class=\"bi bi-play-circle\"></i>") Noi dung bai hoc
+                    </button>
+                    <button class="lesson-tab" data-tab="discuss" onclick="switchTab('discuss')">
+                        @Html.Raw("<i class=\"bi bi-chat-dots\"></i>") Thao luan chung
+                    </button>
                     @if (Model.Progress.PercentComplete >= 100)
                     {
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="review-tab" data-bs-toggle="tab" data-bs-target="#review" type="button" role="tab" style="color: #ff9f0a;">🌟 Đánh giá khóa học</button>
-                        </li>
+                        <button class="lesson-tab highlight" data-tab="review" onclick="switchTab('review')">
+                            @Html.Raw("<i class=\"bi bi-star\"></i>") Danh gia khoa hoc
+                        </button>
                     }
-                </ul>
-                
-                <style>
-                    .nav-tabs {
-                        border-bottom: none !important;
-                        gap: 6px;
-                    }
-                    .nav-tabs .nav-item {
-                        border: none !important;
-                        margin-bottom: 0 !important;
-                    }
-                    .nav-tabs .nav-link {
-                        border: none !important;
-                        outline: none !important;
-                        box-shadow: none;
-                        color: var(--color-label-2);
-                        font-weight: 600;
-                        border-radius: var(--radius-full) !important;
-                        padding: 8px 20px;
-                        transition: background 0.18s, color 0.18s;
-                        background-color: transparent;
-                    }
-                    .nav-tabs .nav-link:hover:not(.active) {
-                        background-color: var(--color-surface-2);
-                        color: var(--color-label-1);
-                    }
-                    .nav-tabs .nav-link.active {
-                        background-color: var(--color-blue) !important;
-                        color: white !important;
-                        box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
-                    }
-                    .nav-tabs .nav-link:focus {
-                        outline: none !important;
-                        box-shadow: none !important;
-                    }
-                </style>
+                </div>
 
-                <!-- Tab content -->
-                <div class="tab-content" id="lessonTabsContent">
-                    
-                    <!-- CONTENT TAB -->
-                    <div class="tab-pane fade show active" id="content" role="tabpanel">
-                        <div class="lesson-header mt-2">
+                <div class="tab-content">
+                    <div class="tab-pane active" id="content">
+                        <div class="lesson-header">
                             <h1>@lesson.Title</h1>
                             <div class="lesson-meta">
-                                <span>@(lesson.LessonType switch
-                                {
-                                    LessonType.Video => "📹 Video",
-                                    LessonType.Reading => "📖 Bài đọc",
-                                    LessonType.Quiz => "📝 Quiz",
-                                    LessonType.Assignment => "📋 Bài tập",
-                                    _ => ""
-                                })</span>
+                                @{
+                                    var lessonTypeIcon = lesson.LessonType switch
+                                    {
+                                        LessonType.Video => "bi-camera-video",
+                                        LessonType.Reading => "bi-book",
+                                        LessonType.Quiz => "bi-pencil-square",
+                                        LessonType.Assignment => "bi-list-task",
+                                        _ => "bi-file-text"
+                                    };
+                                    var lessonTypeName = lesson.LessonType switch
+                                    {
+                                        LessonType.Video => "Video",
+                                        LessonType.Reading => "Bai doc",
+                                        LessonType.Quiz => "Quiz",
+                                        LessonType.Assignment => "Bai tap",
+                                        _ => ""
+                                    };
+                                }
+                                <span>@Html.Raw($"<i class=\"bi {lessonTypeIcon}\"></i>") @lessonTypeName</span>
                                 @if (lesson.VideoDurationSeconds.HasValue)
                                 {
                                     var mins = lesson.VideoDurationSeconds.Value / 60;
                                     var secs = lesson.VideoDurationSeconds.Value % 60;
-                                    <span>⏱ @(mins):@(secs.ToString("D2"))</span>
+                                    <span>@Html.Raw("<i class=\"bi bi-clock\"></i>") @(mins):@(secs.ToString("D2"))</span>
                                 }
                             </div>
                         </div>
 
-                        <!-- Video player -->
                         @if (lesson.LessonType == LessonType.Video && !string.IsNullOrEmpty(lesson.VideoStoragePath))
                         {
                             <div class="video-container">
                                 <video id="videoPlayer" controls preload="metadata">
                                     <source src="@lesson.VideoStoragePath" type="video/mp4" />
-                                    Trình duyệt không hỗ trợ video.
+                                    Trinh duyet khong ho tro video.
                                 </video>
                             </div>
                         }
 
-                        <!-- Reading content -->
                         @if (lesson.LessonType == LessonType.Reading && !string.IsNullOrEmpty(lesson.Content))
                         {
                             <div class="reading-content">
@@ -538,38 +768,35 @@
                             </div>
                         }
 
-                        <!-- Quiz / Assignment placeholder -->
                         @if (lesson.LessonType == LessonType.Quiz)
                         {
                             <div class="reading-content">
-                                <p>Bài quiz này sẽ được làm trong phần Quiz.</p>
+                                <p>Bai quiz nay se duoc lam trong phan Quiz.</p>
                             </div>
                         }
                         @if (lesson.LessonType == LessonType.Assignment)
                         {
                             <div class="reading-content">
-                                <p>Bài tập sẽ được nộp trong phần Assignment.</p>
+                                <p>Bai tap se duoc nop trong phan Assignment.</p>
                             </div>
                         }
 
-                        <!-- Actions: mark complete + next lesson -->
                         <div class="lesson-actions">
                             @if (isCompleted)
                             {
                                 <button class="btn-mark-complete completed" disabled id="btnMarkComplete">
-                                    ✓ Đã hoàn thành
+                                    @Html.Raw("<i class=\"bi bi-check-circle\"></i>") Da hoan thanh
                                 </button>
                             }
                             else
                             {
                                 <button class="btn-mark-complete incomplete" id="btnMarkComplete"
                                         onclick="markComplete(@lesson.LessonId, '@Model.Course.CourseId')">
-                                    ✓ Đánh dấu hoàn thành
+                                    @Html.Raw("<i class=\"bi bi-check-circle\"></i>") Danh dau hoan thanh
                                 </button>
                             }
 
                             @{
-                                // Tìm bài tiếp theo
                                 var allLessons = Model.Course.Sections
                                     .OrderBy(s => s.OrderIndex)
                                     .SelectMany(s => s.Lessons.Where(l => !l.IsDeleted).OrderBy(l => l.OrderIndex))
@@ -584,210 +811,162 @@
                             {
                                 <a class="btn-next-lesson"
                                    href="/Student/LearnCourse?courseId=@Model.Course.CourseId&lessonId=@nextLesson.LessonId">
-                                    Bài tiếp theo →
+                                    Bai tiep theo @Html.Raw("<i class=\"bi bi-arrow-right\"></i>")
                                 </a>
                             }
                         </div>
-                    </div> <!-- End Content Tab -->
+                    </div>
 
-                    <!-- DISCUSS TAB -->
-                    <div class="tab-pane fade" id="discuss" role="tabpanel">
-                        <div class="mt-4">
-                            <h3 class="fw-bold mb-4" style="font-size: 1.4rem;">Thảo luận chung</h3>
-                            
-                            <!-- Create Topic Form -->
-                            <div class="card border-0 shadow-sm rounded-4 mb-4" style="background: var(--apple-card-bg);">
-                                <div class="card-body p-4">
-                                    <form method="post" asp-page-handler="CreateTopic" asp-route-courseId="@Model.Course.CourseId" asp-route-lessonId="@lesson.LessonId">
-                                        <div class="mb-3">
-                                            <textarea asp-for="NewTopicTitle" class="form-control border-0 bg-light rounded-3" rows="2" placeholder="Bạn có câu hỏi gì cần trao đổi?"></textarea>
+                    <div class="tab-pane" id="discuss">
+                        <div class="discussion-section">
+                            <h3>@Html.Raw("<i class=\"bi bi-chat-dots\"></i>") Thao luan chung</h3>
+
+                            <div class="discussion-form">
+                                <form method="post" asp-page-handler="CreateTopic" asp-route-courseId="@Model.Course.CourseId" asp-route-lessonId="@lesson.LessonId">
+                                    <textarea asp-for="NewTopicTitle" placeholder="Ban co cau hoi gi can trao doi?"></textarea>
+                                    <div style="text-align: right;">
+                                        <button type="submit" class="btn btn-primary">
+                                            @Html.Raw("<i class=\"bi bi-send\"></i>") Dang cau hoi
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            @if (Model.Topics != null && Model.Topics.Any())
+                            {
+                                foreach (var topic in Model.Topics)
+                                {
+                                    <div class="discussion-item">
+                                        <div class="discussion-header">
+                                            <div class="discussion-author">
+                                                <span class="discussion-author-name">@topic.CreatorName</span>
+                                                @if (topic.CreatorRole == "Teacher" || topic.CreatorRole == "Admin")
+                                                {
+                                                    <span class="badge badge-purple">Giang vien</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-muted">Hoc vien</span>
+                                                }
+                                            </div>
+                                            <span class="discussion-date">@topic.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
                                         </div>
-                                        <div class="text-end">
-                                            <button type="submit" class="btn btn-primary rounded-pill px-4" style="background-color: var(--color-blue); border:none; font-weight: 500;">
-                                                Đăng câu hỏi
-                                            </button>
+                                        <p class="discussion-title">@topic.Title</p>
+
+                                        @if (topic.Replies != null && topic.Replies.Any())
+                                        {
+                                            <div class="discussion-replies">
+                                                @foreach (var reply in topic.Replies)
+                                                {
+                                                    <div class="reply-item">
+                                                        <div class="reply-header">
+                                                            <span class="reply-author">@reply.UserName</span>
+                                                            @if (reply.UserRole == "Teacher" || reply.UserRole == "Admin")
+                                                            {
+                                                                <span class="badge badge-purple" style="font-size: 9px;">GV</span>
+                                                            }
+                                                            <span class="reply-date">@reply.CreatedAt.ToString("dd/MM HH:mm")</span>
+                                                        </div>
+                                                        <p class="reply-content">@reply.Content</p>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+
+                                        <div class="reply-form">
+                                            <form method="post" asp-page-handler="CreateReply" asp-route-courseId="@Model.Course.CourseId" asp-route-lessonId="@lesson.LessonId" asp-route-topicId="@topic.TopicId" style="display: flex; gap: var(--ud-sp2); width: 100%;">
+                                                <input type="text" name="NewReplyContent" placeholder="Viet phan hoi...">
+                                                <button type="submit" class="btn btn-primary btn-sm">
+                                                    @Html.Raw("<i class=\"bi bi-send\"></i>")
+                                                </button>
+                                            </form>
                                         </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="ud-empty">
+                                    @Html.Raw("<i class=\"bi bi-chat-square-text\" style=\"font-size: 2.5rem;\"></i>")
+                                    <h3>Chua co thao luan</h3>
+                                    <p>Ban hay la nguoi dau tien dat cau hoi!</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    @if (Model.Progress.PercentComplete >= 100)
+                    {
+                        <div class="tab-pane" id="review">
+                            <div class="review-section">
+                                <h2>@Html.Raw("<i class=\"bi bi-trophy\"></i>") Chung minh ban da hoan thanh khoa hoc!</h2>
+                                <p>Hay chia se cam nhan cua ban de giup khoa hoc ngay cang hoan thien hon.</p>
+
+                                <div class="review-form">
+                                    <form method="post" asp-page-handler="SubmitReview" asp-route-courseId="@Model.Course.CourseId" asp-route-lessonId="@lesson.LessonId">
+                                        <div class="form-group">
+                                            <label>Cham diem khoa hoc</label>
+                                            <select asp-for="ReviewRating" class="form-control">
+                                                <option value="5" selected="@(Model.MyReview?.Rating == 5)">@Html.Raw("&#9733;&#9733;&#9733;&#9733;&#9733;") (5) Tuyet voi</option>
+                                                <option value="4" selected="@(Model.MyReview?.Rating == 4)">@Html.Raw("&#9733;&#9733;&#9733;&#9733;") (4) Rat tot</option>
+                                                <option value="3" selected="@(Model.MyReview?.Rating == 3)">@Html.Raw("&#9733;&#9733;&#9733;") (3) Tam ok</option>
+                                                <option value="2" selected="@(Model.MyReview?.Rating == 2)">@Html.Raw("&#9733;&#9733;") (2) Kem</option>
+                                                <option value="1" selected="@(Model.MyReview?.Rating == 1)">@Html.Raw("&#9733;") (1) Rat te</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Nhan xet cua ban</label>
+                                            <textarea asp-for="ReviewComment" placeholder="Nhap cam nhan cua ban ve noi dung, giang vien, va chat luong video...">@(Model.MyReview?.Comment)</textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-full">
+                                            @Html.Raw("<i class=\"bi bi-send\"></i>")
+                                            @(Model.MyReview != null ? "Cap Nhat Danh Gia" : "Gui Danh Gia Khoa Hoc")
+                                        </button>
                                     </form>
                                 </div>
                             </div>
-
-                            <!-- Topics List -->
-                            <div class="discussion-list">
-                                @if (Model.Topics != null && Model.Topics.Any())
-                                {
-                                    @foreach (var topic in Model.Topics)
-                                    {
-                                        <div class="card border-0 shadow-sm rounded-4 mb-3" style="background: var(--apple-card-bg);">
-                                            <div class="card-body p-4">
-                                                <!-- Topic Header -->
-                                                <div class="d-flex w-100 justify-content-between align-items-center mb-2">
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="fw-bold me-2">@topic.CreatorName</div>
-                                                        @if (topic.CreatorRole == "Teacher" || topic.CreatorRole == "Admin")
-                                                        {
-                                                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2">Giảng viên</span>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2">Học viên</span>
-                                                        }
-                                                    </div>
-                                                    <span class="text-muted small">@topic.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
-                                                </div>
-                                                
-                                                <!-- Topic Content -->
-                                                <p class="mb-3 fs-5">@topic.Title</p>
-
-                                                <!-- Replies -->
-                                                @if (topic.Replies != null && topic.Replies.Any())
-                                                {
-                                                    <div class="ms-4 ps-3 border-start">
-                                                        @foreach (var reply in topic.Replies)
-                                                        {
-                                                            <div class="mb-3">
-                                                                <div class="d-flex w-100 justify-content-between align-items-center mb-1">
-                                                                    <div class="d-flex align-items-center">
-                                                                        <div class="fw-bold me-2" style="font-size: 0.95rem;">@reply.UserName</div>
-                                                                        @if (reply.UserRole == "Teacher" || reply.UserRole == "Admin")
-                                                                        {
-                                                                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill" style="font-size:0.7rem;">Giảng viên</span>
-                                                                        }
-                                                                    </div>
-                                                                    <span class="text-muted" style="font-size: 0.8rem;">@reply.CreatedAt.ToString("dd/MM HH:mm")</span>
-                                                                </div>
-                                                                <p class="mb-0 text-dark" style="font-size: 0.95rem;">@reply.Content</p>
-                                                            </div>
-                                                        }
-                                                    </div>
-                                                }
-
-                                                <!-- Reply Form -->
-                                                <div class="ms-4 ps-3 mt-3">
-                                                    <form method="post" asp-page-handler="CreateReply" asp-route-courseId="@Model.Course.CourseId" asp-route-lessonId="@lesson.LessonId" asp-route-topicId="@topic.TopicId">
-                                                        <div class="input-group shadow-sm rounded-pill overflow-hidden">
-                                                            <input type="text" name="NewReplyContent" class="form-control border-0 bg-light ps-4 py-2" placeholder="Viết phản hồi...">
-                                                            <button class="btn btn-primary px-4 fw-bold" type="submit" style="background-color: var(--color-blue); border:none;">Gửi</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    }
-                                }
-                                else
-                                {
-                                    <div class="text-center text-muted py-4">Chưa có thảo luận nào. Bạn hãy là người đầu tiên đặt câu hỏi!</div>
-                                }
-                            </div>
                         </div>
-                    </div> <!-- End Discuss Tab -->
-
-                    <!-- REVIEW TAB -->
-                    @if (Model.Progress.PercentComplete >= 100)
-                    {
-                        <div class="tab-pane fade" id="review" role="tabpanel">
-                            <div class="mt-4 text-center">
-                                <h2 class="mb-2 fw-bold" style="font-size: 1.8rem;">Chúc mừng bạn đã hoàn thành khóa học! 🎉</h2>
-                                <p class="text-muted mb-4 fs-5">Hãy chia sẻ cảm nhận của bạn để giúp khóa học ngày càng hoàn thiện hơn nhé.</p>
-
-                                <div class="card border-0 shadow-sm rounded-4 mx-auto text-start" style="background: var(--apple-card-bg); max-width: 600px;">
-                                    <div class="card-body p-4 p-md-5">
-                                        <form method="post" asp-page-handler="SubmitReview" asp-route-courseId="@Model.Course.CourseId" asp-route-lessonId="@lesson.LessonId">
-                                            <div class="mb-4">
-                                                <label class="form-label text-muted small fw-bold text-uppercase">Chấm điểm khóa học</label>
-                                                <select asp-for="ReviewRating" class="form-select border-0 bg-light rounded-3 py-2 fs-5" style="width: 100%;">
-                                                    <option value="5" selected="@(Model.MyReview?.Rating == 5)">⭐⭐⭐⭐⭐ (5) Tuyệt vời</option>
-                                                    <option value="4" selected="@(Model.MyReview?.Rating == 4)">⭐⭐⭐⭐ (4) Rất tốt</option>
-                                                    <option value="3" selected="@(Model.MyReview?.Rating == 3)">⭐⭐⭐ (3) Tạm ổn</option>
-                                                    <option value="2" selected="@(Model.MyReview?.Rating == 2)">⭐⭐ (2) Kém</option>
-                                                    <option value="1" selected="@(Model.MyReview?.Rating == 1)">⭐ (1) Rất tệ</option>
-                                                </select>
-                                            </div>
-                                            <div class="mb-4">
-                                                <label class="form-label text-muted small fw-bold text-uppercase">Nhận xét của bạn</label>
-                                                <textarea asp-for="ReviewComment" class="form-control border-0 bg-light rounded-3" rows="4" placeholder="Nhập cảm nhận của bạn về nội dung, giảng viên, và chất lượng video...">@(Model.MyReview?.Comment)</textarea>
-                                            </div>
-                                            <button type="submit" class="btn btn-primary rounded-pill w-100 py-3 fw-bold fs-5 shadow-sm" style="background-color: var(--color-blue); border:none;">
-                                                @(Model.MyReview != null ? "Cập Nhật Đánh Giá" : "Gửi Đánh Giá Khóa Học")
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> <!-- End Review Tab -->
                     }
-                </div> <!-- End Tab Content -->
+                </div>
             </div>
-
         }
         else
         {
-            <div class="no-lesson">
-                <h2>Chưa có bài học</h2>
-                <p>Khóa học này chưa có nội dung bài học nào.</p>
+            <div class="learn-content-inner">
+                <div class="no-lesson">
+                    @Html.Raw("<i class=\"bi bi-book\" style=\"font-size: 3rem; color: var(--ud-text-muted); display: block; margin-bottom: var(--ud-sp4);\"></i>")
+                    <h2>Chua co bai hoc</h2>
+                    <p>Khoa hoc nay chua co noi dung bai hoc nao.</p>
+                </div>
             </div>
         }
     </main>
 </div>
 
-<!-- Toast notification -->
 <div id="toast" class="toast-notification"></div>
 
 @Html.AntiForgeryToken()
 
 @section Scripts {
-    <!-- SignalR client -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
     <script>
-        // ===== SignalR: Real-time progress =====
-        const progressConnection = new signalR.HubConnectionBuilder()
-            .withUrl("/hubs/progress")
-            .withAutomaticReconnect()
-            .build();
-
-        // Join course group khi connect thành công
-        const currentCourseId = '@Model.Course?.CourseId';
-        progressConnection.start().then(() => {
-            if (currentCourseId) {
-                progressConnection.invoke("JoinCourseGroup", currentCourseId);
-            }
-        }).catch(err => console.error('SignalR error:', err));
-
-        // Nhận event khi có ai đó (hoặc chính mình) hoàn thành bài học
-        progressConnection.on("LessonCompleted", function (data) {
-            // Cập nhật progress bar real-time
-            document.getElementById('progressBar').style.width = data.percentComplete + '%';
-            const progressText = document.getElementById('progressText');
-            if (progressText) {
-                progressText.textContent = data.completedLessons + ' / ' + data.totalLessons + ' bài hoàn thành (' + data.percentComplete + '%)';
-            }
-
-            // Cập nhật icon bài học trong sidebar
-            const lessonLinks = document.querySelectorAll('.learn-lesson-item');
-            lessonLinks.forEach(link => {
-                if (link.href && link.href.includes('lessonId=' + data.lessonId)) {
-                    const icon = link.querySelector('.lesson-icon');
-                    if (icon) {
-                        icon.className = 'lesson-icon completed';
-                        icon.textContent = '✓';
-                    }
+        function switchTab(tabName) {
+            document.querySelectorAll('.lesson-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.tab === tabName) {
+                    tab.classList.add('active');
                 }
             });
-        });
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+        }
 
-        // Rời group khi đóng trang
-        window.addEventListener('beforeunload', function () {
-            if (currentCourseId && progressConnection.state === signalR.HubConnectionState.Connected) {
-                progressConnection.invoke("LeaveCourseGroup", currentCourseId);
-            }
-        });
-
-        // ===== Toggle section collapse =====
         function toggleSection(el) {
             el.closest('.learn-section').classList.toggle('collapsed');
         }
 
-        // ===== Show toast =====
         function showToast(message, type) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -795,11 +974,10 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // ===== AJAX: Mark lesson complete (4.7) =====
         function markComplete(lessonId, courseId) {
             const btn = document.getElementById('btnMarkComplete');
             btn.disabled = true;
-            btn.textContent = 'Đang xử lý...';
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Dang xu ly...';
 
             fetch('/Student/LearnCourse?handler=MarkComplete', {
                 method: 'POST',
@@ -812,46 +990,41 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    // Cập nhật button
                     btn.className = 'btn-mark-complete completed';
-                    btn.textContent = '✓ Đã hoàn thành';
+                    btn.innerHTML = '<i class="bi bi-check-circle"></i> Da hoan thanh';
                     btn.disabled = true;
 
-                    // Cập nhật progress bar (4.8 real-time)
                     document.getElementById('progressBar').style.width = data.percentComplete + '%';
 
-                    // Cập nhật sidebar icon
                     const activeItem = document.querySelector('.learn-lesson-item.active .lesson-icon');
                     if (activeItem) {
                         activeItem.className = 'lesson-icon completed';
-                        activeItem.textContent = '✓';
+                        activeItem.innerHTML = '<i class="bi bi-check"></i>';
                     }
 
-                    // Cập nhật text — dùng completedLessons và totalLessons từ server (chính xác)
                     const progressText = document.getElementById('progressText');
                     if (progressText) {
-                        progressText.textContent = data.completedLessons + ' / ' + data.totalLessons + ' bài hoàn thành (' + data.percentComplete + '%)';
+                        progressText.textContent = data.completedLessons + ' / ' + data.totalLessons + ' bai hoan thanh (' + data.percentComplete + '%)';
                     }
 
                     if (data.isCourseCompleted) {
-                        showToast('🎉 Chúc mừng! Bạn đã hoàn thành khóa học!', 'success');
+                        showToast('Chuc mung! Ban da hoan thanh khoa hoc!', 'success');
                     } else {
-                        showToast('Đã hoàn thành bài học!', 'success');
+                        showToast('Da hoan thanh bai hoc!', 'success');
                     }
                 } else {
                     btn.disabled = false;
-                    btn.textContent = '✓ Đánh dấu hoàn thành';
+                    btn.innerHTML = '<i class="bi bi-check-circle"></i> Danh dau hoan thanh';
                     showToast(data.message, 'error');
                 }
             })
             .catch(err => {
                 btn.disabled = false;
-                btn.textContent = '✓ Đánh dấu hoàn thành';
-                showToast('Có lỗi xảy ra.', 'error');
+                btn.innerHTML = '<i class="bi bi-check-circle"></i> Danh dau hoan thanh';
+                showToast('Co loi xay ra.', 'error');
             });
         }
 
-        // ===== Video progress tracking =====
         (function () {
             const video = document.getElementById('videoPlayer');
             if (!video) return;
@@ -860,14 +1033,12 @@
 
             video.addEventListener('timeupdate', function () {
                 const current = Math.floor(video.currentTime);
-                // Lưu mỗi 10 giây
                 if (current - lastSaved >= 10) {
                     lastSaved = current;
                     saveWatchedSeconds(current);
                 }
             });
 
-            // Lưu khi pause video
             video.addEventListener('pause', function () {
                 const current = Math.floor(video.currentTime);
                 if (current > 0) {
@@ -875,7 +1046,6 @@
                 }
             });
 
-            // Lưu khi video kết thúc
             video.addEventListener('ended', function () {
                 const current = Math.floor(video.duration);
                 if (current > 0) {
@@ -883,11 +1053,9 @@
                 }
             });
 
-            // Lưu khi rời trang
             window.addEventListener('beforeunload', function () {
                 if (video && !video.paused && video.currentTime > 0) {
                     const current = Math.floor(video.currentTime);
-                    // Dùng sendBeacon để gửi non-blocking khi rời trang
                     const lessonId = @(Model.CurrentLesson?.LessonId ?? 0);
                     if (lessonId === 0) return;
                     const data = JSON.stringify({ lessonId: lessonId, watchedSeconds: current });
@@ -910,5 +1078,42 @@
                 }).catch(() => { });
             }
         })();
+
+        const progressConnection = new signalR.HubConnectionBuilder()
+            .withUrl("/hubs/progress")
+            .withAutomaticReconnect()
+            .build();
+
+        const currentCourseId = '@Model.Course?.CourseId';
+        progressConnection.start().then(() => {
+            if (currentCourseId) {
+                progressConnection.invoke("JoinCourseGroup", currentCourseId);
+            }
+        }).catch(err => console.error('SignalR error:', err));
+
+        progressConnection.on("LessonCompleted", function (data) {
+            document.getElementById('progressBar').style.width = data.percentComplete + '%';
+            const progressText = document.getElementById('progressText');
+            if (progressText) {
+                progressText.textContent = data.completedLessons + ' / ' + data.totalLessons + ' bai hoan thanh (' + data.percentComplete + '%)';
+            }
+
+            const lessonLinks = document.querySelectorAll('.learn-lesson-item');
+            lessonLinks.forEach(link => {
+                if (link.href && link.href.includes('lessonId=' + data.lessonId)) {
+                    const icon = link.querySelector('.lesson-icon');
+                    if (icon) {
+                        icon.className = 'lesson-icon completed';
+                        icon.innerHTML = '<i class="bi bi-check"></i>';
+                    }
+                }
+            });
+        });
+
+        window.addEventListener('beforeunload', function () {
+            if (currentCourseId && progressConnection.state === signalR.HubConnectionState.Connected) {
+                progressConnection.invoke("LeaveCourseGroup", currentCourseId);
+            }
+        });
     </script>
 }

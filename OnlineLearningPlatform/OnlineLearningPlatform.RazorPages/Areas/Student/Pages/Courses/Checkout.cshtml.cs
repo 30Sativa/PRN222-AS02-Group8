@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using OnlineLearningPlatform.Models.Entities;
+using OnlineLearningPlatform.RazorPages.Services;
 using OnlineLearningPlatform.Services.DTOs.Student.Response;
 using OnlineLearningPlatform.Services.Interface;
 using System.Security.Claims;
@@ -14,34 +15,47 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Student.Pages.Courses
         private readonly IPaymentService _paymentService;
         private readonly IWalletService _walletService;
         private readonly ICouponService _couponService;
+        private readonly StudentCartService _cart;
 
         public CheckoutModel(
             IStudentService studentService,
             IOrderService orderService,
             IPaymentService paymentService,
             IWalletService walletService,
-            ICouponService couponService)
+            ICouponService couponService,
+            StudentCartService cart)
         {
             _studentService = studentService;
             _orderService = orderService;
             _paymentService = paymentService;
             _walletService = walletService;
             _couponService = couponService;
+            _cart = cart;
         }
 
         public StudentCourseResponse Course { get; set; } = null!;
         public decimal WalletBalance { get; set; } = 0;
 
         [BindProperty]
-        public bool UseWallet { get; set; } = false;
+        public bool UseWallet { get; set; } = true;
 
         [BindProperty]
         public string? CouponCode { get; set; }
 
+        [BindProperty]
+        public bool AgreeRefundPolicy { get; set; }
+
         public string? CouponMessage { get; set; }
+        public string? RefundPolicyError { get; set; }
         public bool CouponApplied { get; set; } = false;
         public decimal CouponDiscount { get; set; } = 0;
         public decimal FinalPrice { get; set; } = 0;
+
+        /// <summary>Số tiền dự kiến trừ từ ví (min(số dư, tổng sau coupon)).</summary>
+        public decimal WalletDeduction =>
+            UseWallet && WalletBalance > 0 && FinalPrice > 0
+                ? Math.Min(WalletBalance, FinalPrice)
+                : 0;
 
         public async Task<IActionResult> OnGetAsync(Guid id, string? couponError = null, bool couponSuccess = false)
         {
@@ -59,7 +73,7 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Student.Pages.Courses
             FinalPrice = price;
 
             if (course.IsEnrolled)
-                return RedirectToPage("/LearnCourse", new { courseId = id });
+                return RedirectToPage("/LearnCourse", new { area = "Student", courseId = id });
 
             if (!string.IsNullOrEmpty(couponError))
             {
@@ -131,9 +145,15 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Student.Pages.Courses
             var course = await _studentService.GetCourseDetailAsync(id, userId);
             if (course == null) return NotFound();
 
+            var wallet = await _walletService.GetOrCreateWalletAsync(userId);
+            WalletBalance = wallet.Balance;
+            Course = course;
+
             decimal price = (course.DiscountPrice != null && course.DiscountPrice > 0) ? course.DiscountPrice.Value : course.Price;
 
-            var couponCode = TempData["CouponCode"] as string;
+            var couponCode = !string.IsNullOrWhiteSpace(CouponCode)
+                ? CouponCode!.Trim()
+                : TempData["CouponCode"] as string;
 
             if (!string.IsNullOrWhiteSpace(couponCode))
             {
@@ -143,14 +163,32 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Student.Pages.Courses
                 {
                     CouponMessage = message;
                     CouponApplied = false;
-                    Course = course;
+                    FinalPrice = price;
                     return Page();
                 }
+
+                CouponApplied = true;
+                CouponDiscount = discount;
+                CouponMessage = message;
+                FinalPrice = Math.Max(0, price - discount);
+                CouponCode = couponCode;
+            }
+            else
+            {
+                FinalPrice = price;
+            }
+
+            if (price > 0 && !AgreeRefundPolicy)
+            {
+                RefundPolicyError = "Vui lòng tick ô đồng ý chính sách hoàn tiền trước khi thanh toán.";
+                return Page();
             }
 
             if (price > 0)
             {
                 var order = await _orderService.CreateOrderAsync(userId, id, "VNPAY", UseWallet, couponCode);
+
+                _cart.RemoveCourse(id);
 
                 if (order.Status == OrderStatus.Completed)
                     return RedirectToPage("/Payment/PaymentResult", new { orderId = order.OrderId });
@@ -160,7 +198,8 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Student.Pages.Courses
             }
 
             await _studentService.EnrollInCourseAsync(userId, id);
-            return RedirectToPage("/LearnCourse", new { courseId = id });
+            _cart.RemoveCourse(id);
+            return RedirectToPage("/LearnCourse", new { area = "Student", courseId = id });
         }
     }
 }

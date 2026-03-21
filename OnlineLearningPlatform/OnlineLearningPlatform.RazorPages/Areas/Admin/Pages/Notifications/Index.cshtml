@@ -4,41 +4,274 @@
     ViewData["Title"] = "Quản lý thông báo";
 }
 
-<div class="page-head">
-    <div class="breadcrumb">
-        <a asp-area="Admin" asp-page="/Dashboard">Dashboard</a>
-        <span class="breadcrumb-sep">/</span>
-        <span>Thông báo</span>
-    </div>
-    <h1>Quản lý thông báo hệ thống</h1>
-</div>
+<style>
+    .admin-notify-page {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 0 var(--ud-sp2);
+        box-sizing: border-box;
+    }
+    .admin-notify-grid {
+        display: grid;
+        gap: var(--ud-sp6);
+        align-items: start;
+    }
+    @@media (min-width: 1024px) {
+        .admin-notify-grid {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        }
+    }
+    .admin-notify-card {
+        background: var(--ud-white);
+        border: 1px solid var(--ud-border);
+        border-radius: 16px;
+        box-shadow: var(--ud-shadow-sm);
+        overflow: hidden;
+    }
+    .admin-notify-card-head {
+        padding: var(--ud-sp5) var(--ud-sp6);
+        border-bottom: 1px solid var(--ud-border-light);
+        background: linear-gradient(180deg, var(--ud-surface) 0%, var(--ud-white) 100%);
+    }
+    .admin-notify-card-head-inner {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--ud-sp4);
+    }
+    .admin-notify-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, var(--ud-purple), var(--ud-magenta));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 6px 20px rgba(86, 36, 208, 0.25);
+    }
+    .admin-notify-icon i { color: #fff; font-size: 1.35rem; }
+    .admin-notify-card-title {
+        font-size: 1.05rem;
+        font-weight: 800;
+        margin: 0 0 4px;
+        color: var(--ud-text);
+        letter-spacing: -0.02em;
+    }
+    .admin-notify-card-sub {
+        font-size: 0.82rem;
+        color: var(--ud-text-muted);
+        line-height: 1.45;
+        margin: 0;
+    }
+    .admin-notify-card-body { padding: var(--ud-sp6); }
+    .admin-notify-hint {
+        font-size: 0.88rem;
+        color: var(--ud-text-muted);
+        line-height: 1.55;
+        margin: 0 0 var(--ud-sp5);
+    }
+    .admin-form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--ud-text);
+        margin-bottom: var(--ud-sp2);
+    }
+    .admin-form-label .opt {
+        font-weight: 500;
+        color: var(--ud-text-muted);
+    }
+    .admin-notify-side-head {
+        padding: var(--ud-sp5) var(--ud-sp6);
+        border-bottom: 1px solid var(--ud-border);
+        background: var(--ud-surface);
+        display: flex;
+        align-items: center;
+        gap: var(--ud-sp3);
+    }
+    .admin-notify-side-head h3 {
+        font-size: 0.95rem;
+        font-weight: 800;
+        margin: 0;
+        color: var(--ud-text);
+    }
+    .admin-notify-side-head i { color: var(--ud-purple); font-size: 1.1rem; }
+    .admin-notify-empty {
+        padding: var(--ud-sp8) var(--ud-sp6);
+        text-align: center;
+    }
+    .admin-notify-empty-icon {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto var(--ud-sp4);
+        border-radius: 50%;
+        background: var(--ud-surface);
+        border: 1px dashed var(--ud-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .admin-notify-empty-icon i { font-size: 1.75rem; color: var(--ud-text-faint); }
+    .admin-notify-empty h3 {
+        font-size: 1rem;
+        font-weight: 800;
+        margin: 0 0 var(--ud-sp2);
+        color: var(--ud-text);
+    }
+    .admin-notify-empty p {
+        font-size: 0.88rem;
+        color: var(--ud-text-muted);
+        margin: 0;
+        line-height: 1.5;
+        max-width: 280px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .admin-notify-table-wrap { overflow-x: auto; }
+    .admin-notify-table-wrap .ud-table { border-radius: 0; border-left: none; border-right: none; }
+</style>
 
-@if (!string.IsNullOrEmpty(Model.SuccessMessage))
-{
-    <div class="alert" style="background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 12px 20px; border-radius: 8px; margin-bottom: 24px;">
-        @Model.SuccessMessage
-    </div>
-}
-
-<div class="card card-body" style="max-width: 600px;">
-    <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: 16px;">Phát thông báo hệ thống (Broadcast)</h3>
-    <p style="color: var(--color-label-2); margin-bottom: 24px;">
-        Gửi thông báo tới tất cả người dùng trên hệ thống. Thông báo này sẽ xuất hiện trong màn hình Thông Báo của họ.
-    </p>
-
-    <form method="post" asp-page-handler="Broadcast">
-        <div class="form-group" style="margin-bottom: 20px;">
-            <label class="form-label">Nội dung thông báo <span style="color: var(--color-red);">*</span></label>
-            <textarea class="form-control" name="BroadcastMessage" rows="5" placeholder="Nhập nội dung bạn muốn gửi tới tất cả người dùng..." required>@Model.BroadcastMessage</textarea>
-            @Html.ValidationMessage("BroadcastMessage", new { @class = "text-danger", style = "display: block; margin-top: 8px; color: var(--color-red); font-size: 13px;" })
+<div class="ud-page">
+    <div class="admin-notify-page">
+        <div class="ud-page-head ud-fade-up">
+            <h1>Thông báo hệ thống</h1>
+            <p style="color: var(--ud-text-muted); font-size: 0.9rem; margin: 0;">
+                <span>Admin</span>
+                <span style="color: var(--ud-border);"> / </span>
+                <span>Phát thông báo tới người dùng</span>
+            </p>
         </div>
 
-        <div class="form-group" style="margin-bottom: 24px;">
-            <label class="form-label">URL đích (không bắt buộc)</label>
-            <input type="text" class="form-control" name="TargetUrl" value="@Model.TargetUrl" placeholder="Ví dụ: /Courses/Index hoặc https://example.com" />
-            <span style="display: block; font-size: 12px; color: var(--color-label-3); margin-top: 8px;">Nếu có link, người dùng có thể bấm vào thông báo để chuyển hướng.</span>
-        </div>
+        @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+        {
+            <div class="alert alert-success ud-mb-6 ud-fade-up">
+                <i class="bi bi-check-circle-fill" style="font-size: 1.1rem;"></i>
+                <span>@Model.SuccessMessage</span>
+            </div>
+        }
 
-        <button type="submit" class="btn btn-primary">Gửi thông báo</button>
-    </form>
+        <div class="admin-notify-grid ud-fade-up">
+            <!-- Cột trái: form -->
+            <div class="admin-notify-card">
+                <div class="admin-notify-card-head">
+                    <div class="admin-notify-card-head-inner">
+                        <div class="admin-notify-icon">
+                            <i class="bi bi-broadcast"></i>
+                        </div>
+                        <div>
+                            <h2 class="admin-notify-card-title">Phát thông báo</h2>
+                            <p class="admin-notify-card-sub">Gửi một lần tới tất cả tài khoản đang hoạt động — hiển thị trong mục Thông báo của học viên / giảng viên.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="admin-notify-card-body">
+                    <form method="post" asp-page-handler="Broadcast">
+                        <div class="form-group">
+                            <label class="admin-form-label" for="broadcast-msg">
+                                Nội dung <span style="color: var(--ud-red);">*</span>
+                            </label>
+                            <textarea id="broadcast-msg"
+                                      class="form-control"
+                                      name="BroadcastMessage"
+                                      rows="5"
+                                      placeholder="Nhập nội dung thông báo…"
+                                      required>@Model.BroadcastMessage</textarea>
+                            @Html.ValidationMessage("BroadcastMessage", new { @class = "form-error" })
+                        </div>
+
+                        <div class="form-group">
+                            <label class="admin-form-label" for="target-url">
+                                Liên kết kèm theo <span class="opt">(tùy chọn)</span>
+                            </label>
+                            <input id="target-url"
+                                   type="text"
+                                   class="form-control"
+                                   name="TargetUrl"
+                                   value="@Model.TargetUrl"
+                                   placeholder="VD: /Student/Courses/Index hoặc https://…" />
+                            <span class="ud-text-muted" style="display: block; font-size: 0.78rem; margin-top: var(--ud-sp2); line-height: 1.45;">
+                                Nếu điền, người dùng có thể bấm thông báo để mở trang này.
+                            </span>
+                        </div>
+
+                        <div class="ud-flex ud-align-center ud-flex-wrap ud-gap-3" style="margin-top: var(--ud-sp6); padding-top: var(--ud-sp5); border-top: 1px solid var(--ud-border-light);">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send"></i>
+                                Gửi thông báo
+                            </button>
+                            <a asp-area="Admin" asp-page="/Dashboard" class="btn btn-outline">
+                                <i class="bi bi-arrow-left"></i>
+                                Về Dashboard
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Cột phải: lịch sử hoặc empty -->
+            <div class="admin-notify-card">
+                @if (Model.Notifications != null && Model.Notifications.Any())
+                {
+                    <div class="admin-notify-side-head">
+                        <i class="bi bi-clock-history"></i>
+                        <h3>Đã gửi gần đây (@Model.Notifications.Count)</h3>
+                    </div>
+                    <div class="admin-notify-table-wrap">
+                        <table class="ud-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 48px;">#</th>
+                                    <th>Nội dung</th>
+                                    <th>Link</th>
+                                    <th>Thời gian</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var notification in Model.Notifications)
+                                {
+                                    <tr>
+                                        <td><span class="badge badge-muted">@notification.NotificationId</span></td>
+                                        <td style="font-weight: 600; font-size: 0.875rem; max-width: 220px;">
+                                            <span style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">@notification.Content</span>
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(notification.TargetUrl))
+                                            {
+                                                <a href="@notification.TargetUrl" target="_blank" rel="noopener" class="ud-text-muted" style="font-size: 0.78rem; word-break: break-all;">
+                                                    <i class="bi bi-box-arrow-up-right"></i>
+                                                    @notification.TargetUrl
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <span class="ud-text-muted ud-text-small">—</span>
+                                            }
+                                        </td>
+                                        <td style="font-size: 0.78rem; color: var(--ud-text-muted); white-space: nowrap;">
+                                            <i class="bi bi-calendar3"></i>
+                                            @notification.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="admin-notify-side-head">
+                        <i class="bi bi-inbox"></i>
+                        <h3>Lịch sử gửi</h3>
+                    </div>
+                    <div class="admin-notify-empty">
+                        <div class="admin-notify-empty-icon">
+                            <i class="bi bi-bell-slash"></i>
+                        </div>
+                        <h3>Chưa có thông báo</h3>
+                        <p>Sau khi bạn gửi broadcast, các bản ghi sẽ hiển thị ở đây.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
 </div>

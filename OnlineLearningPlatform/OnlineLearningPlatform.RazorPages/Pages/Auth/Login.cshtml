@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model OnlineLearningPlatform.RazorPages.Pages.Auth.LoginModel
 @{
     ViewData["Title"] = "Đăng nhập";
@@ -55,14 +55,14 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width:100%; padding: 12px; font-size: 15px; margin-top: 8px; margin-bottom: 15px">
+            <button type="submit" class="btn btn-primary">
                 Đăng nhập
             </button>
         </form>
 
-        <div class="mt-3">
-            <form method="post" asp-page="/Auth/ExternalLogin" class="mb-3">
-                <button type="submit" name="provider" value="Google" class="btn btn-google" style="width:100%; padding: 12px; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <div style="margin-top: var(--ud-sp5);">
+            <form method="post" asp-page="/Auth/ExternalLogin">
+                <button type="submit" name="provider" value="Google" class="btn btn-google" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -74,9 +74,9 @@
             </form>
         </div>
 
-        <div class="mt-4 text-center">
-            <p class="text-muted mb-2" style="font-size: 0.9rem;">Đăng nhập nhanh (Tài khoản Demo):</p>
-            <div class="d-flex justify-content-center gap-2 flex-wrap">
+        <div class="text-center" style="margin-top: var(--ud-sp6);">
+            <p class="ud-text-muted" style="font-size: 0.88rem; margin-bottom: var(--ud-sp3);">Đăng nhập nhanh (tài khoản demo)</p>
+            <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
                 <button type="button" class="btn btn-outline-danger btn-sm px-3 rounded-pill" onclick="fillDemo('admin@gmail.com', 'Admin@123')">Admin</button>
                 <button type="button" class="btn btn-outline-info btn-sm px-3 rounded-pill" onclick="fillDemo('teacher@gmail.com', 'Teacher@123')">Teacher</button>
                 <button type="button" class="btn btn-outline-success btn-sm px-3 rounded-pill" onclick="fillDemo('student@gmail.com', 'Student@123')">Student</button>

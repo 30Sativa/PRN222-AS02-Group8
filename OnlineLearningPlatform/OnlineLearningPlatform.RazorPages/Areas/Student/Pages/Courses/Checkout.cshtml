@@ -1,370 +1,257 @@
 @page "{id:guid}"
 @model OnlineLearningPlatform.RazorPages.Areas.Student.Pages.Courses.CheckoutModel
 @{
-    ViewData["Title"] = "Xác nhận thanh toán";
+    ViewData["Title"] = "Thanh toán";
 }
 
 <style>
-    /* Checkout UI - Minimalist Apple/Glassmorphism Style */
-    :root {
-        --checkout-bg-start: #fbfbfd;
-        --checkout-bg-end: #e5e5ea;
-        --theme-primary: #0071e3;
-        --theme-primary-hover: #005bb5;
-        --theme-text: #1d1d1f;
-        --theme-muted: #86868b;
-        --theme-glass-bg: rgba(255, 255, 255, 0.85);
-        --theme-border: rgba(255, 255, 255, 0.4);
-        --theme-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-        --theme-radius: 24px;
+    .co-page { background: var(--ud-surface); min-height: 100vh; padding-bottom: 3rem; }
+    .co-inner { max-width: 1180px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+
+    /* Breadcrumb */
+    .co-breadcrumb { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; font-size: .82rem; font-weight: 600; color: var(--ud-text-muted); margin-bottom: 1.5rem; }
+    .co-breadcrumb a { color: var(--ud-magenta) !important; text-decoration: none !important; }
+    .co-breadcrumb a:hover { text-decoration: underline !important; }
+    .co-breadcrumb span { color: var(--ud-text-muted); }
+    .co-breadcrumb .sep { color: var(--ud-border); }
+
+    /* Title */
+    .co-title { font-size: clamp(1.45rem, 3vw, 1.85rem); font-weight: 800; letter-spacing: -0.02em; color: var(--ud-text); margin-bottom: 1.5rem; }
+
+    /* Layout */
+    .co-layout { display: flex; flex-direction: column; gap: 1.5rem; }
+    .co-main { flex: 1; min-width: 0; }
+    .co-aside { flex: 0 0 360px; width: 360px; }
+    @@media (min-width: 992px) {
+        .co-layout { flex-direction: row; align-items: flex-start; gap: 2rem; }
+        .co-main { flex: 1 1 0; max-width: calc(100% - 380px); }
+        .co-aside { flex: 0 0 360px; width: 360px; }
+        .co-sticky { position: sticky; top: 4.75rem; }
     }
 
-    body {
-        background: linear-gradient(135deg, var(--checkout-bg-start) 0%, var(--checkout-bg-end) 100%);
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        color: var(--theme-text);
-        -webkit-font-smoothing: antialiased;
-        min-height: 100vh;
-    }
+    /* Card */
+    .co-card { background: #fff; border: 1px solid var(--ud-border); border-radius: var(--ud-radius); padding: 1.15rem 1.25rem; margin-bottom: 1rem; box-shadow: var(--ud-shadow-sm); }
+    .co-card-title { font-size: .95rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--ud-text-muted); margin-bottom: .85rem; }
+    .co-card-title a { color: var(--ud-magenta) !important; font-weight: 700; font-size: .82rem; text-transform: none; letter-spacing: 0; }
 
-    .checkout-container {
-        padding: 4rem 1rem;
-        max-width: 960px;
-        margin: auto;
-    }
+    /* Course row */
+    .co-course { display: flex; gap: 1rem; align-items: flex-start; }
+    .co-course-thumb { width: 128px; height: 72px; object-fit: cover; border-radius: var(--ud-radius); background: #1c1d1f; flex-shrink: 0; }
+    .co-course-info { flex: 1; min-width: 0; }
+    .co-course-title { font-size: .95rem; font-weight: 700; line-height: 1.35; margin-bottom: .3rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; color: var(--ud-text); }
+    .co-course-teacher { font-size: .78rem; color: var(--ud-text-muted); }
 
-    .page-title {
-        font-weight: 800;
-        font-size: 2.5rem;
-        text-align: center;
-        margin-bottom: 2.5rem;
-        letter-spacing: -0.02em;
-        background: linear-gradient(90deg, #1d1d1f, #434346);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
+    /* Coupon */
+    .co-coupon-row { display: flex; gap: .5rem; align-items: stretch; }
+    .co-coupon-in { flex: 1; display: flex; }
+    .co-coupon-in input { border-radius: var(--ud-radius) 0 0 var(--ud-radius); }
+    .co-coupon-btn { border-radius: 0 var(--ud-radius) var(--ud-radius) 0; padding: 0 .85rem; font-size: .82rem; font-weight: 800; border: 1px solid var(--ud-border); border-left: none; background: #f7f9fa; color: var(--ud-text); cursor: pointer; white-space: nowrap; transition: background .15s; }
+    .co-coupon-btn:hover { background: #eee; }
+    .co-applied-coupon { display: flex; align-items: center; justify-content: space-between; padding: .5rem .75rem; border-radius: var(--ud-radius); background: var(--ud-green-bg); border: 1px solid rgba(21,115,71,.2); font-size: .85rem; font-weight: 600; color: var(--ud-green); }
+    .co-applied-coupon .remove { font-size: .75rem; color: var(--ud-green); font-weight: 700; text-decoration: underline; background: none; border: none; cursor: pointer; }
 
-    .glass-card {
-        background: var(--theme-glass-bg);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid var(--theme-border);
-        border-radius: var(--theme-radius);
-        box-shadow: var(--theme-shadow);
-        overflow: hidden;
-        transition: transform 0.3s ease;
-    }
+    /* Refund */
+    .co-refund { font-size: .8rem; color: var(--ud-text-muted); line-height: 1.5; }
+    .co-check-row { display: flex; align-items: flex-start; gap: .6rem; font-size: .88rem; }
+    .co-check-row input { width: 1.1rem; height: 1.1rem; margin-top: .2rem; flex-shrink: 0; accent-color: var(--ud-magenta); }
+    .co-check-row label { line-height: 1.5; color: var(--ud-text); cursor: pointer; }
 
-    .glass-card:hover {
-        transform: translateY(-4px);
-    }
+    /* Wallet */
+    .co-wallet { display: flex; align-items: center; justify-content: space-between; padding: .65rem .85rem; border-radius: var(--ud-radius); background: rgba(86,36,208,.05); border: 1px solid rgba(86,36,208,.14); font-size: .85rem; }
+    .co-wallet-info { font-weight: 700; color: var(--ud-text); }
+    .co-wallet-info .bal { color: var(--ud-purple); font-weight: 800; }
 
-    .course-overview {
-        padding: 2.5rem;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        display: flex;
-        gap: 2rem;
-        align-items: center;
-    }
-
-    .course-thumbnail {
-        width: 240px;
-        height: 135px;
-        border-radius: 16px;
-        object-fit: cover;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        flex-shrink: 0;
-    }
-
-    .course-info h2 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        line-height: 1.3;
-    }
-
-    .course-info p {
-        color: var(--theme-muted);
-        font-size: 1rem;
-        margin-bottom: 0;
-    }
-
-    .payment-details {
-        padding: 2.5rem;
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-
-    .price-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 1.25rem;
-        font-weight: 600;
-    }
-
-    .price-label {
-        color: var(--theme-muted);
-    }
-
-    .price-value {
-        font-size: 1.75rem;
-        color: var(--theme-text);
-        font-weight: 800;
-        letter-spacing: -1px;
-    }
-
-    .wallet-box {
-        background: rgba(0, 113, 227, 0.05);
-        border: 1px solid rgba(0, 113, 227, 0.1);
-        border-radius: 16px;
-        padding: 1.5rem;
-    }
-
-    .wallet-box .d-flex {
-        font-size: 1.1rem;
-    }
-
-    .form-switch .form-check-input {
-        width: 3em;
-        height: 1.5em;
-        cursor: pointer;
-    }
-
-    .form-switch .form-check-label {
-        cursor: pointer;
-        padding-top: 0.2em;
-        font-weight: 500;
-    }
-
-    .btn-checkout {
-        width: 100%;
-        padding: 1.2rem;
-        font-size: 1.25rem;
-        font-weight: 700;
-        border-radius: 16px;
-        background-color: var(--theme-primary);
-        color: #fff;
-        border: none;
-        transition: all 0.3s ease;
-        box-shadow: 0 8px 20px rgba(0, 113, 227, 0.3);
-    }
-
-    .btn-checkout:hover {
-        background-color: var(--theme-primary-hover);
-        transform: translateY(-2px);
-        box-shadow: 0 12px 28px rgba(0, 113, 227, 0.4);
-        color: #fff;
-    }
-
-    .btn-back {
-        display: inline-block;
-        margin-bottom: 2rem;
-        color: var(--theme-muted);
-        font-weight: 600;
-        text-decoration: none;
-        transition: color 0.2s;
-    }
-
-    .btn-back:hover {
-        color: var(--theme-text);
-    }
-
-    /* Modal Styling */
-    .modal-content.glass-modal {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(25px);
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        border-radius: 28px;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-    }
-    
-    .modal-header {
-        border-bottom: none;
-        padding: 2rem 2rem 1rem;
-    }
-
-    .modal-title {
-        font-weight: 700;
-        font-size: 1.5rem;
-    }
-
-    .modal-body {
-        padding: 0 2rem 2rem;
-        font-size: 1.05rem;
-        color: #333336;
-        line-height: 1.6;
-    }
-
-    .modal-footer {
-        border-top: 1px solid rgba(0,0,0,0.05);
-        padding: 1.5rem 2rem;
-        flex-wrap: nowrap;
-        gap: 1rem;
-    }
-
-    .btn-modal {
-        flex: 1;
-        padding: 1rem;
-        border-radius: 14px;
-        font-weight: 600;
-        font-size: 1.1rem;
-    }
-
-    .btn-cancel {
-        background: #f2f2f7;
-        color: var(--theme-text);
-        border: none;
-    }
-
-    .btn-cancel:hover {
-        background: #e5e5ea;
-    }
-
-    @@media (max-width: 768px) {
-        .course-overview {
-            flex-direction: column;
-            text-align: center;
-        }
-        .course-thumbnail {
-            width: 100%;
-            height: auto;
-            max-height: 200px;
-        }
-    }
+    /* Summary card */
+    .co-summary { background: #fff; border: 1px solid var(--ud-border); border-radius: var(--ud-radius); overflow: hidden; box-shadow: var(--ud-shadow-sm); }
+    .co-summary-head { padding: .85rem 1.25rem; font-weight: 800; font-size: .82rem; text-transform: uppercase; letter-spacing: .06em; color: var(--ud-text-muted); border-bottom: 1px solid var(--ud-border); background: #fafafa; }
+    .co-summary-body { padding: 1rem 1.25rem; }
+    .co-summary-thumb { width: 100%; height: 160px; object-fit: cover; border-radius: var(--ud-radius) var(--ud-radius) 0 0; margin: -1rem -1px 1rem; display: block; background: #1c1d1f; }
+    .co-sum-row { display: flex; justify-content: space-between; align-items: baseline; gap: .75rem; margin-bottom: .45rem; font-size: .9rem; }
+    .co-sum-row .lbl { color: var(--ud-text-muted); }
+    .co-sum-row .val { font-weight: 600; }
+    .co-sum-row .val.green { color: var(--ud-green); }
+    .co-sum-total { margin-top: .85rem; padding-top: .85rem; border-top: 1px solid var(--ud-border); }
+    .co-sum-total .lbl { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--ud-text-muted); display: block; margin-bottom: .2rem; }
+    .co-sum-total .val { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em; color: var(--ud-text); }
+    .co-btn-pay { width: 100%; padding: .8rem 1rem; font-size: .95rem; font-weight: 800; border: none; border-radius: var(--ud-radius); background: var(--ud-magenta); color: #fff; cursor: pointer; transition: background .15s, transform .1s; box-shadow: 0 2px 8px rgba(164,53,240,.32); margin-top: 1rem; }
+    .co-btn-pay:hover { background: var(--ud-magenta-dk); color: #fff; }
+    .co-btn-pay:active { transform: scale(.995); }
+    .co-trust { font-size: .75rem; color: var(--ud-text-muted); line-height: 1.5; margin-top: .85rem; text-align: center; }
+    .co-secure { display: flex; align-items: center; justify-content: center; gap: .4rem; font-size: .75rem; color: var(--ud-text-muted); margin-top: .65rem; }
 </style>
 
-<div class="checkout-container">
-    <a asp-page="./Details" asp-route-id="@Model.Course.CourseId" class="btn-back">
-        <i class="bi bi-chevron-left"></i> Quay lại chi tiết khóa học
-    </a>
+<div class="co-page">
+    <div class="co-inner">
+        <!-- Breadcrumb -->
+        <nav class="co-breadcrumb" aria-label="breadcrumb">
+            <a asp-area="Student" asp-page="/Cart/Index">Giỏ hàng</a>
+            <span class="sep">›</span>
+            <span>Thanh toán</span>
+        </nav>
 
-    <h1 class="page-title">Xác nhận thanh toán</h1>
+        <h1 class="co-title">Thanh toán</h1>
 
-    <div class="glass-card">
-        <div class="course-overview">
-            @if (!string.IsNullOrEmpty(Model.Course.ThumbnailUrl))
-            {
-                <img src="@Model.Course.ThumbnailUrl" alt="@Model.Course.Title" class="course-thumbnail" />
-            }
-            else
-            {
-                <div class="course-thumbnail d-flex align-items-center justify-content-center bg-dark text-white">
-                    <i class="bi bi-image" style="font-size: 3rem;"></i>
-                </div>
-            }
-            <div class="course-info">
-                <h2>@Model.Course.Title</h2>
-                <p><i class="bi bi-person-video3 me-2"></i>Giảng viên: <strong>@Model.Course.TeacherName</strong></p>
-            </div>
-        </div>
+        @if (TempData["Message"] is string msg)
+        {
+            <div class="alert alert-danger" style="margin-bottom:1rem;border-radius:var(--ud-radius);">@msg</div>
+        }
 
-        <div class="payment-details">
-            <div class="price-row">
-                <span class="price-label">Tổng cộng:</span>
-                @{
-                    var basePrice = (Model.Course.DiscountPrice > 0 ? Model.Course.DiscountPrice.Value : Model.Course.Price);
-                    var displayPrice = Model.CouponApplied ? Model.FinalPrice : basePrice;
-                }
-                <span class="price-value">@(displayPrice > 0 ? displayPrice.ToString("N0") + " VNĐ" : "Miễn phí")</span>
-            </div>
-
-            @if (Model.CouponApplied && Model.CouponDiscount > 0)
-            {
-                <div class="alert alert-success d-flex align-items-center gap-2 py-2 px-3" style="border-radius:12px; font-size:0.95rem;">
-                    <i class="bi bi-check-circle-fill"></i>
-                    <div>
-                        <strong>Mã @TempData["CouponCode"]</strong> đã được áp dụng — giảm <strong>@Model.CouponDiscount.ToString("N0") VNĐ</strong>
-                        <span class="text-muted ms-2"><s>@basePrice.ToString("N0") VNĐ</s></span>
+        <div class="co-layout">
+            <div class="co-main">
+                <!-- Course info -->
+                <div class="co-card">
+                    <div class="co-card-title">Khóa học đã chọn</div>
+                    <div class="co-course">
+                        @if (!string.IsNullOrEmpty(Model.Course.ThumbnailUrl))
+                        {
+                            <img class="co-course-thumb" src="@Model.Course.ThumbnailUrl" alt="" />
+                        }
+                        else
+                        {
+                            <div class="co-course-thumb" style="display:flex;align-items:center;justify-content:center;">
+                                <i class="bi bi-image" style="font-size:1.5rem;color:#fff;"></i>
+                            </div>
+                        }
+                        <div class="co-course-info">
+                            <div class="co-course-title">@Model.Course.Title</div>
+                            <div class="co-course-teacher">Giảng viên: @Model.Course.TeacherName</div>
+                        </div>
                     </div>
                 </div>
-            }
 
-            @if (!string.IsNullOrEmpty(Model.CouponMessage))
-            {
-                <div class="alert @(Model.CouponApplied ? "alert-success" : "alert-danger") d-flex align-items-center gap-2 py-2 px-3" style="border-radius:12px; font-size:0.9rem;">
-                    <i class="bi @(Model.CouponApplied ? "bi-check-circle-fill" : "bi-exclamation-circle-fill")"></i>
-                    @Model.CouponMessage
-                </div>
-            }
-
-            <!-- Coupon input -->
-            <form method="post" asp-page-handler="ApplyCoupon" class="d-flex gap-2">
-                <input type="text" class="form-control" name="CouponCode" placeholder="Nhập mã khuyến mãi (VD: SUMMER2026)"
-                       value="@Model.CouponCode" style="text-transform:uppercase; letter-spacing:0.05em;" />
-                <button type="submit" class="btn btn-outline-primary px-3" style="border-radius:12px; white-space:nowrap;">
-                    Áp dụng
-                </button>
-            </form>
-
-            @if (Model.WalletBalance > 0 && displayPrice > 0)
-            {
-                var walletUsed = Math.Min(Model.WalletBalance, displayPrice);
-                var remaining = displayPrice - walletUsed;
-
-                <div class="wallet-box">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="fw-semibold"><i class="bi bi-wallet2 me-2 text-primary"></i>Số dư ví:</span>
-                        <span class="text-primary fw-bold">@Model.WalletBalance.ToString("N0") VNĐ</span>
-                    </div>
-                    <div class="form-check form-switch d-flex align-items-center gap-3">
-                        <input class="form-check-input" type="checkbox" id="useWalletCheck" name="UseWallet" value="true" checked form="checkoutForm">
-                        <label class="form-check-label" for="useWalletCheck">
-                            Trừ trực tiếp: -@walletUsed.ToString("N0") VNĐ
-                        </label>
-                    </div>
-                    @if (remaining > 0)
+                <!-- Coupon -->
+                <div class="co-card">
+                    <div class="co-card-title">Mã khuyến mãi</div>
+                    @if (Model.CouponApplied && !string.IsNullOrWhiteSpace(Model.CouponCode))
                     {
-                        <div class="mt-3 text-danger fw-medium">
-                            <i class="bi bi-exclamation-circle me-1"></i> Cần thanh toán thêm @remaining.ToString("N0") VNĐ qua VNPAY.
+                        <div class="co-applied-coupon">
+                            <span><i class="bi bi-tag me-1"></i> @Model.CouponCode (−@Model.CouponDiscount.ToString("N0") ₫)</span>
                         </div>
                     }
                     else
                     {
-                        <div class="mt-3 text-success fw-medium">
-                            <i class="bi bi-check-circle me-1"></i> Số dư đủ để mua khóa học này!
-                        </div>
+                        <form method="post" asp-page-handler="ApplyCoupon" asp-route-id="@Model.Course.CourseId" class="co-coupon-row" style="margin:0;">
+                            <div class="co-coupon-in" style="flex:1;">
+                                <input asp-for="CouponCode" class="form-control" placeholder="Nhập mã khuyến mãi..." style="border-radius:var(--ud-radius);" />
+                                <button type="submit" class="co-coupon-btn">Áp dụng</button>
+                            </div>
+                        </form>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.CouponMessage))
+                    {
+                        <div style="font-size:.82rem;margin-top:.5rem;color:@(Model.CouponApplied ? "var(--ud-green)" : "var(--ud-red)");">@Model.CouponMessage</div>
                     }
                 </div>
-            }
 
-            <!-- Button trigger modal -->
-            <button type="button" class="btn-checkout mt-2" data-bs-toggle="modal" data-bs-target="#confirmModal">
-                @(displayPrice > 0 ? "Tiến hành thanh toán" : "Xác nhận học miễn phí")
-            </button>
+                <!-- Wallet (hiển thị số dư; bật/tắt trừ ví trong form thanh toán bên dưới) -->
+                @if (Model.WalletBalance > 0 && Model.Course.Price > 0)
+                {
+                    <div class="co-card">
+                        <div class="co-card-title">Ví EduLearn</div>
+                        <div class="co-wallet">
+                            <div class="co-wallet-info">
+                                <i class="bi bi-wallet2 me-1"></i> Số dư: <span class="bal">@Model.WalletBalance.ToString("N0") ₫</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Refund policy + thanh toán -->
+                <div class="co-card">
+                    <div class="co-card-title">Chính sách hoàn tiền</div>
+                    <details class="co-refund">
+                        <summary style="cursor:pointer;font-weight:700;color:var(--ud-text);margin-bottom:.4rem;">Xem chính sách hoàn tiền</summary>
+                        EduLearn đảm bảo hoàn tiền 100% trong vòng 7 ngày nếu khóa học không đáp ứng kỳ vọng của bạn.
+                    </details>
+                    <form method="post" asp-route-id="@Model.Course.CourseId" id="checkout-pay-form" style="margin:1.25rem 0 0;">
+                        @if (Model.CouponApplied && !string.IsNullOrWhiteSpace(Model.CouponCode))
+                        {
+                            <input type="hidden" asp-for="CouponCode" />
+                        }
+                        @if (Model.WalletBalance > 0 && Model.Course.Price > 0)
+                        {
+                            <div class="co-check-row" style="margin-bottom:.85rem;">
+                                <input asp-for="UseWallet" />
+                                <label asp-for="UseWallet">Trừ từ ví (tối đa @Math.Min(Model.WalletBalance, Math.Max(0, Model.FinalPrice)).ToString("N0") ₫)</label>
+                            </div>
+                        }
+                        <div class="co-check-row" style="margin-bottom:.85rem;">
+                            <input asp-for="AgreeRefundPolicy" />
+                            <label asp-for="AgreeRefundPolicy">Tôi đồng ý với chính sách hoàn tiền 7 ngày và điều khoản sử dụng của EduLearn.</label>
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.RefundPolicyError))
+                        {
+                            <div class="text-danger small mb-2">@Model.RefundPolicyError</div>
+                        }
+                        <button type="submit" class="co-btn-pay" style="width:100%;">
+                            @(Model.FinalPrice <= 0 ? "Hoàn tất đăng ký" : "Thanh toán ngay")
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Sidebar summary -->
+            <aside class="co-aside">
+                <div class="co-summary co-sticky">
+                    <div class="co-summary-head">Tóm tắt đơn hàng</div>
+                    <div class="co-summary-body">
+                        @if (!string.IsNullOrEmpty(Model.Course.ThumbnailUrl))
+                        {
+                            <img class="co-summary-thumb" src="@Model.Course.ThumbnailUrl" alt="" />
+                        }
+                        else
+                        {
+                            <div class="co-summary-thumb" style="display:flex;align-items:center;justify-content:center;">
+                                <i class="bi bi-image" style="font-size:2.5rem;color:#6a6f73;"></i>
+                            </div>
+                        }
+
+                        <div class="co-sum-row">
+                            <span class="lbl">Giá gốc</span>
+                            <span class="val">@Model.Course.Price.ToString("N0") ₫</span>
+                        </div>
+                        @if (Model.Course.DiscountPrice.HasValue && Model.Course.DiscountPrice < Model.Course.Price)
+                        {
+                            <div class="co-sum-row">
+                                <span class="lbl">Giảm giá</span>
+                                <span class="val green">−@((Model.Course.Price - Model.Course.DiscountPrice.Value).ToString("N0")) ₫</span>
+                            </div>
+                        }
+                        @if (Model.CouponApplied && Model.CouponDiscount > 0)
+                        {
+                            <div class="co-sum-row">
+                                <span class="lbl">Mã: @(Model.CouponCode ?? "")</span>
+                                <span class="val green">−@Model.CouponDiscount.ToString("N0") ₫</span>
+                            </div>
+                        }
+                        @if (Model.UseWallet && Model.WalletBalance > 0 && Model.WalletDeduction > 0)
+                        {
+                            <div class="co-sum-row">
+                                <span class="lbl">Trừ ví</span>
+                                <span class="val green">−@Model.WalletDeduction.ToString("N0") ₫</span>
+                            </div>
+                        }
+                        <div class="co-sum-total">
+                            <span class="lbl">Tổng thanh toán</span>
+                            <span class="val">@(Model.FinalPrice > 0 ? Model.FinalPrice.ToString("N0") + " ₫" : "Miễn phí")</span>
+                        </div>
+                        @if (Model.FinalPrice > 0 && Model.UseWallet && Model.WalletBalance > 0 && Model.WalletDeduction > 0)
+                        {
+                            <div style="font-size:.75rem;color:var(--ud-text-muted);margin-top:.4rem;text-align:center;">
+                                Phần còn lại qua VNPAY (ước tính): <strong>@Math.Max(0, Model.FinalPrice - Model.WalletDeduction).ToString("N0") ₫</strong>
+                            </div>
+                        }
+
+                        <button type="submit" form="checkout-pay-form" class="co-btn-pay">
+                            @(Model.FinalPrice <= 0 ? "Hoàn tất đăng ký" : "Thanh toán ngay")
+                        </button>
+                        <div class="co-secure">
+                            <i class="bi bi-lock-fill"></i>
+                            Thanh toán an toàn &amp; bảo mật
+                        </div>
+                    </div>
+                </div>
+            </aside>
         </div>
     </div>
-</div>
-
-<!-- Confirmation Modal -->
-<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content glass-modal">
-      <div class="modal-header">
-        <h5 class="modal-title" id="confirmModalLabel">Xác nhận giao dịch</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="alert alert-info rounded-4 border-0 mb-4" style="background-color: rgba(0,113,227,0.08);">
-            <i class="bi bi-info-circle-fill me-2 text-primary"></i> <strong>Chính sách hoàn tiền:</strong>
-        </div>
-        <ul class="text-muted" style="line-height: 1.8; margin-bottom: 0;">
-            <li>Tiền hoàn lại sẽ được <strong>cộng trực tiếp vào Ví điện tử nội bộ</strong> của bạn.</li>
-            <li>Yêu cầu hoàn tiền chỉ được xem xét trong vòng <strong>7 ngày</strong>.</li>
-            <li>Không áp dụng nếu bạn đã hoàn thành quá 20% thời lượng.</li>
-        </ul>
-        <div class="mt-4 text-center fw-medium">
-            Bạn có chắc chắn muốn tiến hành thanh toán?
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-modal btn-cancel" data-bs-dismiss="modal">Hủy bỏ</button>
-        <form id="checkoutForm" method="post" class="m-0 flex-grow-1" style="display:flex;">
-            <!-- UseWallet checkbox state is tied to this form by form="checkoutForm" attribute -->
-            <button type="submit" class="btn btn-modal" style="background-color: var(--theme-primary); color: white;">Đồng ý & Mua</button>
-        </form>
-      </div>
-    </div>
-  </div>
 </div>

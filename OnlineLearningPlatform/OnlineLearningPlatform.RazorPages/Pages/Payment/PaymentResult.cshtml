@@ -169,9 +169,15 @@
             
             @if (Model.Order.OrderDetails != null && Model.Order.OrderDetails.Any())
             {
-                <div class="detail-row">
-                    <span class="detail-label">Sản phẩm</span>
-                    <span class="detail-value course-title-value">@Model.Order.OrderDetails.First().Course.Title</span>
+                var details = Model.Order.OrderDetails.ToList();
+                <div class="detail-row align-items-start">
+                    <span class="detail-label">@(details.Count > 1 ? "Khóa học" : "Sản phẩm")</span>
+                    <div class="detail-value" style="max-width: 65%;">
+                        @foreach (var od in details)
+                        {
+                            <div class="course-title-value mb-1">@(od.Course?.Title ?? "—")</div>
+                        }
+                    </div>
                 </div>
             }
 
@@ -218,7 +224,22 @@
         {
             @if (Model.Order.OrderDetails != null && Model.Order.OrderDetails.Any())
             {
-                <a href="/Student/LearnCourse?courseId=@Model.Order.OrderDetails.First().CourseId" class="action-btn btn-primary-apple">Vào học ngay lập tức</a>
+                var dlist = Model.Order.OrderDetails.ToList();
+                @if (dlist.Count == 1)
+                {
+                    <a href="/Student/LearnCourse?courseId=@dlist[0].CourseId" class="action-btn btn-primary-apple">Vào học ngay lập tức</a>
+                }
+                else
+                {
+                    <a asp-area="Student" asp-page="/MyLearning" class="action-btn btn-primary-apple">Xem khóa học của tôi</a>
+                    <div class="mt-3 text-start w-100">
+                        <p class="small text-muted mb-2">Hoặc mở từng khóa:</p>
+                        @foreach (var od in dlist)
+                        {
+                            <a href="/Student/LearnCourse?courseId=@od.CourseId" class="d-block small course-title-value py-1">→ @(od.Course?.Title ?? "Khóa học")</a>
+                        }
+                    </div>
+                }
             }
             else
             {

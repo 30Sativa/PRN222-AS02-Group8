@@ -4,428 +4,136 @@
     ViewData["Title"] = "Nạp tiền vào ví";
 }
 
-<style>
-    :root {
-        --apple-bg: #fbfbfd;
-        --apple-text: #1d1d1f;
-        --apple-text-muted: #86868b;
-        --apple-blue: #0071e3;
-        --apple-card-bg: #ffffff;
-        --apple-radius: 20px;
-        --apple-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
-        --apple-shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.08);
-        --apple-success: #34c759;
-        --apple-danger: #ff3b30;
-    }
-
-    .topup-page {
-        padding: 3rem 0;
-        min-height: 100vh;
-        background: var(--apple-bg);
-    }
-
-    .topup-container {
-        max-width: 640px;
-        margin: 0 auto;
-    }
-
-    .topup-header {
-        text-align: center;
-        margin-bottom: 2.5rem;
-    }
-
-    .topup-header h1 {
-        font-size: 2.2rem;
-        font-weight: 700;
-        letter-spacing: -0.03em;
-        color: var(--apple-text);
-        margin-bottom: 0.5rem;
-    }
-
-    .topup-header p {
-        color: var(--apple-text-muted);
-        font-size: 1.05rem;
-    }
-
-    .topup-card {
-        background: var(--apple-card-bg);
-        border-radius: var(--apple-radius);
-        padding: 2.5rem;
-        box-shadow: var(--apple-shadow);
-        border: 1px solid rgba(0,0,0,0.05);
-        margin-bottom: 1.5rem;
-    }
-
-    .balance-info {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 16px;
-        padding: 1.5rem 2rem;
-        color: white;
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-
-    .balance-info .label {
-        font-size: 0.9rem;
-        opacity: 0.85;
-        margin-bottom: 0.25rem;
-    }
-
-    .balance-info .amount {
-        font-size: 2.5rem;
-        font-weight: 800;
-        letter-spacing: -0.02em;
-    }
-
-    .balance-info .currency {
-        font-size: 1.2rem;
-        font-weight: 400;
-        opacity: 0.8;
-    }
-
-    .section-label {
-        font-size: 0.85rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: var(--apple-text-muted);
-        margin-bottom: 1rem;
-    }
-
-    .quick-amounts {
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 0.75rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .quick-amount-btn {
-        padding: 0.75rem 0.5rem;
-        border: 2px solid #e5e5ea;
-        border-radius: 12px;
-        background: white;
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: var(--apple-text);
-        cursor: pointer;
-        transition: all 0.2s ease;
-        text-align: center;
-    }
-
-    .quick-amount-btn:hover,
-    .quick-amount-btn.selected {
-        border-color: var(--apple-blue);
-        background: rgba(0, 113, 227, 0.05);
-        color: var(--apple-blue);
-    }
-
-    .quick-amount-btn.selected {
-        background: var(--apple-blue);
-        color: white;
-    }
-
-    .custom-amount-group {
-        margin-bottom: 1.5rem;
-    }
-
-    .custom-amount-label {
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: var(--apple-text);
-        margin-bottom: 0.5rem;
-    }
-
-    .input-group {
-        position: relative;
-    }
-
-    .input-group .currency-symbol {
-        position: absolute;
-        left: 16px;
-        top: 50%;
-        transform: translateY(-50%);
-        font-weight: 600;
-        color: var(--apple-text-muted);
-        font-size: 1.1rem;
-    }
-
-    .input-group input {
-        width: 100%;
-        padding: 14px 16px 14px 40px;
-        border: 2px solid #e5e5ea;
-        border-radius: 12px;
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: var(--apple-text);
-        outline: none;
-        transition: border-color 0.2s;
-        box-sizing: border-box;
-    }
-
-    .input-group input:focus {
-        border-color: var(--apple-blue);
-    }
-
-    .bonus-info {
-        background: linear-gradient(135deg, rgba(52, 199, 89, 0.08), rgba(52, 199, 89, 0.04));
-        border: 1px solid rgba(52, 199, 89, 0.2);
-        border-radius: 12px;
-        padding: 1rem 1.25rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .bonus-info .bonus-title {
-        font-weight: 700;
-        color: var(--apple-success);
-        font-size: 0.95rem;
-        margin-bottom: 0.25rem;
-    }
-
-    .bonus-info .bonus-desc {
-        font-size: 0.85rem;
-        color: var(--apple-text-muted);
-    }
-
-    .topup-btn {
-        width: 100%;
-        padding: 16px;
-        background: var(--apple-blue);
-        color: white;
-        border: none;
-        border-radius: 14px;
-        font-size: 1.1rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-    }
-
-    .topup-btn:hover {
-        background: #005bb5;
-        transform: translateY(-1px);
-        box-shadow: 0 8px 24px rgba(0, 113, 227, 0.3);
-    }
-
-    .topup-btn:active {
-        transform: translateY(0);
-    }
-
-    .topup-btn:disabled {
-        background: #ccc;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-    }
-
-    .security-note {
-        text-align: center;
-        margin-top: 1.5rem;
-        font-size: 0.85rem;
-        color: var(--apple-text-muted);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-    }
-
-    .alert {
-        padding: 1rem 1.25rem;
-        border-radius: 12px;
-        margin-bottom: 1.5rem;
-        font-size: 0.95rem;
-    }
-
-    .alert-error {
-        background: rgba(255, 59, 48, 0.08);
-        border: 1px solid rgba(255, 59, 48, 0.2);
-        color: var(--apple-danger);
-    }
-
-    .alert-success {
-        background: rgba(52, 199, 89, 0.08);
-        border: 1px solid rgba(52, 199, 89, 0.2);
-        color: var(--apple-success);
-    }
-
-    .back-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: var(--apple-blue);
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 0.95rem;
-        margin-bottom: 1.5rem;
-        transition: opacity 0.2s;
-    }
-
-    .back-link:hover {
-        opacity: 0.8;
-    }
-
-    .payment-methods {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 1rem;
-        margin-top: 1rem;
-        padding-top: 1rem;
-        border-top: 1px solid rgba(0,0,0,0.06);
-    }
-
-    .payment-methods img {
-        height: 24px;
-    }
-
-    .payment-label {
-        font-size: 0.8rem;
-        color: var(--apple-text-muted);
-    }
-
-    .summary-box {
-        background: #f5f5f7;
-        border-radius: 12px;
-        padding: 1.25rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .summary-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.5rem 0;
-        font-size: 0.95rem;
-    }
-
-    .summary-row.total {
-        border-top: 1px solid rgba(0,0,0,0.1);
-        padding-top: 1rem;
-        margin-top: 0.5rem;
-        font-weight: 700;
-        font-size: 1.1rem;
-    }
-
-    .summary-label {
-        color: var(--apple-text-muted);
-    }
-
-    .summary-value {
-        font-weight: 600;
-        color: var(--apple-text);
-    }
-
-    .summary-value.highlight {
-        color: var(--apple-blue);
-    }
-</style>
-
-<div class="topup-page">
-    <div class="topup-container">
-        <a href="/Student/Wallet" class="back-link">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <path d="M15 19l-7-7 7-7"/>
-            </svg>
-            Quay về ví
+<div class="ud-page-narrow ud-fade-up">
+    <div class="ud-page-head">
+        <a href="/Student/Wallet" class="btn btn-ghost btn-sm" style="margin-bottom: var(--ud-sp3);">
+            @Html.Raw("<i class=\"bi bi-arrow-left\"></i>") Quay về ví
         </a>
+        <h1>Nạp tiền vào ví</h1>
+        <p>Nạp tiền nhanh chóng qua VNPAY để mua khóa học</p>
+    </div>
 
-        <div class="topup-header">
-            <h1>Nạp tiền vào ví</h1>
-            <p>Nạp tiền nhanh chóng qua VNPAY</p>
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger" style="margin-bottom: var(--ud-sp5);">
+            @Html.Raw("<i class=\"bi bi-exclamation-circle-fill\"></i>") @Model.ErrorMessage
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success" style="margin-bottom: var(--ud-sp5);">
+            @Html.Raw("<i class=\"bi bi-check-circle-fill\"></i>") @Model.SuccessMessage
+        </div>
+    }
+
+    <div class="ud-card" style="padding: var(--ud-sp6);">
+        <div style="background: linear-gradient(135deg, var(--ud-purple) 0%, var(--ud-magenta) 100%); border-radius: var(--ud-radius); padding: var(--ud-sp5) var(--ud-sp6); text-align: center; margin-bottom: var(--ud-sp6);">
+            <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255,255,255,0.85); margin-bottom: var(--ud-sp2);">
+                Số dư hiện tại
+            </div>
+            <div style="font-size: 2.25rem; font-weight: 800; color: #fff; letter-spacing: -0.02em;">
+                @(Model.StudentWallet?.Balance.ToString("N0") ?? "0")
+                <span style="font-size: 1.1rem; font-weight: 400; opacity: 0.8;">VNĐ</span>
+            </div>
         </div>
 
-        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-        {
-            <div class="alert alert-error">
-                <i class="bi bi-exclamation-circle-fill"></i> @Model.ErrorMessage
-            </div>
-        }
-
-        @if (!string.IsNullOrEmpty(Model.SuccessMessage))
-        {
-            <div class="alert alert-success">
-                <i class="bi bi-check-circle-fill"></i> @Model.SuccessMessage
-            </div>
-        }
-
-        <div class="topup-card">
-            <div class="balance-info">
-                <div class="label">Số dư hiện tại</div>
-                <div class="amount">
-                    @(Model.StudentWallet?.Balance.ToString("N0") ?? "0")
-                    <span class="currency">VNĐ</span>
-                </div>
-            </div>
-
-            <div class="section-label">Chọn số tiền nạp</div>
-
-            <div class="quick-amounts">
+        <div style="margin-bottom: var(--ud-sp5);">
+            <label class="form-label">Chọn số tiền nạp</label>
+            <div class="ud-grid" style="grid-template-columns: repeat(5, 1fr); gap: var(--ud-sp2); margin-bottom: var(--ud-sp5);">
                 @foreach (var amount in OnlineLearningPlatform.RazorPages.Areas.Student.Pages.Wallet.TopUpModel.QuickAmounts)
                 {
-                    <button type="button" class="quick-amount-btn @(Model.Amount == amount ? "selected" : "")"
+                    <button type="button" 
+                            class="quick-amount-btn @(Model.Amount == amount ? "selected" : "")"
                             onclick="selectAmount(@amount)">
                         @amount.ToString("N0")
                     </button>
                 }
             </div>
+        </div>
 
-            <div class="custom-amount-group">
-                <div class="custom-amount-label">Hoặc nhập số tiền khác</div>
-                <div class="input-group">
-                    <span class="currency-symbol">₫</span>
-                    <input type="number"
-                           id="customAmount"
-                           name="Amount"
-                           value="@Model.Amount"
-                           min="10000"
-                           max="100000000"
-                           step="1000"
-                           placeholder="Nhập số tiền..."
-                           oninput="updateSummary()" />
-                </div>
+        <div class="form-group">
+            <label class="form-label">Hoặc nhập số tiền khác</label>
+            <div style="position: relative;">
+                <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-weight: 700; color: var(--ud-text-muted); font-size: 1rem;">₫</span>
+                <input type="number"
+                       id="customAmount"
+                       name="Amount"
+                       value="@Model.Amount"
+                       min="10000"
+                       max="100000000"
+                       step="1000"
+                       placeholder="Nhập số tiền..."
+                       class="form-control"
+                       style="padding-left: 36px; font-size: 1.1rem; font-weight: 700;"
+                       oninput="updateSummary()" />
             </div>
+        </div>
 
-            <div class="summary-box">
-                <div class="summary-row">
-                    <span class="summary-label">Số tiền nạp</span>
-                    <span class="summary-value" id="summaryAmount">@Model.Amount.ToString("N0") VNĐ</span>
-                </div>
-                <div class="summary-row">
-                    <span class="summary-label">Phí giao dịch</span>
-                    <span class="summary-value">Miễn phí</span>
-                </div>
-                <div class="summary-row total">
-                    <span class="summary-label">Số tiền được cộng vào ví</span>
-                    <span class="summary-value highlight" id="summaryTotal">@Model.Amount.ToString("N0") VNĐ</span>
-                </div>
+        <div style="background: var(--ud-surface); border-radius: var(--ud-radius); padding: var(--ud-sp4) var(--ud-sp5); margin-bottom: var(--ud-sp5); border: 1px solid var(--ud-border-light, #e8e8ed);">
+            <div class="ud-flex ud-justify-between ud-align-center" style="padding: var(--ud-sp2) 0;">
+                <span class="ud-text-muted" style="font-size: 0.875rem;">Số tiền nạp</span>
+                <span id="summaryAmount" style="font-weight: 700; font-size: 0.95rem;">@Model.Amount.ToString("N0") VNĐ</span>
             </div>
-
-            <form method="post" action="/api/wallet/topup" id="topupForm">
-                <input type="hidden" name="amount" id="hiddenAmount" value="@Model.Amount" />
-                <button type="submit" class="topup-btn" id="submitBtn">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                    </svg>
-                    Nạp @Model.Amount.ToString("N0") VNĐ qua VNPAY
-                </button>
-            </form>
-
-            <div class="security-note">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                </svg>
-                Thanh toán an toàn qua cổng VNPAY
+            <div class="ud-flex ud-justify-between ud-align-center" style="padding: var(--ud-sp2) 0; border-top: 1px solid var(--ud-border-light, #e8e8ed); margin-top: var(--ud-sp2); padding-top: var(--ud-sp3);">
+                <span class="ud-text-muted" style="font-size: 0.875rem;">Phí giao dịch</span>
+                <span style="font-weight: 700; font-size: 0.95rem; color: var(--ud-green);">Miễn phí</span>
             </div>
-
-            <div class="payment-methods">
-                <span class="payment-label">Hỗ trợ:</span>
-                <span style="font-weight: 700; color: #e31837; font-size: 1.1rem;">VNPAY</span>
+            <div class="ud-flex ud-justify-between ud-align-center" style="padding: var(--ud-sp3) 0 0 0; border-top: 1px solid var(--ud-border); margin-top: var(--ud-sp2);">
+                <span style="font-size: 0.9rem; font-weight: 700;">Số tiền được cộng vào ví</span>
+                <span id="summaryTotal" style="font-weight: 800; font-size: 1.1rem; color: var(--ud-purple);">@Model.Amount.ToString("N0") VNĐ</span>
             </div>
+        </div>
+
+        <form method="post" action="/api/wallet/topup" id="topupForm">
+            <input type="hidden" name="amount" id="hiddenAmount" value="@Model.Amount" />
+            <button type="submit" class="btn btn-primary btn-full btn-lg" id="submitBtn">
+                @Html.Raw("<i class=\"bi bi-wallet2\"></i>") Nạp @Model.Amount.ToString("N0") VNĐ qua VNPAY
+            </button>
+        </form>
+
+        <div style="display: flex; align-items: center; justify-content: center; gap: var(--ud-sp2); margin-top: var(--ud-sp4); padding-top: var(--ud-sp4); border-top: 1px solid var(--ud-border-light, #e8e8ed);">
+            @Html.Raw("<i class=\"bi bi-shield-lock\" style=\"color: var(--ud-green);\"></i>")
+            <span class="ud-text-muted" style="font-size: 0.8rem;">Thanh toán an toàn qua cổng VNPAY</span>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: center; gap: var(--ud-sp3); margin-top: var(--ud-sp4);">
+            <span class="ud-text-muted" style="font-size: 0.75rem;">Hỗ trợ thanh toán:</span>
+            <span style="font-weight: 800; color: var(--ud-purple); font-size: 1rem;">VNPAY</span>
         </div>
     </div>
 </div>
+
+<style>
+    .quick-amount-btn {
+        padding: var(--ud-sp3) var(--ud-sp2);
+        border: 1px solid var(--ud-border);
+        border-radius: var(--ud-radius);
+        background: var(--ud-white);
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--ud-text);
+        cursor: pointer;
+        transition: all var(--ud-ease);
+        text-align: center;
+    }
+
+    .quick-amount-btn:hover {
+        border-color: var(--ud-magenta);
+        background: rgba(164, 53, 240, 0.04);
+        color: var(--ud-magenta);
+    }
+
+    .quick-amount-btn.selected {
+        border-color: var(--ud-magenta);
+        background: var(--ud-magenta);
+        color: #fff;
+    }
+
+    .quick-amount-btn.selected:hover {
+        background: var(--ud-magenta-dk);
+    }
+</style>
 
 @section Scripts {
 <script>
@@ -435,15 +143,12 @@
         selectedAmount = amount;
         document.getElementById('customAmount').value = amount;
         document.getElementById('hiddenAmount').value = amount;
-        document.getElementById('submitBtn').innerHTML = `
-            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-            </svg>
-            Nạp ${amount.toLocaleString('vi-VN')} VNĐ qua VNPAY
-        `;
+        document.getElementById('submitBtn').innerHTML = '<i class="bi bi-wallet2"></i> Nạp ' + amount.toLocaleString('vi-VN') + ' VNĐ qua VNPAY';
 
         document.querySelectorAll('.quick-amount-btn').forEach(btn => {
-            if (parseInt(btn.textContent.replace(/\D/g, '')) === amount) {
+            var btnText = btn.textContent.trim();
+            var btnAmount = parseInt(btnText.replace(/\D/g, ''));
+            if (btnAmount === amount) {
                 btn.classList.add('selected');
             } else {
                 btn.classList.remove('selected');
@@ -454,8 +159,8 @@
     }
 
     function updateSummary() {
-        const input = document.getElementById('customAmount');
-        let amount = parseInt(input.value) || 0;
+        var input = document.getElementById('customAmount');
+        var amount = parseInt(input.value) || 0;
 
         if (amount < 10000) amount = 0;
         if (amount > 100000000) amount = 100000000;
@@ -465,21 +170,17 @@
         document.getElementById('summaryAmount').textContent = amount.toLocaleString('vi-VN') + ' VNĐ';
         document.getElementById('summaryTotal').textContent = amount.toLocaleString('vi-VN') + ' VNĐ';
 
-        if (amount > 0) {
-            document.getElementById('submitBtn').innerHTML = `
-                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                </svg>
-                Nạp ${amount.toLocaleString('vi-VN')} VNĐ qua VNPAY
-            `;
+        if (amount >= 10000) {
+            document.getElementById('submitBtn').innerHTML = '<i class="bi bi-wallet2"></i> Nạp ' + amount.toLocaleString('vi-VN') + ' VNĐ qua VNPAY';
             document.getElementById('submitBtn').disabled = false;
         } else {
-            document.getElementById('submitBtn').innerHTML = 'Vui lòng nhập số tiền';
+            document.getElementById('submitBtn').innerHTML = '<i class="bi bi-exclamation-circle"></i> Vui lòng nhập số tiền (tối thiểu 10.000 VNĐ)';
             document.getElementById('submitBtn').disabled = true;
         }
 
         document.querySelectorAll('.quick-amount-btn').forEach(btn => {
-            const btnAmount = parseInt(btn.textContent.replace(/\D/g, ''));
+            var btnText = btn.textContent.trim();
+            var btnAmount = parseInt(btnText.replace(/\D/g, ''));
             if (btnAmount === amount) {
                 btn.classList.add('selected');
             } else {
@@ -493,43 +194,40 @@
     document.getElementById('topupForm').addEventListener('submit', async function(e) {
         e.preventDefault();
 
-        const amount = parseInt(document.getElementById('hiddenAmount').value);
+        var amount = parseInt(document.getElementById('hiddenAmount').value);
         if (amount < 10000) {
             alert('Số tiền nạp tối thiểu là 10.000 VNĐ');
             return;
         }
 
-        const btn = document.getElementById('submitBtn');
+        var btn = document.getElementById('submitBtn');
         btn.disabled = true;
-        btn.innerHTML = '<span>Đang xử lý...</span>';
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Đang xử lý...';
 
         try {
-            const response = await fetch('/api/wallet/topup', {
+            var token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+            var response = await fetch('/api/wallet/topup', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                    'RequestVerificationToken': token
                 },
                 body: JSON.stringify({ amount: amount })
             });
 
-            const data = await response.json();
+            var data = await response.json();
 
             if (data.success && data.paymentUrl) {
                 window.location.href = data.paymentUrl;
             } else {
                 alert(data.error || 'Có lỗi xảy ra. Vui lòng thử lại.');
                 btn.disabled = false;
-                btn.innerHTML = `
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                    </svg>
-                    Nạp ${amount.toLocaleString('vi-VN')} VNĐ qua VNPAY
-                `;
+                btn.innerHTML = '<i class="bi bi-wallet2"></i> Nạp ' + amount.toLocaleString('vi-VN') + ' VNĐ qua VNPAY';
             }
         } catch (error) {
             alert('Có lỗi xảy ra. Vui lòng thử lại.');
             btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-wallet2"></i> Nạp ' + amount.toLocaleString('vi-VN') + ' VNĐ qua VNPAY';
         }
     });
 

@@ -1,304 +1,486 @@
-﻿@page
+@page
 @model OnlineLearningPlatform.RazorPages.Areas.Student.Pages.DashboardModel
 @{
     ViewData["Title"] = "Dashboard";
 }
 
 <style>
-    /* ── Section label ── */
-    .stat-section-label {
-        font-size: var(--text-xs); font-weight: 600;
-        text-transform: uppercase; letter-spacing: .07em;
-        color: var(--color-label-2);
-        margin-bottom: var(--space-3); margin-top: var(--space-6);
+    /* Bo góc & khoảng cách riêng dashboard (site.css dùng --ud-radius 2px) */
+    .student-dashboard {
+        --dash-r: 14px;
+        --dash-r-md: 16px;
+        --dash-r-lg: 20px;
+        --dash-r-xl: 24px;
+        --dash-gap-stat: 1.25rem;
+        --dash-gap-cols: 1.75rem;
     }
-    .stat-section-label:first-of-type { margin-top: 0; }
 
-    /* ── Icon trong stat card ── */
-    .stat-card-icon {
-        width: 36px; height: 36px; border-radius: var(--radius-sm);
-        display: flex; align-items: center; justify-content: center;
-        margin-bottom: var(--space-3);
+    .student-dashboard .ud-card {
+        border-radius: var(--dash-r-lg);
+        padding: var(--ud-sp5) var(--ud-sp6);
+        box-sizing: border-box;
     }
-    .stat-card-icon svg { width: 18px; height: 18px; }
 
-    .icon-blue   { background: var(--color-blue-tint);  color: var(--color-blue); }
-    .icon-green  { background: var(--color-green-tint); color: var(--color-green); }
-    .icon-amber  { background: var(--color-amber-tint); color: var(--color-amber); }
-    .icon-purple { background: #f0eeff;                 color: #6b21a8; }
-
-    .stat-sub { font-size: 11px; color: var(--color-label-3); margin-top: 4px; }
-
-    /* ── 2-col grid ── */
-    .dash-grid {
-        display: grid; grid-template-columns: 1fr 1fr;
-        gap: var(--space-5); margin-top: var(--space-5);
+    .student-dashboard .ud-empty {
+        border-radius: var(--dash-r-lg);
+        padding: var(--ud-sp10) var(--ud-sp8);
+        margin-top: var(--ud-sp2);
     }
-    @@media (max-width: 768px) { .dash-grid { grid-template-columns: 1fr; } }
 
-    /* ── Welcome banner ── */
-    .welcome-banner {
-        background: linear-gradient(135deg, #1d8348 0%, #0071e3 100%);
-        border-radius: var(--radius-xl);
-        padding: var(--space-8) var(--space-10);
-        display: flex; align-items: center; justify-content: space-between;
-        gap: var(--space-6); margin-bottom: var(--space-8);
-        overflow: hidden; position: relative;
+    .student-dashboard .ud-page-head {
+        margin-bottom: var(--ud-sp5);
     }
-    .welcome-banner::before {
+
+    /* ── Welcome Banner ── */
+    .dash-welcome {
+        background: linear-gradient(135deg, var(--ud-purple) 0%, var(--ud-magenta) 100%);
+        border-radius: var(--dash-r-xl);
+        padding: var(--ud-sp8) clamp(var(--ud-sp6), 4vw, var(--ud-sp10));
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--ud-sp6);
+        margin-bottom: var(--ud-sp8);
+        overflow: hidden;
+        position: relative;
+    }
+    .dash-welcome::before {
         content: '';
-        position: absolute; top: -40px; right: -40px;
-        width: 200px; height: 200px; border-radius: 50%;
+        position: absolute;
+        top: -40px; right: -40px;
+        width: 200px; height: 200px;
+        border-radius: 50%;
         background: rgba(255,255,255,.08);
     }
-    .welcome-banner::after {
+    .dash-welcome::after {
         content: '';
-        position: absolute; bottom: -60px; right: 80px;
-        width: 150px; height: 150px; border-radius: 50%;
+        position: absolute;
+        bottom: -60px; right: 80px;
+        width: 150px; height: 150px;
+        border-radius: 50%;
         background: rgba(255,255,255,.05);
     }
-    .welcome-text { position: relative; z-index: 1; }
-    .welcome-text h2 {
-        font-size: var(--text-xl); font-weight: 700;
-        color: #fff; letter-spacing: -.03em; margin-bottom: var(--space-2);
+    .dash-welcome-text { position: relative; z-index: 1; }
+    .dash-welcome-text h2 {
+        font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -0.02em;
+        margin-bottom: var(--ud-sp2);
     }
-    .welcome-text p { font-size: var(--text-sm); color: rgba(255,255,255,.80); }
-    .welcome-actions { position: relative; z-index: 1; display: flex; gap: var(--space-3); flex-shrink: 0; }
-    .btn-white {
-        background: rgba(255,255,255,.18); color: #fff !important;
+    .dash-welcome-text p {
+        font-size: 0.875rem;
+        color: rgba(255,255,255,.80);
+    }
+    .dash-welcome-actions {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem 1rem;
+        flex-shrink: 0;
+    }
+    .dash-btn-white {
+        background: #fff;
+        color: var(--ud-purple) !important;
+        font-size: 0.8rem;
+        font-weight: 700;
+        border-radius: var(--ud-radius-pill);
+        padding: 10px 20px;
+        text-decoration: none !important;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: opacity var(--ud-ease);
+        border: none;
+        cursor: pointer;
+    }
+    .dash-btn-white:hover { opacity: .88; color: var(--ud-purple-dk); }
+    .dash-btn-ghost {
+        background: rgba(255,255,255,.18);
+        color: #fff !important;
         border: 1px solid rgba(255,255,255,.30);
         backdrop-filter: blur(8px);
-        font-size: var(--text-sm); font-weight: 500;
-        border-radius: var(--radius-full); padding: 9px 20px;
-        text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
-        transition: background var(--transition);
+        font-size: 0.8rem;
+        font-weight: 600;
+        border-radius: var(--ud-radius-pill);
+        padding: 10px 20px;
+        text-decoration: none !important;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: background var(--ud-ease);
     }
-    .btn-white:hover { background: rgba(255,255,255,.28); opacity: 1 !important; }
-    .btn-white-solid {
-        background: #fff; color: #1d8348 !important;
-        font-size: var(--text-sm); font-weight: 600;
-        border-radius: var(--radius-full); padding: 9px 20px;
-        text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
-        transition: opacity var(--transition); border: none;
-    }
-    .btn-white-solid:hover { opacity: .88 !important; }
-    @@media (max-width: 640px) {
-        .welcome-banner { flex-direction: column; padding: var(--space-6); }
-        .welcome-actions { flex-wrap: wrap; }
-    }
+    .dash-btn-ghost:hover { background: rgba(255,255,255,.28); color: #fff; }
 
-    /* ── Course mini-cards ── */
-    .course-mini-grid {
+    /* ── Stat Cards ── */
+    .dash-stat-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: var(--space-4);
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--dash-gap-stat);
+        margin-bottom: var(--ud-sp8);
     }
-    .course-mini-card {
-        background: var(--color-surface);
-        border: 1px solid var(--color-border-light);
-        border-radius: var(--radius-lg);
+    .dash-stat-card {
+        background: var(--ud-white);
+        border: 1px solid var(--ud-border);
+        border-radius: var(--dash-r-lg);
+        padding: var(--ud-sp5) var(--ud-sp6);
+        box-shadow: var(--ud-shadow-sm);
+    }
+    .dash-stat-icon {
+        width: 42px; height: 42px;
+        border-radius: var(--dash-r);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        margin-bottom: var(--ud-sp3);
+    }
+    .dash-stat-icon-blue   { background: rgba(0,113,227,.08); color: #0055b3; }
+    .dash-stat-icon-green  { background: var(--ud-green-bg); color: var(--ud-green); }
+    .dash-stat-icon-amber  { background: var(--ud-amber-bg); color: var(--ud-amber); }
+    .dash-stat-icon-purple { background: rgba(86,36,208,.08); color: var(--ud-purple); }
+    .dash-stat-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: var(--ud-text-muted);
+        margin-bottom: .25rem;
+    }
+    .dash-stat-value {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--ud-text);
+        line-height: 1;
+        letter-spacing: -0.03em;
+        margin-bottom: .25rem;
+    }
+    .dash-stat-sub {
+        font-size: 0.72rem;
+        color: var(--ud-text-muted);
+    }
+
+    /* ── Two-column section ── */
+    .dash-two-col {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: var(--dash-gap-cols);
+        align-items: flex-start;
+    }
+    .dash-section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--ud-sp4);
+        flex-wrap: wrap;
+        margin-bottom: var(--ud-sp5);
+        padding-bottom: var(--ud-sp5);
+        border-bottom: 1px solid var(--ud-border);
+    }
+    .dash-section-head .btn {
+        border-radius: var(--ud-radius-pill);
+        flex-shrink: 0;
+    }
+    .dash-section-head h2 {
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--ud-text);
+        display: flex;
+        align-items: center;
+        gap: var(--ud-sp2);
+    }
+    .dash-section-head h2 i { color: var(--ud-purple); }
+
+    /* ── Course mini cards ── */
+    .dash-course-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: var(--ud-sp5);
+        padding-top: var(--ud-sp2);
+    }
+    .dash-course-card {
+        background: var(--ud-white);
+        border: 1px solid var(--ud-border);
+        border-radius: var(--dash-r-lg);
         overflow: hidden;
-        transition: box-shadow var(--transition), transform var(--transition);
-        display: flex; flex-direction: column;
+        display: flex;
+        flex-direction: column;
+        box-shadow: var(--ud-shadow-sm);
+        transition: box-shadow var(--ud-ease), transform var(--ud-ease);
     }
-    .course-mini-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
-    .course-mini-thumb {
-        height: 120px; width: 100%;
-        object-fit: cover; background: var(--color-surface-2);
-        display: flex; align-items: center; justify-content: center;
-        font-size: 40px; flex-shrink: 0;
+    .dash-course-card:hover { box-shadow: var(--ud-shadow-lg); transform: translateY(-2px); }
+    .dash-course-thumb {
+        height: 110px;
+        background: #1c1d1f;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: #6a6f73;
+        flex-shrink: 0;
     }
-    .course-mini-body { padding: var(--space-4); flex: 1; display: flex; flex-direction: column; }
-    .course-mini-title {
-        font-size: var(--text-sm); font-weight: 600; color: var(--color-label-1);
-        margin-bottom: 4px;
-        overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2;
+    .dash-course-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .dash-course-body {
+        padding: var(--ud-sp4);
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .dash-course-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--ud-text);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin-bottom: .25rem;
     }
-    .course-mini-teacher { font-size: 11px; color: var(--color-label-2); margin-bottom: var(--space-3); }
-
-    /* Progress bar */
-    .mini-progress-bar {
-        background: var(--color-surface-2); border-radius: var(--radius-full);
-        height: 5px; overflow: hidden; margin-bottom: 5px;
+    .dash-course-teacher {
+        font-size: 0.72rem;
+        color: var(--ud-text-muted);
+        margin-bottom: var(--ud-sp3);
     }
-    .mini-progress-fill {
-        height: 100%; border-radius: var(--radius-full);
-        background: var(--color-blue); transition: width .5s ease;
+    .dash-progress-track {
+        background: var(--ud-border);
+        border-radius: var(--ud-radius-pill);
+        height: 4px;
+        overflow: hidden;
+        margin-bottom: .3rem;
     }
-    .mini-progress-fill.done { background: var(--color-green); }
-    .mini-progress-text {
-        display: flex; justify-content: space-between;
-        font-size: 11px; color: var(--color-label-2);
-        margin-bottom: var(--space-3);
+    .dash-progress-fill {
+        height: 100%;
+        border-radius: var(--ud-radius-pill);
+        background: var(--ud-magenta);
+        transition: width .4s ease;
     }
-    .mini-progress-text .pct { font-weight: 600; color: var(--color-blue); }
-    .mini-progress-text .pct.done { color: var(--color-green); }
-
-    .btn-continue-sm {
-        display: block; text-align: center;
-        padding: 9px 16px; border-radius: var(--radius-full);
-        font-size: var(--text-sm); font-weight: 600;
-        text-decoration: none; transition: opacity var(--transition);
+    .dash-progress-fill.done { background: var(--ud-green); }
+    .dash-progress-info {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.7rem;
+        color: var(--ud-text-muted);
+        margin-bottom: var(--ud-sp3);
+    }
+    .dash-progress-info .pct { font-weight: 700; color: var(--ud-magenta); }
+    .dash-progress-info .pct.done { color: var(--ud-green); }
+    .dash-btn-continue {
+        display: block;
+        text-align: center;
+        padding: 9px 16px;
+        border-radius: var(--ud-radius-pill);
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-decoration: none !important;
+        transition: opacity var(--ud-ease);
         margin-top: auto;
     }
-    .btn-continue-sm.blue  { background: var(--color-blue); color: #fff !important; }
-    .btn-continue-sm.green { background: var(--color-green-tint); color: var(--color-green) !important; }
-    .btn-continue-sm:hover { opacity: .82 !important; }
+    .dash-btn-continue.blue {
+        background: var(--ud-magenta);
+        color: #fff !important;
+    }
+    .dash-btn-continue.green {
+        background: var(--ud-green-bg);
+        color: var(--ud-green) !important;
+        border: 1px solid rgba(21,115,71,.2);
+    }
+    .dash-btn-continue:hover { opacity: .82; }
 
-    .empty-state {
-        text-align: center; padding: var(--space-10) var(--space-6);
-        color: var(--color-label-2); font-size: var(--text-sm);
+    /* ── Quick Access sidebar ── */
+    .dash-quick-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem 1.1rem;
+        padding-top: var(--ud-sp2);
+    }
+    .dash-quick-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: var(--ud-sp5) var(--ud-sp4);
+        background: var(--ud-surface);
+        border: 1px solid var(--ud-border);
+        border-radius: var(--dash-r-lg);
+        text-decoration: none !important;
+        transition: border-color var(--ud-ease), box-shadow var(--ud-ease);
+        gap: var(--ud-sp2);
+    }
+    .dash-quick-item:hover {
+        border-color: var(--ud-purple);
+        box-shadow: 0 0 0 2px rgba(86,36,208,.10);
+    }
+    .dash-quick-icon {
+        width: 44px; height: 44px;
+        border-radius: var(--dash-r-md);
+        background: rgba(86,36,208,.08);
+        color: var(--ud-purple);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+    .dash-quick-icon.green { background: var(--ud-green-bg); color: var(--ud-green); }
+    .dash-quick-title {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--ud-text);
+    }
+    .dash-quick-desc {
+        font-size: 0.68rem;
+        color: var(--ud-text-muted);
     }
 
-    @@keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(12px); }
-        to   { opacity: 1; transform: translateY(0); }
+    /* ── Responsive ── */
+    @@media (max-width: 1024px) {
+        .dash-two-col { grid-template-columns: 1fr; }
     }
-    .fade-up { animation: fadeInUp .4s cubic-bezier(.25,.46,.45,.94) both; }
-    .delay-1 { animation-delay: .06s; }
-    .delay-2 { animation-delay: .12s; }
-    .delay-3 { animation-delay: .18s; }
+    @@media (max-width: 768px) {
+        .dash-welcome { flex-direction: column; padding: var(--ud-sp6); align-items: stretch; }
+        .dash-welcome-actions { flex-wrap: wrap; justify-content: flex-start; }
+        .dash-stat-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        .dash-quick-grid { grid-template-columns: repeat(2, 1fr); gap: 0.9rem 1rem; }
+    }
+    @@media (max-width: 480px) {
+        .dash-stat-grid { grid-template-columns: 1fr; }
+    }
 </style>
 
-@* ── PAGE HEADER ── *@
-<div class="page-head fade-up">
-    <h1>Dashboard</h1>
-    <div class="breadcrumb">
-        <span>Học viên</span>
-        <span class="breadcrumb-sep">›</span>
-        <span>Tổng quan</span>
-    </div>
-</div>
+@* ── PAGE WRAPPER ── *@
+<div class="ud-page-wide student-dashboard">
 
-@* ── WELCOME BANNER ── *@
-<div class="welcome-banner fade-up delay-1">
-    <div class="welcome-text">
-        <h2>Xin chào, @(Model.UserInfo?.FullName ?? "Bạn") 👋</h2>
-        <p>Tiếp tục hành trình học tập — mỗi bài học đưa bạn đến gần mục tiêu hơn.</p>
+    @* ── PAGE HEADER ── *@
+    <div class="ud-page-head ud-fade-up">
+        <h1>Dashboard</h1>
+        <p>Học viên &rarr; Tổng quan</p>
     </div>
-    <div class="welcome-actions">
-        <a asp-area="Student" asp-page="/MyLearning" class="btn-white-solid">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-            Xem khóa học của tôi
-        </a>
-        <a asp-area="Student" asp-page="/Profile" class="btn-white">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            Hồ sơ của tôi
-        </a>
-    </div>
-</div>
 
-@* ── STATS ── *@
-<p class="stat-section-label fade-up delay-2">Tiến độ học tập</p>
-<div class="stat-grid fade-up delay-2">
-
-    <div class="stat-card">
-        <div class="stat-card-icon icon-blue">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-            </svg>
+    @* ── WELCOME BANNER ── *@
+    <div class="dash-welcome ud-fade-up" style="animation-delay:.05s">
+        <div class="dash-welcome-text">
+            <h2>Xin chào, @(Model.UserInfo?.FullName ?? "Bạn")!</h2>
+            <p>Tiếp tục hành trình học tập — mỗi bài học đưa bạn đến gần mục tiêu hơn.</p>
         </div>
-        <div class="stat-label">Khóa học đã đăng ký</div>
-        <div class="stat-value">@Model.TotalEnrolled</div>
-        <div class="stat-sub">Tổng số khóa học của bạn</div>
+        <div class="dash-welcome-actions">
+            <a asp-area="Student" asp-page="/MyLearning" class="dash-btn-white">
+                @Html.Raw("<i class=\"bi bi-book\"></i>")
+                Khóa học của tôi
+            </a>
+            <a asp-area="Student" asp-page="/Profile" class="dash-btn-ghost">
+                @Html.Raw("<i class=\"bi bi-person\"></i>")
+                Hồ sơ
+            </a>
+        </div>
     </div>
 
-    <div class="stat-card">
-        <div class="stat-card-icon icon-green">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"/>
-            </svg>
+    @* ── STAT CARDS ── *@
+    <div class="dash-stat-grid ud-fade-up" style="animation-delay:.10s">
+
+        <div class="dash-stat-card">
+            <div class="dash-stat-icon dash-stat-icon-blue">
+                @Html.Raw("<i class=\"bi bi-journal-bookmark\"></i>")
+            </div>
+            <div class="dash-stat-label">Khóa đã đăng ký</div>
+            <div class="dash-stat-value">@Model.TotalEnrolled</div>
+            <div class="dash-stat-sub">Tổng khóa học</div>
         </div>
-        <div class="stat-label">Đã hoàn thành</div>
-        <div class="stat-value">@Model.CompletedCourses</div>
-        <div class="stat-sub">Khóa học hoàn thành 100%</div>
+
+        <div class="dash-stat-card">
+            <div class="dash-stat-icon dash-stat-icon-green">
+                @Html.Raw("<i class=\"bi bi-check-circle\"></i>")
+            </div>
+            <div class="dash-stat-label">Đã hoàn thành</div>
+            <div class="dash-stat-value">@Model.CompletedCourses</div>
+            <div class="dash-stat-sub">Hoàn thành 100%</div>
+        </div>
+
+        <div class="dash-stat-card">
+            <div class="dash-stat-icon dash-stat-icon-amber">
+                @Html.Raw("<i class=\"bi bi-lightning-charge\"></i>")
+            </div>
+            <div class="dash-stat-label">Đang học</div>
+            <div class="dash-stat-value">@Model.InProgressCourses</div>
+            <div class="dash-stat-sub">Tiến độ &gt; 0%</div>
+        </div>
+
+        <div class="dash-stat-card">
+            <div class="dash-stat-icon dash-stat-icon-purple">
+                @Html.Raw("<i class=\"bi bi-patch-check\"></i>")
+            </div>
+            <div class="dash-stat-label">Chứng chỉ</div>
+            <div class="dash-stat-value">@Model.CompletedCourses</div>
+            <div class="dash-stat-sub">Đã nhận được</div>
+        </div>
+
     </div>
 
-    <div class="stat-card">
-        <div class="stat-card-icon icon-amber">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-            </svg>
-        </div>
-        <div class="stat-label">Đang học</div>
-        <div class="stat-value">@Model.InProgressCourses</div>
-        <div class="stat-sub">Khóa học đang tiến hành</div>
-    </div>
+    @* ── TWO COLUMN: Recent courses + Quick Access ── *@
+    <div class="dash-two-col ud-fade-up" style="animation-delay:.15s">
 
-    <div class="stat-card">
-        <div class="stat-card-icon icon-purple">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="8" r="6"/>
-                <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
-            </svg>
-        </div>
-        <div class="stat-label">Chứng chỉ</div>
-        <div class="stat-value">@Model.CompletedCourses</div>
-        <div class="stat-sub">Khóa học đã nhận chứng chỉ</div>
-    </div>
+        @* Recent Courses *@
+        <div class="ud-card">
+            <div class="dash-section-head">
+                <h2>
+                    @Html.Raw("<i class=\"bi bi-play-circle\"></i>")
+                    Tiếp tục học
+                </h2>
+                <a asp-area="Student" asp-page="/MyLearning" class="btn btn-sm btn-outline">
+                    Xem tất cả
+                </a>
+            </div>
 
-</div>
-
-@* ── ROW: Recent courses + Quick Access ── *@
-<div class="dash-grid fade-up delay-3">
-
-    @* Khóa học đang học *@
-    <div class="card">
-        <div class="card-header">
-            <h2>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;margin-right:6px;vertical-align:-2px;color:var(--color-blue)">
-                    <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-                </svg>
-                Tiếp tục học
-            </h2>
-            <a asp-area="Student" asp-page="/MyLearning" class="btn btn-sm btn-secondary">Xem tất cả</a>
-        </div>
-        <div class="card-body">
             @if (!Model.RecentCourses.Any())
             {
-                <div class="empty-state">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto var(--space-3)">
-                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-                    </svg>
-                    <p>Bạn chưa đăng ký khóa học nào.</p>
+                <div class="ud-empty">
+                    @Html.Raw("<i class=\"bi bi-book\" style=\"font-size:2.5rem\"></i>")
+                    <h3>Chưa có khóa học nào</h3>
+                    <p>Khám phá và đăng ký khóa học để bắt đầu học tập.</p>
+                    <a asp-area="" asp-page="/Index" class="btn btn-primary btn-sm" style="margin-top:var(--ud-sp4);border-radius:var(--ud-radius-pill);">
+                        @Html.Raw("<i class=\"bi bi-compass\"></i>")
+                        Khám phá khóa học
+                    </a>
                 </div>
             }
             else
             {
-                <div class="course-mini-grid">
+                <div class="dash-course-grid" style="padding-bottom:var(--ud-sp2)">
                     @foreach (var item in Model.RecentCourses)
                     {
                         bool isDone = item.Progress?.IsCompleted ?? false;
                         int pct = (int)(item.Progress?.PercentComplete ?? 0);
                         string learnUrl = $"/Student/LearnCourse?courseId={item.CourseId}{(item.ResumeLessonId.HasValue ? $"&lessonId={item.ResumeLessonId}" : "")}";
-                        <div class="course-mini-card">
+                        <div class="dash-course-card">
                             @if (!string.IsNullOrEmpty(item.ThumbnailUrl))
                             {
-                                <img src="@item.ThumbnailUrl" alt="@item.Title" class="course-mini-thumb" style="display:block" />
+                                <div class="dash-course-thumb">
+                                    <img src="@item.ThumbnailUrl" alt="@item.Title" />
+                                </div>
                             }
                             else
                             {
-                                <div class="course-mini-thumb">📚</div>
-                            }
-                            <div class="course-mini-body">
-                                <div class="course-mini-title" title="@item.Title">@item.Title</div>
-                                <div class="course-mini-teacher">@item.TeacherName</div>
-                                <div class="mini-progress-bar">
-                                    <div class="mini-progress-fill @(isDone ? "done" : "")" style="width:@pct%"></div>
+                                <div class="dash-course-thumb">
+                                    @Html.Raw("<i class=\"bi bi-book\"></i>")
                                 </div>
-                                <div class="mini-progress-text">
+                            }
+                            <div class="dash-course-body">
+                                <div class="dash-course-title" title="@item.Title">@item.Title</div>
+                                <div class="dash-course-teacher">@item.TeacherName</div>
+                                <div class="dash-progress-track">
+                                    <div class="dash-progress-fill @(isDone ? "done" : "")" style="width:@pct%"></div>
+                                </div>
+                                <div class="dash-progress-info">
                                     <span>@(item.Progress?.CompletedLessons ?? 0)/@(item.Progress?.TotalLessons ?? 0) bài</span>
                                     <span class="pct @(isDone ? "done" : "")">@pct%</span>
                                 </div>
                                 @if (isDone)
                                 {
-                                    <a href="@learnUrl" class="btn-continue-sm green">✓ Xem lại</a>
+                                    <a href="@learnUrl" class="dash-btn-continue green">@Html.Raw("<i class=\"bi bi-arrow-repeat\"></i>") Xem lại</a>
                                 }
                                 else
                                 {
-                                    <a href="@learnUrl" class="btn-continue-sm blue">▶ Tiếp tục học</a>
+                                    <a href="@learnUrl" class="dash-btn-continue blue">@Html.Raw("<i class=\"bi bi-play-fill\"></i>") Tiếp tục</a>
                                 }
                             </div>
                         </div>
@@ -306,62 +488,54 @@
                 </div>
             }
         </div>
-    </div>
 
-    @* Quick Access *@
-    <div class="card">
-        <div class="card-header">
-            <h2>Truy cập nhanh</h2>
-        </div>
-        <div class="card-body">
-            <div class="quick-grid" style="grid-template-columns:1fr 1fr;gap:var(--space-3);">
+        @* Quick Access Sidebar *@
+        <div class="ud-card">
+            <div class="dash-section-head">
+                <h2>
+                    @Html.Raw("<i class=\"bi bi-grid-3x3-gap\"></i>")
+                    Truy cập nhanh
+                </h2>
+            </div>
+            <div style="padding-bottom:var(--ud-sp2)">
+                <div class="dash-quick-grid">
 
-                <a asp-area="Student" asp-page="/MyLearning" class="quick-item">
-                    <div class="quick-item-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-                        </svg>
-                    </div>
-                    <div class="quick-item-title">Khóa học của tôi</div>
-                    <div class="quick-item-desc">Xem và tiếp tục các khóa học</div>
-                </a>
+                    <a asp-area="Student" asp-page="/MyLearning" class="dash-quick-item">
+                        <div class="dash-quick-icon">
+                            @Html.Raw("<i class=\"bi bi-journal-bookmark\"></i>")
+                        </div>
+                        <div class="dash-quick-title">Khóa học</div>
+                        <div class="dash-quick-desc">Xem & tiếp tục</div>
+                    </a>
 
-                <a asp-area="Student" asp-page="/Profile" class="quick-item">
-                    <div class="quick-item-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                            <circle cx="12" cy="7" r="4"/>
-                        </svg>
-                    </div>
-                    <div class="quick-item-title">Hồ sơ cá nhân</div>
-                    <div class="quick-item-desc">Xem và chỉnh sửa thông tin</div>
-                </a>
+                    <a asp-area="Student" asp-page="/Profile" class="dash-quick-item">
+                        <div class="dash-quick-icon">
+                            @Html.Raw("<i class=\"bi bi-person\"></i>")
+                        </div>
+                        <div class="dash-quick-title">Hồ sơ</div>
+                        <div class="dash-quick-desc">Thông tin cá nhân</div>
+                    </a>
 
-                <a asp-area="Student" asp-page="/EditProfile" class="quick-item">
-                    <div class="quick-item-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                        </svg>
-                    </div>
-                    <div class="quick-item-title">Chỉnh sửa hồ sơ</div>
-                    <div class="quick-item-desc">Cập nhật ảnh đại diện, bio...</div>
-                </a>
+                    <a asp-area="Student" asp-page="/EditProfile" class="dash-quick-item">
+                        <div class="dash-quick-icon">
+                            @Html.Raw("<i class=\"bi bi-pencil-square\"></i>")
+                        </div>
+                        <div class="dash-quick-title">Chỉnh sửa</div>
+                        <div class="dash-quick-desc">Cập nhật hồ sơ</div>
+                    </a>
 
-                <a asp-area="Student" asp-page="/Certificates/Index" class="quick-item">
-                    <div class="quick-item-icon" style="background:var(--color-green-tint); color:var(--color-green)">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="8" r="6"/>
-                            <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
-                        </svg>
-                    </div>
-                    <div class="quick-item-title">Chứng chỉ</div>
-                    <div class="quick-item-desc">Xem tất cả chứng chỉ</div>
-                </a>
+                    <a asp-area="Student" asp-page="/Certificates/Index" class="dash-quick-item">
+                        <div class="dash-quick-icon green">
+                            @Html.Raw("<i class=\"bi bi-patch-check\"></i>")
+                        </div>
+                        <div class="dash-quick-title">Chứng chỉ</div>
+                        <div class="dash-quick-desc">Xem tất cả</div>
+                    </a>
 
+                </div>
             </div>
         </div>
+
     </div>
 
 </div>

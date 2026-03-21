@@ -4,63 +4,82 @@
     ViewData["Title"] = "Thông báo";
 }
 
-<div class="page-head" style="display: flex; justify-content: space-between; align-items: center;">
-    <div>
-        <div class="breadcrumb">
-            <a asp-area="Student" asp-page="/Dashboard">Dashboard</a>
-            <span class="breadcrumb-sep">/</span>
-            <span>Thông báo</span>
+<div class="ud-page">
+    <div class="ud-page-head">
+        <div class="ud-page-head-row">
+            <div>
+                <h1>Thông báo của bạn</h1>
+                <p>Xem các thông báo và cập nhật mới nhất từ khóa học của bạn.</p>
+            </div>
+            @if (Model.Notifications.Any(n => !n.IsRead))
+            {
+                <form method="post" asp-page-handler="MarkAllRead">
+                    <button type="submit" class="btn btn-outline">Đánh dấu tất cả đã đọc</button>
+                </form>
+            }
         </div>
-        <h1>Thông báo của bạn</h1>
     </div>
-    @if (Model.Notifications.Any(n => !n.IsRead))
-    {
-        <form method="post" asp-page-handler="MarkAllRead">
-            <button type="submit" class="btn btn-secondary">Đánh dấu tất cả đã đọc</button>
-        </form>
-    }
-</div>
 
-@if (!Model.Notifications.Any())
-{
-    <div class="card card-body" style="text-align: center; padding: 60px 20px;">
-        <h3 style="color: var(--color-label-2); margin-bottom: 16px;">Bạn không có thông báo nào</h3>
-    </div>
-}
-else
-{
-    <div class="card">
-        <div style="display: flex; flex-direction: column;">
+    @if (!Model.Notifications.Any())
+    {
+        <div class="ud-empty">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            <h3>Không có thông báo nào</h3>
+            <p>Bạn sẽ nhận được thông báo khi có cập nhật mới từ khóa học.</p>
+        </div>
+    }
+    else
+    {
+        <div class="ud-card">
             @foreach (var n in Model.Notifications)
             {
-                var bgClass = n.IsRead ? "" : "background: var(--color-blue-tint);";
-                var iconUrl = n.Type == "CertificateIssued" ? "🎓" : "🔔";
+                var iconClass = n.Type == "CertificateIssued" ? "bi-award-fill" : "bi-bell-fill";
                 var title = n.Type == "CertificateIssued" ? "Chứng chỉ mới" : "Thông báo hệ thống";
-
-                <div style="display: flex; gap: 16px; padding: 20px; border-bottom: 1px solid var(--color-border); @bgClass transition: background var(--transition);">
-                    <div style="font-size: 24px; padding-top: 2px;">@iconUrl</div>
-                    <div style="flex: 1;">
-                        <h4 style="font-size: var(--text-md); font-weight: 600; margin-bottom: 4px; color: var(--color-label-1);">@title</h4>
-                        <p style="font-size: var(--text-base); color: var(--color-label-2); margin-bottom: 8px;">@n.Content</p>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: var(--text-sm); color: var(--color-label-3);">@n.TimeAgo</span>
-                            
-                            <div style="display: flex; gap: 12px;">
-                                @if (!string.IsNullOrEmpty(n.TargetUrl) && n.TargetUrl != "null")
-                                {
-                                    <a href="@n.TargetUrl" class="btn btn-primary btn-sm" style="padding: 4px 12px; font-size: 13px;">Xem chi tiết</a>
-                                }
+                var iconColor = n.Type == "CertificateIssued" ? "var(--ud-green)" : "var(--ud-magenta)";
+                var bgStyle = n.IsRead ? "" : "background: rgba(164,53,240,.03);";
+                <div class="ud-notification-item" style="display: flex; gap: var(--ud-sp4); padding: var(--ud-sp5) var(--ud-sp5); border-bottom: 1px solid var(--ud-border-light, #e8e8ed); @bgStyle transition: background var(--ud-ease);">
+                    <div class="ud-notification-icon" style="width: 44px; height: 44px; border-radius: 50%; background: rgba(164,53,240,.08); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        @Html.Raw($"<i class=\"bi {iconClass}\" style=\"font-size: 1.25rem; color: {iconColor};\"></i>")
+                    </div>
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: var(--ud-sp3); margin-bottom: var(--ud-sp2);">
+                            <div style="display: flex; align-items: center; gap: var(--ud-sp2);">
+                                <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--ud-text); margin: 0;">@title</h4>
                                 @if (!n.IsRead)
                                 {
-                                    <form method="post" asp-page-handler="MarkRead" asp-route-id="@n.NotificationId">
-                                        <button type="submit" class="btn btn-secondary btn-sm" style="padding: 4px 12px; font-size: 13px;">Đã đọc</button>
-                                    </form>
+                                    <span class="badge badge-green">Mới</span>
                                 }
                             </div>
+                            <span class="ud-text-muted ud-text-xs" style="white-space: nowrap;">@n.TimeAgo</span>
+                        </div>
+                        <p style="font-size: 0.875rem; color: var(--ud-text-muted); margin: 0 0 var(--ud-sp4) 0; line-height: 1.5;">@n.Content</p>
+                        <div style="display: flex; gap: var(--ud-sp3); flex-wrap: wrap;">
+                            @if (!string.IsNullOrEmpty(n.TargetUrl) && n.TargetUrl != "null")
+                            {
+                                <a href="@n.TargetUrl" class="btn btn-primary btn-sm">Xem chi tiết</a>
+                            }
+                            @if (!n.IsRead)
+                            {
+                                <form method="post" asp-page-handler="MarkRead" asp-route-id="@n.NotificationId">
+                                    <button type="submit" class="btn btn-outline btn-sm">Đánh dấu đã đọc</button>
+                                </form>
+                            }
                         </div>
                     </div>
                 </div>
             }
         </div>
-    </div>
-}
+    }
+</div>
+
+<style>
+    .ud-notification-item:last-child {
+        border-bottom: none !important;
+    }
+    .ud-notification-item:hover {
+        background: var(--ud-surface);
+    }
+</style>

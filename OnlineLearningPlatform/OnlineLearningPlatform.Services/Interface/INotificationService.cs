@@ -1,3 +1,4 @@
+using OnlineLearningPlatform.Models.Entities;
 using OnlineLearningPlatform.Services.DTOs.Notification;
 
 namespace OnlineLearningPlatform.Services.Interface
@@ -18,5 +19,7 @@ namespace OnlineLearningPlatform.Services.Interface
         /// Gửi thông báo hệ thống đến tất cả user (Announcement).
         /// </summary>
         Task BroadcastSystemAsync(string content, string? targetUrl = null);
+
+        Task<IReadOnlyList<Notification>> GetRecentSystemBroadcastsForAdminAsync(int maxDistinct = 50);
     }
 }

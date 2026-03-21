@@ -1,0 +1,208 @@
+@page
+@model OnlineLearningPlatform.RazorPages.Areas.Student.Pages.Cart.IndexModel
+@{
+    ViewData["Title"] = "Giỏ hàng";
+    var walletUsedPreview = Model.Total > 0 && Model.UseWallet ? Math.Min(Model.WalletBalance, Model.Total) : 0;
+    var remainingPreview = Math.Max(0, Model.Total - walletUsedPreview);
+}
+
+<style>
+    .cart-page { background: var(--ud-surface); min-height: 100vh; padding-bottom: 3rem; }
+    .cart-inner { max-width: 1180px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+    .cart-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; margin-bottom: 1.5rem; }
+    .cart-head h1 { font-size: clamp(1.5rem, 3vw, 1.85rem); font-weight: 800; letter-spacing: -0.02em; color: var(--ud-text); margin: 0; }
+
+    /* Layout */
+    .cart-layout { display: flex; flex-direction: column-reverse; gap: 1.5rem; align-items: stretch; }
+    .cart-main { flex: 1; min-width: 0; }
+    .cart-aside { flex: 1; min-width: 0; }
+    @@media (min-width: 992px) {
+        .cart-layout { flex-direction: row; align-items: flex-start; gap: 1.75rem; }
+        .cart-main { flex: 1 1 0; max-width: calc(100% - 368px); }
+        .cart-aside { flex: 0 0 348px; width: 348px; }
+        .cart-aside-sticky { position: sticky; top: 4.75rem; }
+    }
+
+    /* List panel */
+    .cart-list { background: #fff; border: 1px solid var(--ud-border); border-radius: var(--ud-radius); overflow: hidden; }
+    .cart-list-head { padding: .85rem 1.25rem; font-weight: 800; font-size: 1rem; border-bottom: 1px solid var(--ud-border); background: #fafafa; }
+    .cart-list-body { padding: 0 1.25rem; }
+
+    /* Row */
+    .cart-row {
+        display: grid;
+        grid-template-columns: 128px 1fr minmax(130px, auto);
+        gap: 1rem 1.25rem;
+        align-items: center;
+        padding: 1.25rem 0;
+        border-bottom: 1px solid var(--ud-border);
+    }
+    .cart-row:last-child { border-bottom: none; }
+    @@media (max-width: 576px) {
+        .cart-row { grid-template-columns: 100px 1fr; grid-template-rows: auto auto; }
+        .cart-row-side { grid-column: 1 / -1; flex-direction: row !important; justify-content: space-between !important; align-items: center !important; border-top: 1px dashed var(--ud-border); margin-top: .5rem; padding-top: .85rem; }
+    }
+
+    .cart-thumb { width: 128px; height: 72px; object-fit: cover; border-radius: var(--ud-radius); background: #1c1d1f; border: 1px solid rgba(0,0,0,.06); flex-shrink: 0; }
+    @@media (max-width: 576px) { .cart-thumb { width: 100px; height: 56px; } }
+    .cart-body { min-width: 0; }
+    .cart-title { font-size: 1rem; font-weight: 800; line-height: 1.35; margin-bottom: .35rem; }
+    .cart-title a { color: var(--ud-text); text-decoration: none; }
+    .cart-title a:hover { color: var(--ud-magenta); }
+    .cart-meta { font-size: .82rem; color: var(--ud-text-muted); }
+    .cart-side { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; text-align: right; gap: .5rem; min-height: 72px; }
+    .cart-price-stack { text-align: right; line-height: 1.25; }
+    .cart-price-old { font-size: .78rem; color: var(--ud-text-muted); }
+    .cart-price { font-size: 1.05rem; font-weight: 800; color: var(--ud-text); }
+    .cart-remove-btn { font-size: .78rem; font-weight: 700; color: var(--ud-magenta); background: transparent; border: 1px solid var(--ud-border); border-radius: var(--ud-radius); padding: .3rem .7rem; cursor: pointer; transition: border-color .15s, background .15s; }
+    .cart-remove-btn:hover { border-color: var(--ud-magenta); background: rgba(164,53,240,.06); }
+
+    /* Summary */
+    .cart-summary { background: #fff; border: 1px solid var(--ud-border); border-radius: var(--ud-radius); padding: 1.15rem 1.25rem 1.35rem; box-shadow: 0 4px 14px rgba(0,0,0,.08); }
+    .cart-summary-title { font-size: 1.05rem; font-weight: 800; margin: 0 0 1rem; padding-bottom: .75rem; border-bottom: 1px solid var(--ud-border); }
+    .cart-sum-row { display: flex; justify-content: space-between; align-items: baseline; gap: .75rem; font-size: .9rem; margin-bottom: .5rem; }
+    .cart-sum-row .lbl { color: var(--ud-text-muted); }
+    .cart-sum-row .val { font-weight: 700; text-align: right; }
+    .cart-sum-row.discount .val { color: var(--ud-green); }
+    .cart-sum-total { margin-top: .85rem; padding-top: .85rem; border-top: 1px solid var(--ud-border); }
+    .cart-sum-total .lbl { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--ud-text-muted); margin-bottom: .2rem; }
+    .cart-sum-total .val { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
+    .cart-check { display: flex; align-items: flex-start; gap: .65rem; margin: 1rem 0 .75rem; }
+    .cart-check .form-check-input { width: 1.1rem; height: 1.1rem; margin-top: .2rem; flex-shrink: 0; accent-color: var(--ud-magenta); }
+    .cart-check label { font-size: .82rem; line-height: 1.45; color: var(--ud-text); cursor: pointer; margin: 0; }
+    .cart-btn-pay { width: 100%; padding: .8rem 1rem; font-size: .95rem; font-weight: 800; border: none; border-radius: var(--ud-radius); background: var(--ud-magenta); color: #fff; cursor: pointer; transition: background .15s, transform .1s; box-shadow: 0 2px 8px rgba(164,53,240,.35); }
+    .cart-btn-pay:hover { background: var(--ud-magenta-dk); color: #fff; }
+    .cart-btn-pay:active { transform: scale(.995); }
+    .cart-trust { font-size: .75rem; color: var(--ud-text-muted); line-height: 1.45; margin: .85rem 0 0; }
+
+    .cart-empty { background: #fff; border: 1px dashed var(--ud-border); border-radius: var(--ud-radius); padding: 3.5rem 1.5rem; text-align: center; color: var(--ud-text-muted); }
+    .cart-empty h3 { font-size: 1.1rem; font-weight: 800; color: var(--ud-text); margin-bottom: .35rem; }
+    .cart-empty p { font-size: .88rem; }
+</style>
+
+<div class="cart-page">
+    <div class="cart-inner">
+        <div class="cart-head">
+            <h1>Giỏ hàng</h1>
+        </div>
+
+        @if (Model.Items.Count == 0)
+        {
+            <div class="cart-empty">
+                <h3>Giỏ hàng trống</h3>
+                <p>Bạn chưa thêm khóa học nào vào giỏ hàng.</p>
+                <a asp-area="Student" asp-page="/Courses/Index" class="btn btn-dark btn-sm" style="margin-top:.75rem;">Khám phá khóa học</a>
+            </div>
+        }
+        else
+        {
+            <div class="cart-layout">
+                <!-- Left: list -->
+                <div class="cart-main">
+                    <div class="cart-list">
+                        <div class="cart-list-head">@Model.Items.Count khóa học trong giỏ</div>
+                        <div class="cart-list-body">
+                            @foreach (var c in Model.Items)
+                            {
+                                var line = (c.DiscountPrice != null && c.DiscountPrice > 0) ? c.DiscountPrice.Value : c.Price;
+                                <div class="cart-row">
+                                    @if (!string.IsNullOrEmpty(c.ThumbnailUrl))
+                                    {
+                                        <img class="cart-thumb" src="@c.ThumbnailUrl" alt="" />
+                                    }
+                                    else
+                                    {
+                                        <div class="cart-thumb" style="display:flex;align-items:center;justify-content:center;color:#fff;"><i class="bi bi-image" style="font-size:1.5rem;"></i></div>
+                                    }
+                                    <div class="cart-body">
+                                        <div class="cart-title">
+                                            <a asp-area="Student" asp-page="/Courses/Details" asp-route-id="@c.CourseId">@c.Title</a>
+                                        </div>
+                                        <div class="cart-meta">Giảng viên: @c.TeacherName</div>
+                                    </div>
+                                    <div class="cart-side cart-row-side">
+                                        <div class="cart-price-stack">
+                                            @if (c.DiscountPrice != null && c.DiscountPrice > 0 && c.DiscountPrice < c.Price)
+                                            {
+                                                <div class="cart-price-old"><s>@c.Price.ToString("N0") ₫</s></div>
+                                            }
+                                            <div class="cart-price">@(line > 0 ? line.ToString("N0") + " ₫" : "Miễn phí")</div>
+                                        </div>
+                                        <form method="post" asp-page-handler="Remove" asp-route-id="@c.CourseId" style="margin:0;">
+                                            <button type="submit" class="cart-remove-btn"><i class="bi bi-trash3 me-1"></i> Xóa</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: summary -->
+                <aside class="cart-aside">
+                    <form method="post" asp-page-handler="CheckoutAll" class="cart-summary cart-aside-sticky">
+                        <div class="cart-summary-title">Tóm tắt đơn hàng</div>
+
+                        <div class="cart-sum-row">
+                            <span class="lbl">Tạm tính</span>
+                            <span class="val">@Model.Total.ToString("N0") ₫</span>
+                        </div>
+
+                        @if (Model.Total > 0)
+                        {
+                            <div class="form-check form-switch" style="margin:.5rem 0;">
+                                <input class="form-check-input" type="checkbox" asp-for="UseWallet" id="useWallet" />
+                                <label class="form-check-label" for="useWallet" style="font-size:.88rem;font-weight:600;">Dùng ví (@Model.WalletBalance.ToString("N0") ₫)</label>
+                            </div>
+                            @if (Model.UseWallet && Model.WalletBalance > 0)
+                            {
+                                <div class="cart-sum-row">
+                                    <span class="lbl">Trừ ví</span>
+                                    <span class="val" style="color:var(--ud-green);">−@walletUsedPreview.ToString("N0") ₫</span>
+                                </div>
+                                <div class="cart-sum-row">
+                                    <span class="lbl" style="font-weight:700;">Còn lại (VNPAY)</span>
+                                    <span class="val" style="font-weight:800;">@remainingPreview.ToString("N0") ₫</span>
+                                </div>
+                            }
+                        }
+
+                        <div class="cart-sum-total">
+                            <div class="lbl">Tổng thanh toán</div>
+                            <div class="val">@Model.Total.ToString("N0") ₫</div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(Model.CheckoutError))
+                        {
+                            <div class="alert alert-danger py-2 px-2 mt-2 mb-0" style="font-size:.85rem;border-radius:var(--ud-radius);">@Model.CheckoutError</div>
+                        }
+
+                        @if (Model.Total > 0)
+                        {
+                            <div class="cart-check">
+                                <input class="form-check-input" type="checkbox" asp-for="AgreeRefundPolicy" id="agreeRefund" />
+                                <label for="agreeRefund">
+                                    Tôi đồng ý với <strong>chính sách hoàn tiền</strong> (7 ngày).
+                                </label>
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.RefundPolicyError))
+                            {
+                                <div style="font-size:.8rem;color:var(--ud-red);margin-top:.25rem;">@Model.RefundPolicyError</div>
+                            }
+                        }
+
+                        <button type="submit" class="cart-btn-pay">
+                            @(Model.Total <= 0
+                                ? "Hoàn tất đăng ký"
+                                : (Model.UseWallet && remainingPreview <= 0 ? "Thanh toán bằng ví" : "Thanh toán"))
+                        </button>
+
+                        <p class="cart-trust mb-0">
+                            <i class="bi bi-shield-lock me-1"></i>Một giao dịch cho toàn bộ giỏ. Phần chưa đủ thanh toán qua VNPAY.
+                        </p>
+                    </form>
+                </aside>
+            </div>
+        }
+    </div>
+</div>

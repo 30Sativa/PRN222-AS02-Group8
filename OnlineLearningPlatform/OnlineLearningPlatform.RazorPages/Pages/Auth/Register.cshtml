@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model OnlineLearningPlatform.RazorPages.Pages.Auth.RegisterModel
 @{
     ViewData["Title"] = "Đăng ký";
@@ -46,12 +46,12 @@
                 <span asp-validation-for="RegisterRequest.Password" class="form-error"></span>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width:100%; padding: 12px; font-size: 15px; margin-top: 8px;">
+            <button type="submit" class="btn btn-primary">
                 Tạo tài khoản
             </button>
         </form>
 
-        <div class="auth-footer">
+        <div class="auth-footer" style="margin-top: var(--ud-sp6);">
             Đã có tài khoản?
             <a asp-page="/Auth/Login">Đăng nhập</a>
         </div>

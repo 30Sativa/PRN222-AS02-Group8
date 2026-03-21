@@ -5,7 +5,7 @@
 }
 
 <div class="page-head fade-up">
-    <h1>Hồ sơ cá nhân</h1>
+    <h1>Hồ sơ học viên</h1>
     <div class="breadcrumb">
         <a asp-area="Student" asp-page="/Dashboard">Dashboard</a>
         <span class="breadcrumb-sep">/</span>
@@ -45,14 +45,14 @@ else
                 </div>
                 <div class="detail-row">
                     <div class="dr-label">Số điện thoại</div>
-                    <div class="dr-value">@(Model.UserInfo.PhoneNumber ?? "Chưa cập nhật")</div>
+                    <div class="dr-value">@(string.IsNullOrEmpty(Model.UserInfo.PhoneNumber) ? "Chưa cập nhật" : Model.UserInfo.PhoneNumber)</div>
                 </div>
                 <div class="detail-row">
                     <div class="dr-label">Ngày tham gia</div>
                     <div class="dr-value">@Model.UserInfo.CreatedAt.ToString("dd/MM/yyyy")</div>
                 </div>
                 <div class="detail-row">
-                    <div class="dr-label">Role</div>
+                    <div class="dr-label">Vai trò</div>
                     <div class="dr-value"><span class="role-pill role-student">Học viên</span></div>
                 </div>
                 <div class="detail-row" style="grid-column: 1 / -1;">

@@ -4,57 +4,90 @@
     ViewData["Title"] = "Chỉnh sửa hồ sơ";
 }
 
-<div class="page-head fade-up">
-    <h1>Chỉnh sửa hồ sơ</h1>
-    <div class="breadcrumb">
-        <a asp-area="Student" asp-page="/Dashboard">Dashboard</a>
-        <span class="breadcrumb-sep">/</span>
-        <a asp-area="Student" asp-page="/Profile">Hồ sơ</a>
-        <span class="breadcrumb-sep">/</span>
-        <span>Chỉnh sửa</span>
+<div class="ud-page">
+    <div class="ud-page-head ud-fade-up">
+        <div class="ud-page-head-row">
+            <div>
+                <h1>Chỉnh sửa hồ sơ</h1>
+                <p>Cập nhật thông tin cá nhân của bạn</p>
+            </div>
+        </div>
     </div>
-</div>
 
-@if (Model.SuccessMessage != null)
-{
-    <div class="alert alert-success fade-up">@Model.SuccessMessage</div>
-}
-@if (Model.ErrorMessage != null)
-{
-    <div class="alert alert-danger fade-up">@Model.ErrorMessage</div>
-}
+    @if (Model.SuccessMessage != null)
+    {
+        <div class="alert alert-success ud-fade-up" style="margin-bottom: var(--ud-sp5);">
+            @Html.Raw("<i class=\"bi bi-check-circle\"></i>")
+            @Model.SuccessMessage
+        </div>
+    }
+    @if (Model.ErrorMessage != null)
+    {
+        <div class="alert alert-danger ud-fade-up" style="margin-bottom: var(--ud-sp5);">
+            @Html.Raw("<i class=\"bi bi-x-circle\"></i>")
+            @Model.ErrorMessage
+        </div>
+    }
 
-<div class="card fade-up" style="max-width: 640px;">
-    <div class="card-header"><h2>Thông tin cá nhân</h2></div>
-    <div class="card-body">
-        <form method="post">
-            <div class="form-group">
-                <label>Email</label>
-                <input type="text" class="form-control" value="@Model.CurrentEmail" disabled />
-                <span class="form-hint">Email không thể thay đổi.</span>
-            </div>
+    <div class="ud-card ud-fade-up" style="max-width: 640px;">
+        <div style="padding: var(--ud-sp6); border-bottom: 1px solid var(--ud-border);">
+            <h3 style="font-size: 1rem; font-weight: 700; margin: 0;">
+                @Html.Raw("<i class=\"bi bi-pencil-square\"></i>")
+                Thông tin cá nhân
+            </h3>
+        </div>
 
-            <div class="form-group">
-                <label asp-for="Input.FullName">Họ và tên</label>
-                <input asp-for="Input.FullName" class="form-control" placeholder="Nhập họ và tên" />
-                <span asp-validation-for="Input.FullName" class="form-error"></span>
-            </div>
+        <div style="padding: var(--ud-sp6);">
+            <form method="post">
+                <div class="form-group">
+                    <label class="form-label">
+                        @Html.Raw("<i class=\"bi bi-envelope\"></i>")
+                        Email
+                    </label>
+                    <input type="text" class="form-control" value="@Model.CurrentEmail" disabled />
+                    <small style="font-size: 0.78rem; color: var(--ud-text-muted); margin-top: 4px; display: block;">
+                        @Html.Raw("<i class=\"bi bi-info-circle\"></i>")
+                        Email không thể thay đổi.
+                    </small>
+                </div>
 
-            <div class="form-group">
-                <label asp-for="Input.PhoneNumber">Số điện thoại</label>
-                <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Nhập số điện thoại" />
-            </div>
+                <div class="form-group">
+                    <label class="form-label" asp-for="Input.FullName">
+                        @Html.Raw("<i class=\"bi bi-person\"></i>")
+                        Họ và tên
+                    </label>
+                    <input asp-for="Input.FullName" class="form-control" placeholder="Nhập họ và tên của bạn" />
+                    <span asp-validation-for="Input.FullName" class="form-error"></span>
+                </div>
 
-            <div class="form-group">
-                <label asp-for="Input.Bio">Giới thiệu bản thân</label>
-                <textarea asp-for="Input.Bio" class="form-control" placeholder="Viết vài dòng về bản thân bạn..."></textarea>
-            </div>
+                <div class="form-group">
+                    <label class="form-label" asp-for="Input.PhoneNumber">
+                        @Html.Raw("<i class=\"bi bi-telephone\"></i>")
+                        Số điện thoại
+                    </label>
+                    <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Nhập số điện thoại của bạn" />
+                </div>
 
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
-                <a asp-area="Student" asp-page="/Profile" class="btn btn-secondary">Hủy</a>
-            </div>
-        </form>
+                <div class="form-group" style="margin-bottom: var(--ud-sp6);">
+                    <label class="form-label" asp-for="Input.Bio">
+                        @Html.Raw("<i class=\"bi bi-file-text\"></i>")
+                        Giới thiệu bản thân
+                    </label>
+                    <textarea asp-for="Input.Bio" class="form-control" rows="4" placeholder="Viết vài dòng về bản thân bạn..."></textarea>
+                </div>
+
+                <div class="ud-flex ud-align-center" style="gap: var(--ud-sp3);">
+                    <button type="submit" class="btn btn-primary">
+                        @Html.Raw("<i class=\"bi bi-check-lg\"></i>")
+                        Lưu thay đổi
+                    </button>
+                    <a asp-area="Student" asp-page="/Profile" class="btn btn-outline">
+                        @Html.Raw("<i class=\"bi bi-x-lg\"></i>")
+                        Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 

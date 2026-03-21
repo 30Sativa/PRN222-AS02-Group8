@@ -1,280 +1,341 @@
 @page "{id:guid}"
+@using System.Net
+@using System.Text.RegularExpressions
 @model OnlineLearningPlatform.RazorPages.Areas.Student.Pages.Courses.DetailsModel
 @{
     ViewData["Title"] = Model.Course.Title;
+    var plainDesc = Model.Course.Description != null
+        ? Regex.Replace(Model.Course.Description, "<[^>]+>", " ")
+        : string.Empty;
+    plainDesc = WebUtility.HtmlDecode(plainDesc);
+    plainDesc = Regex.Replace(plainDesc, @"\s+", " ").Trim();
+    var heroExcerpt = plainDesc.Length > 260 ? plainDesc.Substring(0, 260).Trim() + "…" : plainDesc;
+
+    var learnBullets = new List<string>();
+    if (!string.IsNullOrEmpty(plainDesc))
+    {
+        var parts = plainDesc.Split(new[] { '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries);
+        foreach (var p in parts)
+        {
+            var t = p.Trim();
+            if (t.Length < 12) continue;
+            learnBullets.Add(t.Length > 140 ? t.Substring(0, 137).Trim() + "…" : t);
+            if (learnBullets.Count >= 8) break;
+        }
+    }
+    if (learnBullets.Count == 0)
+    {
+        learnBullets.Add("Kiến thức nền tảng và thực hành trong từng bài học");
+        learnBullets.Add("Truy cập tài liệu trọn đời sau khi đăng ký");
+        learnBullets.Add("Học theo tiến độ phù hợp với bạn");
+    }
 }
 
 <style>
-    /* Typography & Core Variables */
-    :root {
-        --apple-bg: #fbfbfd;
-        --apple-text: #1d1d1f;
-        --apple-text-muted: #86868b;
-        --apple-blue: #0071e3;
-        --apple-card-bg: #ffffff;
-        --apple-radius: 24px;
-        --apple-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
-        --apple-border: rgba(0,0,0,0.05);
-    }
-
-    body {
-        background-color: var(--apple-bg);
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        color: var(--apple-text);
-        -webkit-font-smoothing: antialiased;
-    }
-
-    .page-container {
-        padding: 2rem 0;
-    }
-
-    /* Media Wrapper */
-    .media-wrapper {
-        border-radius: 16px;
-        overflow: hidden;
-        background-color: #000;
+    /* ── Hero full-bleed (Udemy style) ── */
+    .d-hero {
+        width: 100vw;
         position: relative;
-        padding-top: 56.25%; /* 16:9 Aspect Ratio */
-        box-shadow: var(--apple-shadow);
-        margin-bottom: 2rem;
+        left: 50%;
+        right: 50%;
+        margin-left: -50vw;
+        margin-right: -50vw;
+        background: #2d2f31;
+        color: #fff;
+        padding: 1.25rem 0 6rem;
     }
-
-    .media-wrapper img {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+    @@media (min-width: 992px) {
+        .d-hero { padding-bottom: 7rem; }
     }
+    .d-hero-inner { max-width: 1180px; margin: 0 auto; }
 
-    /* Course Info */
-    .course-title {
+    .d-breadcrumb {
+        display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .6rem;
+        font-size: .8rem; font-weight: 600; margin-bottom: .85rem;
+    }
+    .d-breadcrumb a { color: #c0c4fc !important; text-decoration: none !important; opacity: 1 !important; }
+    .d-breadcrumb a:hover { text-decoration: underline !important; color: #fff !important; }
+    .d-breadcrumb-sep { opacity: .7; }
+
+    .d-title {
         font-weight: 800;
-        font-size: 2rem;
-        letter-spacing: -0.02em;
+        font-size: clamp(1.45rem, 3.2vw, 2.25rem);
         line-height: 1.2;
-        margin-bottom: 0.5rem;
-        color: var(--apple-text);
-    }
-
-    .course-meta {
-        font-size: 0.95rem;
-        color: var(--apple-text-muted);
-        margin-bottom: 1.5rem;
-    }
-
-    .prose-content {
-        font-size: 1.05rem;
-        line-height: 1.6;
-        color: #333336;
-        margin-bottom: 2rem;
-    }
-
-    /* Features Grid */
-    .feature-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 2rem;
-        padding: 1.5rem 0;
-        border-top: 1px solid var(--apple-border);
-        border-bottom: 1px solid var(--apple-border);
-    }
-
-    .feature-item {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .feature-icon {
-        font-size: 1.5rem;
-        color: var(--apple-blue);
-    }
-
-    .feature-text .title {
-        font-size: 0.8rem;
-        color: var(--apple-text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        font-weight: 600;
-        margin-bottom: 0.1rem;
-    }
-
-    .feature-text .value {
-        font-size: 0.95rem;
-        font-weight: 500;
-        color: var(--apple-text);
-    }
-
-    /* Pricing Info */
-    .pricing-card {
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        border-radius: 24px;
-        padding: 2rem;
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
-        position: sticky;
-        top: 2rem;
-        transition: transform 0.3s ease;
-    }
-    
-    .pricing-card:hover {
-        transform: translateY(-4px);
-    }
-
-    .price-value {
-        font-size: 2.2rem;
-        font-weight: 700;
         letter-spacing: -0.02em;
-        line-height: 1;
-        margin-bottom: 0.25rem;
+        margin-bottom: .65rem;
+        max-width: 46rem;
+    }
+    .d-badges {
+        display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .85rem;
+        margin-bottom: .85rem; font-size: .88rem; color: #fff;
+    }
+    .d-badge-bestseller {
+        background: #eceb98; color: #3d3c0a; font-weight: 800;
+        font-size: .72rem; padding: .2rem .5rem; text-transform: uppercase;
+        letter-spacing: .02em;
+    }
+    .d-badge-cat {
+        border: 1px solid rgba(255,255,255,.35); color: #fff;
+        padding: .15rem .55rem; border-radius: 2px;
+        font-weight: 600; font-size: .72rem;
+    }
+    .d-rating { display: inline-flex; align-items: center; gap: .35rem; flex-wrap: wrap; }
+    .d-rating .star { color: #e59819; font-size: .82rem; letter-spacing: 0; }
+    .d-rating .num { font-weight: 800; color: #f3ca8c; }
+    .d-rating .count { color: #c0c4fc; }
+    .d-by { font-size: .9rem; color: #d1d7dc; margin-bottom: .75rem; }
+    .d-by a { color: #c0c4fc !important; text-decoration: underline; opacity: 1 !important; }
+    .d-meta-row {
+        display: flex; flex-wrap: wrap; gap: .75rem 1.25rem;
+        font-size: .8rem; color: #d1d7dc; margin-top: .25rem;
+    }
+    .d-meta-row i { margin-right: .35rem; opacity: .85; }
+    .d-excerpt { font-size: 1.05rem; line-height: 1.55; color: #d1d7dc; max-width: 42rem; margin: .75rem 0 0; }
+
+    /* ── Body: 2 columns ── */
+    .d-body { max-width: 1180px; margin: 0 auto; padding: 0 .75rem 2rem; }
+    @@media (min-width: 768px) { .d-body { padding-left: 1rem; padding-right: 1rem; } }
+
+    .d-grid {
+        display: flex; flex-direction: column; gap: 1.5rem;
+    }
+    .d-main { order: 2; padding-top: 1.5rem; }
+    .d-sidebar { order: 1; }
+    @@media (min-width: 992px) {
+        .d-grid { display: grid; grid-template-columns: minmax(0,1fr) 360px; gap: 2rem; align-items: start; }
+        .d-main { order: 1; padding-top: 2rem; padding-right: .5rem; }
+        .d-sidebar { order: 2; margin-top: -8.5rem; position: relative; z-index: 2; }
+        .d-sticky { position: sticky; top: 4.75rem; }
     }
 
-    .price-original {
-        font-size: 1rem;
-        color: var(--apple-text-muted);
-        text-decoration: line-through;
-        margin-left: 0.5rem;
-        font-weight: 400;
+    /* ── Sidebar buy card ── */
+    .d-buy-card {
+        background: #fff; border: 1px solid #d1d7dc;
+        border-radius: 2px; box-shadow: 0 2px 12px rgba(0,0,0,.12), 0 0 1px rgba(0,0,0,.08);
+        overflow: hidden;
     }
+    .d-buy-tabs {
+        display: flex; border-bottom: 1px solid #d1d7dc; background: #fff;
+    }
+    .d-buy-tab {
+        flex: 1; text-align: center; padding: .65rem .5rem;
+        font-weight: 800; font-size: .8rem; color: #6a6f73;
+        border: none; background: transparent; cursor: default;
+        border-bottom: 3px solid transparent; margin-bottom: -1px;
+    }
+    .d-buy-tab.active { color: #1c1d1f; border-bottom-color: #1c1d1f; }
+    .d-buy-tab.muted { opacity: .45; }
 
-    .action-btn {
-        width: 100%;
-        padding: 1rem;
-        border-radius: 14px;
-        font-weight: 600;
-        font-size: 1.1rem;
-        transition: all 0.2s ease;
-        border: none;
-        display: inline-block;
-        text-align: center;
-        text-decoration: none;
-        margin-top: 1.5rem;
+    .d-preview { position: relative; aspect-ratio: 16/9; background: #1c1d1f; }
+    .d-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .d-preview-overlay {
+        position: absolute; inset: 0;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        background: rgba(0,0,0,.35); color: #fff; text-align: center;
+        padding: 1rem; pointer-events: none;
     }
+    .d-preview-overlay i { font-size: 3.25rem; margin-bottom: .35rem; filter: drop-shadow(0 2px 8px rgba(0,0,0,.4)); }
+    .d-preview-overlay span { font-weight: 800; font-size: .95rem; text-shadow: 0 1px 4px rgba(0,0,0,.5); }
 
-    .action-btn-primary {
-        background-color: var(--apple-blue);
-        color: #ffffff;
-    }
+    .d-buy-body { padding: 1.15rem 1.25rem 1.35rem; }
+    .d-price-row { margin-bottom: 1rem; }
+    .d-price { font-size: 1.9rem; font-weight: 800; color: #1c1d1f; line-height: 1.1; }
+    .d-price-old { font-size: 1rem; color: #6a6f73; text-decoration: line-through; margin-left: .5rem; }
+    .d-price-free { font-size: 1.75rem; font-weight: 800; color: #157347; }
+    .d-or { display: flex; align-items: center; gap: .75rem; margin: .85rem 0 1rem; color: #6a6f73; font-size: .75rem; font-weight: 600; }
+    .d-or::before, .d-or::after { content: ""; flex: 1; height: 1px; background: #d1d7dc; }
 
-    .action-btn-primary:hover {
-        background-color: var(--apple-blue-hover);
-        transform: translateY(-2px);
-        color: #ffffff;
-        box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+    .d-btn-outline {
+        display: block; width: 100%; text-align: center; padding: .8rem 1rem;
+        font-weight: 800; font-size: .95rem; border-radius: 2px;
+        border: 1px solid #a435f0; background: #fff;
+        color: #a435f0 !important; text-decoration: none !important;
+        transition: background .15s, border-color .15s, color .15s; margin-bottom: .5rem; opacity: 1 !important;
     }
+    .d-btn-outline:hover { background: rgba(164,53,240,.06); border-color: #8710d8; color: #8710d8 !important; }
+    .d-btn-primary {
+        display: block; width: 100%; text-align: center; padding: .8rem 1rem;
+        font-weight: 800; font-size: .95rem; border: none; border-radius: 2px;
+        background: #a435f0; color: #fff !important; text-decoration: none !important;
+        transition: background .15s ease; margin-bottom: .5rem; opacity: 1 !important;
+    }
+    .d-btn-primary:hover { background: #8710d8; color: #fff !important; }
+    .d-btn-continue {
+        display: block; width: 100%; text-align: center; padding: .85rem;
+        font-weight: 800; border-radius: 2px;
+        background: #a435f0; color: #fff !important; text-decoration: none !important; opacity: 1 !important;
+    }
+    .d-btn-continue:hover { background: #8710d8; color: #fff !important; }
 
-    .action-btn-enrolled {
-        background-color: rgba(52, 199, 89, 0.1);
-        color: #34c759;
+    .d-buy-links {
+        display: flex; flex-wrap: wrap; justify-content: center;
+        gap: .5rem 1rem; margin-top: 1rem; padding-top: .85rem;
+        border-top: 1px solid #d1d7dc; font-size: .8rem; font-weight: 800;
     }
-    .action-btn-enrolled:hover {
-        background-color: rgba(52, 199, 89, 0.15);
-        color: #34c759;
-    }
+    .d-buy-links a { color: #a435f0 !important; text-decoration: none !important; opacity: 1 !important; }
+    .d-buy-links a:hover { color: #8710d8 !important; text-decoration: underline !important; }
 
-    .guarantee-text {
-        font-size: 0.85rem;
-        color: var(--apple-text-muted);
-        text-align: center;
-        margin-top: 1rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.4rem;
+    .d-buy-note {
+        font-size: .72rem; color: #6a6f73; text-align: center;
+        margin-top: .75rem; line-height: 1.45;
+        display: flex; align-items: flex-start; justify-content: center; gap: .4rem;
     }
+    .d-buy-list { list-style: none; padding: 0; margin: .85rem 0 0; font-size: .78rem; color: #1c1d1f; }
+    .d-buy-list li { display: flex; align-items: flex-start; gap: .5rem; margin-bottom: .45rem; }
+    .d-buy-list i { color: #a435f0; margin-top: .12rem; flex-shrink: 0; }
 
-    @@media (max-width: 991px) {
-        .pricing-card {
-            position: relative;
-            top: 0;
-            margin-top: 2rem;
-        }
-        .course-title {
-            font-size: 1.8rem;
-        }
-    }
+    /* ── Sections ── */
+    .d-section-title { font-size: 1.35rem; font-weight: 800; color: #1c1d1f; margin-bottom: 1rem; letter-spacing: -0.02em; }
+    .d-learn-box { border: 1px solid #d1d7dc; background: #f7f9fa; padding: 1.35rem 1.5rem 1.5rem; margin-bottom: 2rem; }
+    .d-learn-grid { display: grid; grid-template-columns: 1fr; gap: .65rem 2rem; }
+    @@media (min-width: 768px) { .d-learn-grid { grid-template-columns: 1fr 1fr; } }
+    .d-learn-item { display: flex; align-items: flex-start; gap: .6rem; font-size: .9rem; line-height: 1.45; color: #1c1d1f; }
+    .d-learn-item i { color: #1c1d1f; font-size: .85rem; margin-top: .2rem; flex-shrink: 0; }
+
+    .d-prose { font-size: 1rem; line-height: 1.65; color: #3e4143; }
+    .d-feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; padding: 1.25rem; border: 1px solid #d1d7dc; background: #fff; margin-top: 1.5rem; }
+    .d-feature-item { display: flex; align-items: flex-start; gap: .75rem; font-size: .9rem; }
+    .d-feature-item i { color: #a435f0; font-size: 1.2rem; flex-shrink: 0; }
+    .d-feature-item .t { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: #6a6f73; font-weight: 700; }
+    .d-feature-item .v { font-weight: 600; color: #1c1d1f; }
+
+    .d-tags-section { margin-top: 2rem; margin-bottom: .5rem; }
+    .d-tags-title { font-weight: 800; font-size: 1rem; margin-bottom: .75rem; color: #1c1d1f; }
+    .d-tags { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .d-tag { display: inline-block; padding: .4rem .75rem; border-radius: 999px; border: 1px solid #d1d7dc; background: #fff; font-size: .78rem; font-weight: 700; color: #1c1d1f; }
+
+    .d-review-summary { background: #fff; border: 1px solid #d1d7dc; border-radius: 2px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
+    .d-review-row { border-bottom: 1px solid #d1d7dc; padding: 1.25rem 0; }
+    .d-review-row:last-child { border-bottom: none; }
+    .d-review-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem; }
+    .d-review-user { font-weight: 700; margin: 0; }
+    .d-review-date { font-size: .78rem; color: #6a6f73; }
+    .d-review-stars { font-size: .85rem; color: #e59819; margin-bottom: .4rem; }
+    .d-review-comment { color: #6a6f73; margin: 0; }
+    .d-review-form { background: #fff; border: 1px solid #d1d7dc; border-radius: 2px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; }
+    .d-review-form h5 { font-weight: 800; margin-bottom: 1rem; }
+    .d-empty { text-align: center; padding: 2rem 1.25rem; border: 1px dashed #d1d7dc; background: #fafafa; }
+    .d-empty i { font-size: 2rem; color: #ccc; display: block; margin-bottom: .5rem; }
 </style>
 
-<div class="page-container">
-    <div class="container container-xl">
-        
-        <!-- Back Link -->
-        <a asp-page="./Index" class="text-decoration-none mb-3 d-inline-block" style="color: var(--apple-text-muted); font-weight: 500;">
-            <i class="bi bi-arrow-left-short fs-5 align-middle"></i> Quay lại
-        </a>
-
-        <div class="row align-items-start">
-            
-            <!-- Left Info Column -->
-            <div class="col-lg-8 pe-lg-4">
-                
-                <!-- Media -->
-                <div class="media-wrapper">
-                    @if (!string.IsNullOrEmpty(Model.Course.ThumbnailUrl))
+<div class="d-hero">
+    <div class="d-hero-inner px-3 px-md-4">
+        <nav class="d-breadcrumb" aria-label="breadcrumb">
+            <a asp-area="Student" asp-page="/Courses/Index">Khám phá</a>
+            <span class="d-breadcrumb-sep">›</span>
+            @if (!string.IsNullOrEmpty(Model.Course.CategoryName))
+            {
+                <span>@Model.Course.CategoryName</span>
+                <span class="d-breadcrumb-sep">›</span>
+            }
+            <span style="opacity:.85;">@Model.Course.Title</span>
+        </nav>
+        @if (TempData["CartMessage"] is string cm)
+        {
+            <div class="alert alert-success py-2 px-3 mb-3" style="max-width:36rem;" role="alert">@cm</div>
+        }
+        <h1 class="d-title">@Model.Course.Title</h1>
+        <div class="d-badges">
+            @if (Model.ReviewCount >= 50 && Model.AverageRating >= 4.5)
+            {
+                <span class="d-badge-bestseller">Bán chạy</span>
+            }
+            @if (!string.IsNullOrEmpty(Model.Course.CategoryName))
+            {
+                <span class="d-badge-cat">@Model.Course.CategoryName</span>
+            }
+            <span class="d-rating">
+                <span class="num">@Model.AverageRating.ToString("0.0")</span>
+                <span class="star">
+                    @for (int i = 1; i <= 5; i++)
                     {
-                        <img src="@Model.Course.ThumbnailUrl" alt="@Model.Course.Title" />
+                        if (i <= Math.Round(Model.AverageRating, 0, MidpointRounding.AwayFromZero))
+                        {
+                            <i class="bi bi-star-fill"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-star"></i>
+                        }
                     }
-                    else
+                </span>
+                <span class="count">(@Model.ReviewCount đánh giá)</span>
+            </span>
+        </div>
+        <p class="d-by">Tạo bởi <a>@Model.Course.TeacherName</a></p>
+        <div class="d-meta-row">
+                            <span><i class="bi bi-globe2"></i>Ngôn ngữ: @Model.Course.Language</span>
+            <span><i class="bi bi-bar-chart-steps"></i>Trình độ: @Model.Course.Level</span>
+        </div>
+        @if (!string.IsNullOrEmpty(heroExcerpt))
+        {
+            <p class="d-excerpt">@heroExcerpt</p>
+        }
+    </div>
+</div>
+
+<div class="d-body">
+    <div class="d-grid">
+        <main class="d-main">
+            <h2 class="d-section-title">Bạn sẽ học được gì</h2>
+            <div class="d-learn-box">
+                <div class="d-learn-grid">
+                    @foreach (var line in learnBullets)
                     {
-                        <div class="d-flex align-items-center justify-content-center w-100 h-100 position-absolute top-0 start-0">
-                            <i class="bi bi-play-circle text-muted opacity-25" style="font-size: 4rem;"></i>
+                        <div class="d-learn-item">
+                            <i class="bi bi-check-lg"></i>
+                            <span>@line</span>
                         </div>
                     }
                 </div>
+            </div>
 
-                <h1 class="course-title">@Model.Course.Title</h1>
-                <div class="course-meta">
-                    <span class="badge bg-primary bg-opacity-10 text-primary me-2 px-2 py-1 rounded-pill">@Model.Course.CategoryName</span>
-                    <span>Giảng viên: <strong>@Model.Course.TeacherName</strong></span>
+            <h2 class="d-section-title">Giới thiệu khóa học</h2>
+            <div class="d-prose">
+                @if (!string.IsNullOrEmpty(Model.Course.Description))
+                {
+                    @Html.Raw(Model.Course.Description ?? "")
+                }
+                else
+                {
+                    <p style="font-style:italic;color:#6a6f73;">Giảng viên chưa cập nhật mô tả cho khóa học này.</p>
+                }
+            </div>
+
+            <div class="d-feature-grid">
+                <div class="d-feature-item">
+                    <i class="bi bi-globe2"></i>
+                    <div><div class="t">Ngôn ngữ</div><div class="v">@Model.Course.Language</div></div>
                 </div>
-
-                <div class="prose-content">
-                    @if (!string.IsNullOrEmpty(Model.Course.Description))
-                    {
-                        @Html.Raw(Model.Course.Description)
-                    }
-                    else
-                    {
-                        <p class="text-muted fst-italic">Giảng viên chưa cập nhật mô tả cho khóa học này.</p>
-                    }
+                <div class="d-feature-item">
+                    <i class="bi bi-bar-chart-steps"></i>
+                    <div><div class="t">Trình độ</div><div class="v">@Model.Course.Level</div></div>
                 </div>
+                <div class="d-feature-item">
+                    <i class="bi bi-infinity"></i>
+                    <div><div class="t">Truy cập</div><div class="v">Trọn đời</div></div>
+                </div>
+            </div>
 
-                <div class="feature-list">
-                    <div class="feature-item">
-                        <i class="bi bi-globe2 feature-icon"></i>
-                        <div class="feature-text">
-                            <div class="title">Ngôn ngữ</div>
-                            <div class="value">@Model.Course.Language</div>
-                        </div>
+            @if (!string.IsNullOrEmpty(Model.Course.CategoryName))
+            {
+                <div class="d-tags-section">
+                    <div class="d-tags-title">Chủ đề liên quan</div>
+                    <div class="d-tags">
+                        <span class="d-tag">@Model.Course.CategoryName</span>
+                        <span class="d-tag">EduLearn</span>
+                        <span class="d-tag">Học trực tuyến</span>
                     </div>
-                    <div class="feature-item">
-                        <i class="bi bi-bar-chart feature-icon"></i>
-                        <div class="feature-text">
-                            <div class="title">Trình độ</div>
-                            <div class="value">@Model.Course.Level</div>
-                        </div>
-                    </div>
-                    <div class="feature-item">
-                        <i class="bi bi-infinity feature-icon"></i>
-                        <div class="feature-text">
-                            <div class="title">Truy cập</div>
-                            <div class="value">Trọn đời</div>
-                        </div>
-                    </div>
                 </div>
+            }
 
-                <!-- Reviews Section -->
-                <div class="reviews-section mt-5 pt-3 mb-5">
-                    <h2 class="course-title" style="font-size: 1.6rem;">Đánh giá của học viên</h2>
-                    
-                    <div class="d-flex align-items-center mb-4 mt-3">
-                        <div class="display-4 fw-bold me-3 text-dark">@Model.AverageRating.ToString("0.0")</div>
+            <div style="margin-top:2.5rem;margin-bottom:3rem;">
+                <h2 class="d-section-title">Đánh giá của học viên</h2>
+                <div class="d-review-summary">
+                    <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;">
+                        <div style="font-size:2.5rem;font-weight:800;color:#1c1d1f;line-height:1;">@Model.AverageRating.ToString("0.0")</div>
                         <div>
-                            <div class="text-warning mb-1" style="font-size: 1.2rem;">
+                            <div style="font-size:1.1rem;letter-spacing:2px;color:#e59819;margin-bottom:.25rem;">
                                 @for (int i = 1; i <= 5; i++)
                                 {
                                     if (i <= Math.Round(Model.AverageRating, 0, MidpointRounding.AwayFromZero))
@@ -287,113 +348,142 @@
                                     }
                                 }
                             </div>
-                            <div class="text-muted small">@Model.ReviewCount đánh giá</div>
+                            <div style="font-size:.8rem;color:#6a6f73;">@Model.ReviewCount đánh giá từ học viên</div>
                         </div>
-                    </div>
-
-                    @if (Model.Course.IsEnrolled)
-                    {
-                        <div class="card border-0 shadow-sm rounded-4 mb-4" style="background: var(--apple-card-bg);">
-                            <div class="card-body p-4">
-                                <h5 class="fw-bold mb-3">@(Model.MyReview != null ? "Cập nhật đánh giá của bạn" : "Thêm đánh giá")</h5>
-                                <form method="post" asp-page-handler="SubmitReview" asp-route-id="@Model.Course.CourseId">
-                                    <div class="mb-3">
-                                        <label class="form-label text-muted small fw-semibold">Gắn sao</label>
-                                        <select asp-for="ReviewRating" class="form-select border-0 bg-light rounded-3" style="max-width: 150px;">
-                                            <option value="5" selected="@(Model.MyReview?.Rating == 5)">5 Sao (Tuyệt vời)</option>
-                                            <option value="4" selected="@(Model.MyReview?.Rating == 4)">4 Sao (Rất tốt)</option>
-                                            <option value="3" selected="@(Model.MyReview?.Rating == 3)">3 Sao (Tạm ổn)</option>
-                                            <option value="2" selected="@(Model.MyReview?.Rating == 2)">2 Sao (Kém)</option>
-                                            <option value="1" selected="@(Model.MyReview?.Rating == 1)">1 Sao (Rất tệ)</option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label text-muted small fw-semibold">Nội dung đánh giá</label>
-                                        <textarea asp-for="ReviewComment" class="form-control border-0 bg-light rounded-3" rows="3" placeholder="Chia sẻ cảm nhận của bạn về khóa học này...">@(Model.MyReview?.Comment)</textarea>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold" style="background-color: var(--apple-blue); border:none;">
-                                        Gửi Đánh Giá
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    }
-
-                    <div class="review-list">
-                        @if (Model.Reviews != null && Model.Reviews.Any())
-                        {
-                            @foreach (var review in Model.Reviews)
-                            {
-                                <div class="review-item border-bottom py-4">
-                                    <div class="d-flex w-100 justify-content-between align-items-center mb-2">
-                                        <p class="mb-0 fw-bold">@review.UserName</p>
-                                        <span class="text-muted small">@review.CreatedAt.ToString("dd/MM/yyyy")</span>
-                                    </div>
-                                    <div class="text-warning mb-2" style="font-size: 0.9rem;">
-                                        @for (var i = 1; i <= 5; i++)
-                                        {
-                                            if (i <= review.Rating)
-                                            {
-                                                <i class="bi bi-star-fill"></i>
-                                            }
-                                            else
-                                            {
-                                                <i class="bi bi-star"></i>
-                                            }
-                                        }
-                                    </div>
-                                    <p class="text-muted mb-0">@review.Comment</p>
-                                </div>
-                            }
-                        }
-                        else
-                        {
-                            <p class="text-muted fst-italic">Chưa có đánh giá nào cho khóa học này.</p>
-                        }
                     </div>
                 </div>
-            </div>
 
-            <!-- Right Pricing Column -->
-            <div class="col-lg-4">
-                <div class="pricing-card">
-                    <div class="mb-2">
+                @if (Model.Course.IsEnrolled)
+                {
+                    <div class="d-review-form">
+                        <h5>@(Model.MyReview != null ? "Cập nhật đánh giá của bạn" : "Thêm đánh giá")</h5>
+                        <form method="post" asp-page-handler="SubmitReview" asp-route-id="@Model.Course.CourseId">
+                            <div style="margin-bottom:1rem;">
+                                <label class="form-label">Gắn sao</label>
+                                <select asp-for="ReviewRating" class="form-control" style="max-width:180px;">
+                                    <option value="5">5 Sao (Tuyệt vời)</option>
+                                    <option value="4">4 Sao (Rất tốt)</option>
+                                    <option value="3">3 Sao (Tạm ổn)</option>
+                                    <option value="2">2 Sao (Kém)</option>
+                                    <option value="1">1 Sao (Rất tệ)</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom:1rem;">
+                                <label class="form-label">Nội dung đánh giá</label>
+                                <textarea asp-for="ReviewComment" class="form-control" rows="3" placeholder="Chia sẻ cảm nhận của bạn...">@(Model.MyReview?.Comment)</textarea>
+                            </div>
+                            <button type="submit" class="d-btn-primary" style="max-width:220px;">Gửi đánh giá</button>
+                        </form>
+                    </div>
+                }
+
+                @if (Model.Reviews != null && Model.Reviews.Any())
+                {
+                    @foreach (var review in Model.Reviews)
+                    {
+                        <div class="d-review-row">
+                            <div class="d-review-head">
+                                <p class="d-review-user">@review.UserName</p>
+                                <span class="d-review-date">@review.CreatedAt.ToString("dd/MM/yyyy")</span>
+                            </div>
+                            <div class="d-review-stars">
+                                @for (var i = 1; i <= 5; i++)
+                                {
+                                    if (i <= review.Rating)
+                                    {
+                                        <i class="bi bi-star-fill"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-star"></i>
+                                    }
+                                }
+                            </div>
+                            <p class="d-review-comment">@review.Comment</p>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="d-empty">
+                        <i class="bi bi-chat-quote"></i>
+                        <p style="font-weight:700;color:#1c1d1f;margin-bottom:.35rem;">Chưa có đánh giá</p>
+                        <p style="font-size:.85rem;color:#6a6f73;">Hãy là người đầu tiên chia sẻ cảm nhận sau khi học xong nhé.</p>
+                    </div>
+                }
+            </div>
+        </main>
+
+        <aside class="d-sidebar">
+            <div class="d-buy-card d-sticky">
+                <div class="d-buy-tabs">
+                    <button type="button" class="d-buy-tab active" aria-current="true">Cá nhân</button>
+                    <button type="button" class="d-buy-tab muted" disabled title="Sắp có">Nhóm</button>
+                </div>
+                <div class="d-preview">
+                    @if (!string.IsNullOrEmpty(Model.Course.ThumbnailUrl))
+                    {
+                        <img src="@Model.Course.ThumbnailUrl" alt="@Model.Course.Title" />
+                    }
+                    <div class="d-preview-overlay">
+                        <i class="bi bi-play-circle-fill"></i>
+                        <span>Xem trước khóa học này</span>
+                    </div>
+                </div>
+                <div class="d-buy-body">
+                    <div class="d-or"><span>Mua khóa học</span></div>
+                    <div class="d-price-row">
                         @if (Model.Course.DiscountPrice.HasValue && Model.Course.DiscountPrice < Model.Course.Price)
                         {
-                            <div class="price-value">@Model.Course.DiscountPrice.Value.ToString("N0") <span class="fs-4">VNĐ</span></div>
-                            <div class="price-original">@Model.Course.Price.ToString("N0") VNĐ</div>
+                            <span class="d-price">@Model.Course.DiscountPrice.Value.ToString("N0") ₫</span>
+                            <span class="d-price-old">@Model.Course.Price.ToString("N0") ₫</span>
                         }
                         else if (Model.Course.Price == 0)
                         {
-                            <div class="price-value text-success">Miễn phí</div>
+                            <div class="d-price-free">Miễn phí</div>
                         }
                         else
                         {
-                            <div class="price-value">@Model.Course.Price.ToString("N0") <span class="fs-4">VNĐ</span></div>
+                            <span class="d-price">@Model.Course.Price.ToString("N0") ₫</span>
                         }
                     </div>
 
                     @if (Model.Course.IsEnrolled)
                     {
-                        <a asp-page="/LearnCourse" asp-route-courseId="@Model.Course.CourseId" class="action-btn action-btn-enrolled">
-                            <i class="bi bi-play-fill me-1"></i>Tiếp tục học
+                        <a asp-area="Student" asp-page="/LearnCourse" asp-route-courseId="@Model.Course.CourseId" class="d-btn-continue">
+                            <i class="bi bi-play-fill me-1"></i> Tiếp tục học
                         </a>
                     }
                     else
                     {
-                        <a asp-page="./Checkout" asp-route-id="@Model.Course.CourseId" class="action-btn action-btn-primary">
-                            Đăng ký học
-                        </a>
-                        if (Model.Course.Price > 0 || (Model.Course.DiscountPrice > 0))
-                        {
-                            <div class="guarantee-text">
-                                <i class="bi bi-shield-check"></i> Hoàn tiền trong 7 ngày
-                            </div>
-                        }
+                        <form method="post" asp-page-handler="AddToCart" asp-route-id="@Model.Course.CourseId" style="margin:0;">
+                            <button type="submit" class="d-btn-outline">
+                                <i class="bi bi-cart-plus me-1"></i> Thêm vào giỏ hàng
+                            </button>
+                        </form>
+                        <a asp-page="./Checkout" asp-route-id="@Model.Course.CourseId" class="d-btn-primary">Mua ngay</a>
                     }
+
+                    <ul class="d-buy-list">
+                        <li><i class="bi bi-check-lg"></i> Truy cập trọn đời</li>
+                        <li><i class="bi bi-check-lg"></i> Học trên mọi thiết bị</li>
+                        <li><i class="bi bi-check-lg"></i> Bài giảng &amp; tài liệu theo khóa</li>
+                    </ul>
+
+                    @if (!Model.Course.IsEnrolled && (Model.Course.Price > 0 || (Model.Course.DiscountPrice > 0)))
+                    {
+                        <div class="d-buy-note">
+                            <i class="bi bi-shield-check"></i>
+                            <span>Đảm bảo hoàn tiền trong 7 ngày theo chính sách EduLearn.</span>
+                        </div>
+                    }
+
+                    <div class="d-buy-links">
+                        <a href="#" onclick="navigator.clipboard?.writeText(window.location.href);return false;">Chia sẻ</a>
+                        <a asp-page="./Checkout" asp-route-id="@Model.Course.CourseId">Áp dụng coupon</a>
+                    </div>
                 </div>
             </div>
-
-        </div>
+        </aside>
     </div>
 </div>

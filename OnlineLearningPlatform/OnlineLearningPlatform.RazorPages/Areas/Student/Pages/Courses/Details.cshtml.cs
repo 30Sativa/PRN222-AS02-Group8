@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using OnlineLearningPlatform.RazorPages.Services;
 using OnlineLearningPlatform.Services.DTOs.Student.Response;
 using OnlineLearningPlatform.Services.Interface;
 using OnlineLearningPlatform.Services.DTOs.Review;
@@ -14,11 +15,13 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Student.Pages.Courses
     {
         private readonly IStudentService _studentService;
         private readonly IReviewService _reviewService;
+        private readonly StudentCartService _cart;
 
-        public DetailsModel(IStudentService studentService, IReviewService reviewService)
+        public DetailsModel(IStudentService studentService, IReviewService reviewService, StudentCartService cart)
         {
             _studentService = studentService;
             _reviewService = reviewService;
+            _cart = cart;
         }
 
         public StudentCourseResponse Course { get; set; } = null!;
@@ -54,6 +57,11 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Student.Pages.Courses
             if (!string.IsNullOrEmpty(userId) && course.IsEnrolled)
             {
                 MyReview = await _reviewService.GetUserReviewAsync(userId, id);
+                if (MyReview != null)
+                {
+                    ReviewRating = MyReview.Rating;
+                    ReviewComment = MyReview.Comment ?? string.Empty;
+                }
             }
 
             return Page();
@@ -74,6 +82,27 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Student.Pages.Courses
 
             await _reviewService.SubmitReviewAsync(userId, id, ReviewRating, ReviewComment);
             return RedirectToPage(new { id = id });
+        }
+
+        public async Task<IActionResult> OnPostAddToCartAsync(Guid id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return RedirectToPage("/Auth/Login");
+
+            var course = await _studentService.GetCourseDetailAsync(id, userId);
+            if (course == null)
+                return NotFound();
+
+            if (course.IsEnrolled)
+            {
+                TempData["CartMessage"] = "Bạn đã đăng ký khóa học này rồi.";
+                return RedirectToPage(new { id });
+            }
+
+            _cart.AddCourse(id);
+            TempData["CartMessage"] = "Đã thêm khóa học vào giỏ hàng.";
+            return RedirectToPage(new { id });
         }
     }
 }

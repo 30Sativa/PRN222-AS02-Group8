@@ -6,24 +6,82 @@
 }
 
 <style>
-    .chat-wrapper { display:flex; height:calc(100vh - 140px); margin:-24px -32px; background:var(--color-bg); overflow:hidden; }
-    .chat-sidebar { width:300px; min-width:260px; background:var(--color-surface); border-right:1px solid var(--color-border-light); display:flex; flex-direction:column; overflow:hidden; }
-    .chat-sidebar-header { padding:20px 16px 14px; border-bottom:1px solid var(--color-border-light); font-size:15px; font-weight:700; color:var(--color-label-1); }
-    .chat-conv-list { flex:1; overflow-y:auto; padding:8px 0; }
-    .chat-conv-item { display:flex; align-items:center; gap:10px; padding:10px 16px; cursor:pointer; text-decoration:none; border-left:3px solid transparent; transition:background 0.15s; }
-    .chat-conv-item:hover { background:var(--color-surface-2); }
-    .chat-conv-item.active { background:var(--color-blue-tint); border-left-color:var(--color-blue); }
+    .chat-page {
+        max-width: 1220px;
+        margin: 0 auto;
+        padding: var(--ud-sp6) var(--ud-sp4) var(--ud-sp8);
+        box-sizing: border-box;
+    }
+    .chat-page-title {
+        font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: var(--ud-text);
+        margin: 0 0 6px;
+    }
+    .chat-page-sub { font-size: 0.88rem; color: var(--ud-text-muted); margin: 0 0 var(--ud-sp5); }
+    .chat-wrapper {
+        display: flex;
+        height: min(720px, calc(100vh - 220px));
+        min-height: 440px;
+        margin: 0;
+        background: var(--ud-white);
+        border: 1px solid var(--ud-border);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--ud-shadow);
+        overflow: hidden;
+    }
+    .chat-sidebar {
+        width: 320px;
+        min-width: 260px;
+        max-width: 38%;
+        background: var(--ud-surface);
+        border-right: 1px solid var(--ud-border-light);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .chat-sidebar-header {
+        padding: 18px 18px 14px;
+        border-bottom: 1px solid var(--ud-border-light);
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--ud-text);
+        background: linear-gradient(180deg, rgba(86,36,208,0.06) 0%, transparent 100%);
+    }
+    .chat-conv-list { flex: 1; overflow-y: auto; padding: 10px 8px; }
+    .chat-conv-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        margin: 0 4px 4px;
+        border-radius: 12px;
+        cursor: pointer;
+        text-decoration: none;
+        border: 1px solid transparent;
+        transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+    .chat-conv-item:hover { background: var(--ud-white); border-color: var(--ud-border-light); box-shadow: var(--ud-shadow-sm); }
+    .chat-conv-item.active { background: var(--ud-white); border-color: rgba(0,113,227,0.25); box-shadow: 0 0 0 2px rgba(0,113,227,0.12); }
     .chat-conv-avatar { width:40px; height:40px; border-radius:50%; background:var(--color-green); color:#fff; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700; flex-shrink:0; }
     .chat-conv-info { flex:1; overflow:hidden; }
     .chat-conv-name { font-size:14px; font-weight:600; color:var(--color-label-1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .chat-conv-course { font-size:11px; color:var(--color-blue); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .chat-conv-last { font-size:12px; color:var(--color-label-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .chat-unread { background:var(--color-blue); color:#fff; border-radius:10px; font-size:11px; font-weight:700; padding:2px 7px; min-width:20px; text-align:center; flex-shrink:0; }
-    .chat-main { flex:1; display:flex; flex-direction:column; background:var(--color-bg); overflow:hidden; }
-    .chat-main-header { padding:16px 24px; border-bottom:1px solid var(--color-border-light); background:var(--color-surface); display:flex; align-items:center; gap:12px; }
+    .chat-main { flex: 1; display: flex; flex-direction: column; background: var(--ud-white); overflow: hidden; min-width: 0; }
+    .chat-main-header {
+        padding: 14px 22px;
+        border-bottom: 1px solid var(--ud-border-light);
+        background: var(--ud-white);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
     .chat-main-header-info h3 { font-size:15px; font-weight:700; color:var(--color-label-1); margin:0; }
     .chat-main-header-info p { font-size:12px; color:var(--color-label-2); margin:0; }
-    .chat-messages { flex:1; overflow-y:auto; padding:24px; display:flex; flex-direction:column; gap:12px; }
+    .chat-messages { flex: 1; overflow-y: auto; padding: 22px; display: flex; flex-direction: column; gap: 12px; background: linear-gradient(180deg, var(--ud-surface) 0%, var(--ud-white) 28%); }
     .chat-bubble-wrap { display:flex; align-items:flex-end; gap:8px; }
     .chat-bubble-wrap.mine { flex-direction:row-reverse; }
     .chat-bubble-avatar { width:32px; height:32px; border-radius:50%; background:var(--color-surface-2); color:var(--color-label-2); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0; }
@@ -40,13 +98,57 @@
     .chat-send-btn { width:42px; height:42px; border-radius:50%; background:var(--color-green); color:#fff; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background 0.2s, transform 0.15s; }
     .chat-send-btn:hover { opacity:.85; transform:scale(1.05); }
     .chat-send-btn:disabled { opacity:.5; cursor:default; transform:none; }
-    .chat-empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--color-label-2); gap:12px; text-align:center; padding:40px; }
-    .chat-empty svg { color:var(--color-label-3); }
-    .chat-empty h3 { font-size:18px; color:var(--color-label-1); margin:0; }
-    .chat-empty p { font-size:14px; margin:0; }
-    .chat-new-section { padding:12px 16px 4px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--color-label-3); }
+    .chat-empty {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        text-align: center;
+        padding: 48px 32px;
+        background: linear-gradient(180deg, var(--ud-surface) 0%, var(--ud-white) 45%);
+    }
+    .chat-empty-icon {
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(86,36,208,0.12), rgba(164,53,240,0.1));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .chat-empty svg { color: var(--ud-purple); opacity: 0.85; }
+    .chat-empty h3 { font-size: 1.15rem; font-weight: 800; color: var(--ud-text); margin: 0; letter-spacing: -0.02em; }
+    .chat-empty p { font-size: 0.9rem; color: var(--ud-text-muted); margin: 0; max-width: 320px; line-height: 1.55; }
+    .chat-new-section {
+        padding: 8px 16px 6px;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--ud-text-muted);
+    }
+    .chat-sidebar-empty {
+        padding: 28px 18px;
+        margin: 12px;
+        text-align: center;
+        font-size: 0.88rem;
+        color: var(--ud-text-muted);
+        line-height: 1.55;
+        background: var(--ud-white);
+        border: 1px dashed var(--ud-border);
+        border-radius: 12px;
+    }
+    @@media (max-width: 768px) {
+        .chat-wrapper { flex-direction: column; height: auto; min-height: 520px; }
+        .chat-sidebar { max-width: none; width: 100%; border-right: none; border-bottom: 1px solid var(--ud-border-light); max-height: 240px; }
+    }
 </style>
 
+<div class="chat-page">
+    <h1 class="chat-page-title">Tin nhắn</h1>
+    <p class="chat-page-sub">Trao đổi với học viên theo từng khóa học.</p>
 <div class="chat-wrapper">
     <!-- ═══ SIDEBAR ═══ -->
     <aside class="chat-sidebar">
@@ -78,8 +180,8 @@
             }
             else
             {
-                <div style="padding:24px 16px;color:var(--color-label-2);font-size:13px;text-align:center">
-                    Chưa có học viên nào nhắn tin cho bạn.
+                <div class="chat-sidebar-empty">
+                    Chưa có học viên nào nhắn tin cho bạn. Khi có tin, danh sách sẽ hiện ở đây.
                 </div>
             }
         </div>
@@ -127,15 +229,18 @@
         else
         {
             <div class="chat-empty">
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                </svg>
+                <div class="chat-empty-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </div>
                 <h3>Chọn cuộc trò chuyện</h3>
-                <p>Chọn một cuộc trò chuyện bên trái để trả lời học viên của bạn.</p>
+                <p>Chọn một cuộc trò chuyện bên trái để xem và trả lời học viên.</p>
             </div>
         }
     </main>
+</div>
 </div>
 
 @Html.AntiForgeryToken()

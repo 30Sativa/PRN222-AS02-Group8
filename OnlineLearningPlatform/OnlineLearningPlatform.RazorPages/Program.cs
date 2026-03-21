@@ -83,6 +83,17 @@ namespace OnlineLearningPlatform.RazorPages
             builder.Services.AddScoped<ICouponRepository, CouponRepository>();
             builder.Services.AddScoped<IEmailService, EmailService>();
 
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<OnlineLearningPlatform.RazorPages.Services.StudentCartService>();
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromDays(14);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+                options.Cookie.Name = ".EduLearn.Session";
+            });
+
             // ================= REPOSITORIES =================
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -161,6 +172,7 @@ namespace OnlineLearningPlatform.RazorPages
             app.UseStaticFiles();
 
             app.UseRouting();
+            app.UseSession();
 
             app.UseAuthentication();
             app.UseAuthorization();

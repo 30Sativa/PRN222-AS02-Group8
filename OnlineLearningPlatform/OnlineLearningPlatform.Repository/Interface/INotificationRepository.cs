@@ -10,5 +10,8 @@ namespace OnlineLearningPlatform.Repository.Interface
         Task MarkAllReadAsync(string userId);
         Task MarkReadAsync(int notificationId);
         Task BulkCreateAsync(List<Notification> notifications);
+
+        /// <summary>Lấy mẫu broadcast hệ thống gần đây (gộp bản ghi trùng nội dung/phút).</summary>
+        Task<List<Notification>> GetRecentSystemBroadcastsForAdminAsync(int maxDistinct = 50);
     }
 }

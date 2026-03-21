@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using OnlineLearningPlatform.Models.Entities;
 using OnlineLearningPlatform.Services.Interface;
-using System.Security.Claims;
 
 namespace OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Notifications
 {
@@ -22,8 +22,11 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Notifications
 
         public string SuccessMessage { get; set; } = string.Empty;
 
-        public void OnGet()
+        public IReadOnlyList<Notification> Notifications { get; private set; } = Array.Empty<Notification>();
+
+        public async Task OnGetAsync()
         {
+            await LoadNotificationsAsync();
         }
 
         public async Task<IActionResult> OnPostBroadcastAsync()
@@ -31,17 +34,23 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Notifications
             if (string.IsNullOrWhiteSpace(BroadcastMessage))
             {
                 ModelState.AddModelError("BroadcastMessage", "Vui lòng nhập nội dung thông báo.");
+                await LoadNotificationsAsync();
                 return Page();
             }
 
-            // Gửi thông báo hệ thống tới tất cả users
             await _notificationService.BroadcastSystemAsync(BroadcastMessage, TargetUrl);
 
             SuccessMessage = "Đã gửi thông báo hệ thống thành công!";
             BroadcastMessage = string.Empty;
             TargetUrl = string.Empty;
 
+            await LoadNotificationsAsync();
             return Page();
+        }
+
+        private async Task LoadNotificationsAsync()
+        {
+            Notifications = await _notificationService.GetRecentSystemBroadcastsForAdminAsync();
         }
     }
 }

@@ -6,10 +6,19 @@
 }
 
 <style>
+/* ── Căn giữa, không tràn viền màn hình rộng ── */
+.course-details-page {
+    max-width: 1220px;
+    margin: 0 auto;
+    padding: var(--space-6) var(--space-4) var(--space-10);
+    box-sizing: border-box;
+    width: 100%;
+}
+
 /* ── Page layout ── */
 .course-detail-layout {
     display: grid;
-    grid-template-columns: 1fr 320px;
+    grid-template-columns: minmax(0, 1fr) 300px;
     gap: var(--space-6);
     align-items: start;
 }
@@ -150,6 +159,7 @@
     return;
 }
 
+<div class="course-details-page">
 <div class="page-head fade-up">
     <h1>@Model.Course.Title</h1>
     <div class="breadcrumb">
@@ -163,8 +173,6 @@
 
 <div class="course-detail-layout fade-up">
 
-    <!-- ── LEFT: Content builder ── -->
-    <!-- ── LEFT: Content builder ── -->
     <div class="main-content-tabs">
         <ul class="nav nav-tabs mb-4 px-2 border-0" id="courseTabs" role="tablist">
             <li class="nav-item border-0 mb-0" role="presentation">
@@ -578,6 +586,7 @@
         }
     </aside>
 
+</div>
 </div>
 
 @section Scripts {

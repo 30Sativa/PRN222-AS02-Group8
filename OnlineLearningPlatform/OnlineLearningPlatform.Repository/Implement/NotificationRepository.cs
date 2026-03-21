@@ -56,5 +56,22 @@ namespace OnlineLearningPlatform.Repository.Implement
             _context.Notifications.AddRange(notifications);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<List<Notification>> GetRecentSystemBroadcastsForAdminAsync(int maxDistinct = 50)
+        {
+            var batch = await _context.Notifications
+                .AsNoTracking()
+                .Where(n => n.Type == NotificationType.System)
+                .OrderByDescending(n => n.CreatedAt)
+                .Take(3000)
+                .ToListAsync();
+
+            return batch
+                .GroupBy(n => $"{n.Content}\u001f{n.TargetUrl}\u001f{n.CreatedAt:yyyy-MM-dd HH:mm}")
+                .Select(g => g.First())
+                .OrderByDescending(n => n.CreatedAt)
+                .Take(maxDistinct)
+                .ToList();
+        }
     }
 }
