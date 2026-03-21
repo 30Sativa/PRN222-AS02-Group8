@@ -53,5 +53,14 @@ namespace OnlineLearningPlatform.Repository.Implement
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<Order?> GetOrderByOrderIdAsync(int orderId)
+        {
+            return await _context.Orders
+                .Include(o => o.OrderDetails)
+                .ThenInclude(od => od.Course)
+                .Include(o => o.User)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId);
+        }
     }
 }

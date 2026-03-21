@@ -11,32 +11,61 @@ namespace OnlineLearningPlatform.Services.Implement
         private readonly IEnrollmentService _enrollmentService;
         private readonly IWalletService _walletService;
         private readonly IProgressService _progressService;
+        private readonly ICouponService _couponService;
 
-        public OrderService(IOrderRepository orderRepo, ICourseRepository courseRepo, IEnrollmentService enrollmentService, IWalletService walletService, IProgressService progressService)
+        public OrderService(
+            IOrderRepository orderRepo,
+            ICourseRepository courseRepo,
+            IEnrollmentService enrollmentService,
+            IWalletService walletService,
+            IProgressService progressService,
+            ICouponService couponService)
         {
             _orderRepo = orderRepo;
             _courseRepo = courseRepo;
             _enrollmentService = enrollmentService;
             _walletService = walletService;
             _progressService = progressService;
+            _couponService = couponService;
         }
 
-        public async Task<Order> CreateOrderAsync(string userId, Guid courseId, string paymentMethod, bool useWallet = false)
+        public async Task<Order> CreateOrderAsync(string userId, Guid courseId, string paymentMethod, bool useWallet = false, string? couponCode = null)
         {
             var course = await _courseRepo.GetByIdAsync(courseId);
             if (course == null) throw new Exception("Course not found");
 
-            decimal finalPrice = (course.DiscountPrice != null && course.DiscountPrice > 0) ? course.DiscountPrice.Value : course.Price;
+            decimal price = (course.DiscountPrice != null && course.DiscountPrice > 0) ? course.DiscountPrice.Value : course.Price;
+            decimal? couponDiscountAmount = null;
+            int? appliedCouponId = null;
+
+            if (!string.IsNullOrWhiteSpace(couponCode))
+            {
+                var (isValid, _, discountAmount) = await _couponService.ValidateAndCalculateDiscountAsync(
+                    couponCode, userId, courseId, price);
+
+                if (isValid && discountAmount > 0)
+                {
+                    couponDiscountAmount = discountAmount;
+                    price = Math.Max(0, price - discountAmount);
+
+                    var matchedCoupon = await _couponService.GetByCodeAsync(couponCode);
+                    if (matchedCoupon != null) appliedCouponId = matchedCoupon.CouponId;
+                }
+            }
 
             decimal walletUsed = 0;
-            if (useWallet)
+            if (useWallet && price > 0)
             {
                 var wallet = await _walletService.GetOrCreateWalletAsync(userId);
                 if (wallet.Balance > 0)
                 {
-                    walletUsed = wallet.Balance >= finalPrice ? finalPrice : wallet.Balance;
+                    walletUsed = wallet.Balance >= price ? price : wallet.Balance;
                 }
             }
+
+            decimal finalPrice = price;
+            decimal courseOriginalPrice = (course.DiscountPrice != null && course.DiscountPrice > 0) ? course.DiscountPrice.Value : course.Price;
+            decimal? orderDiscountApplied = couponDiscountAmount.HasValue ? couponDiscountAmount : null;
 
             var order = new Order
             {
@@ -46,13 +75,15 @@ namespace OnlineLearningPlatform.Services.Implement
                 PaymentMethod = paymentMethod,
                 Status = OrderStatus.Pending,
                 CreatedAt = DateTime.UtcNow,
+                CouponId = appliedCouponId,
+                CouponDiscountAmount = orderDiscountApplied,
                 OrderDetails = new List<OrderDetail>
                 {
                     new OrderDetail
                     {
                         CourseId = courseId,
-                        Price = course.Price,
-                        DiscountApplied = course.Price - finalPrice
+                        Price = courseOriginalPrice,
+                        DiscountApplied = couponDiscountAmount ?? 0
                     }
                 }
             };
@@ -66,12 +97,16 @@ namespace OnlineLearningPlatform.Services.Implement
 
             if (walletUsed >= finalPrice)
             {
-                // Fully paid by wallet, complete it
                 createdOrder.Status = OrderStatus.Completed;
                 createdOrder.PaymentMethod = "WALLET";
                 createdOrder.CompletedAt = DateTime.UtcNow;
                 await _orderRepo.UpdateOrderAsync(createdOrder);
                 await _enrollmentService.EnrollAsync(userId, courseId, true);
+
+                if (appliedCouponId.HasValue)
+                {
+                    await _couponService.RecordUsageAsync(appliedCouponId.Value, userId, createdOrder.OrderId, couponDiscountAmount ?? 0);
+                }
             }
 
             return createdOrder;
@@ -185,6 +220,48 @@ namespace OnlineLearningPlatform.Services.Implement
             await _enrollmentService.CancelEnrollmentAsync(userId, courseId);
 
             return (true, "Đã hoàn tiền thành công vào ví của bạn.");
+        }
+
+        public async Task<Order> CreateTopUpOrderAsync(string userId, decimal amount)
+        {
+            var order = new Order
+            {
+                UserId = userId,
+                TotalAmount = amount,
+                WalletUsed = 0,
+                PaymentMethod = "VNPAY_TOPUP",
+                Status = OrderStatus.Pending,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            var createdOrder = await _orderRepo.CreateOrderAsync(order);
+            return createdOrder;
+        }
+
+        public async Task<bool> CompleteTopUpOrderAsync(int orderId, string transactionId, string gatewayResponse)
+        {
+            var order = await _orderRepo.GetOrderByOrderIdAsync(orderId);
+            if (order == null || order.Status == OrderStatus.Completed) return false;
+
+            order.Status = OrderStatus.Completed;
+            order.TransactionId = transactionId;
+            order.PaymentGatewayResponse = gatewayResponse;
+            order.CompletedAt = DateTime.UtcNow;
+
+            var result = await _orderRepo.UpdateOrderAsync(order);
+
+            if (result)
+            {
+                await _walletService.AddFundsAsync(
+                    order.UserId,
+                    order.TotalAmount,
+                    $"Nạp tiền vào ví",
+                    order.OrderId,
+                    Models.Entities.WalletTransactionType.TopUp
+                );
+            }
+
+            return result;
         }
     }
 }

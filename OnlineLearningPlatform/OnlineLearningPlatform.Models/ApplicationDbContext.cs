@@ -58,6 +58,8 @@ namespace OnlineLearningPlatform.Models
 
         public DbSet<ChatConversation> ChatConversations { get; set; } = default!;
         public DbSet<ChatMessage> ChatMessages { get; set; } = default!;
+        public DbSet<Coupon> Coupons { get; set; } = default!;
+        public DbSet<CouponUsage> CouponUsages { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -437,6 +439,55 @@ namespace OnlineLearningPlatform.Models
                 .WithMany()
                 .HasForeignKey(cm => cm.SenderId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            // Coupon relationships
+            builder.Entity<Coupon>()
+                .HasOne(c => c.Course)
+                .WithMany()
+                .HasForeignKey(c => c.CourseId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.Entity<Coupon>()
+                .HasOne(c => c.CreatedByTeacher)
+                .WithMany()
+                .HasForeignKey(c => c.CreatedByTeacherId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Coupon>()
+                .HasOne(c => c.CreatedByAdmin)
+                .WithMany()
+                .HasForeignKey(c => c.CreatedByAdminId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Coupon>()
+                .HasIndex(c => c.Code)
+                .IsUnique();
+
+            // CouponUsage relationships
+            builder.Entity<CouponUsage>()
+                .HasOne(cu => cu.Coupon)
+                .WithMany(c => c.CouponUsages)
+                .HasForeignKey(cu => cu.CouponId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<CouponUsage>()
+                .HasOne(cu => cu.User)
+                .WithMany()
+                .HasForeignKey(cu => cu.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<CouponUsage>()
+                .HasOne(cu => cu.Order)
+                .WithMany()
+                .HasForeignKey(cu => cu.OrderId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Order → Coupon relationship
+            builder.Entity<Order>()
+                .HasOne(o => o.Coupon)
+                .WithMany()
+                .HasForeignKey(o => o.CouponId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

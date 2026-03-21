@@ -9,5 +9,6 @@ namespace OnlineLearningPlatform.Repository.Interface
         Task<Order?> GetOrderByTransactionIdAsync(string transactionId);
         Task<List<Order>> GetOrdersByUserIdAsync(string userId);
         Task<bool> UpdateOrderAsync(Order order);
+        Task<Order?> GetOrderByOrderIdAsync(int orderId);
     }
 }

@@ -127,6 +127,31 @@
     .tx-amount.negative {
         color: var(--apple-text);
     }
+
+    .topup-action {
+        margin-top: 1.5rem;
+        text-align: center;
+    }
+
+    .topup-btn-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 14px 28px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 14px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 1.05rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .topup-btn-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
 </style>
 
 <div class="wallet-hero">
@@ -138,6 +163,15 @@
     <div class="balance-label">Số dư hiện tại</div>
     <div class="balance-amount">
         @(Model.StudentWallet?.Balance.ToString("N0") ?? "0") <span style="font-size: 2rem; font-weight: 500; color: var(--apple-text-muted);">VNĐ</span>
+    </div>
+
+    <div class="topup-action">
+        <a href="/Student/Wallet/TopUp" class="topup-btn-link">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+            Nạp tiền vào ví
+        </a>
     </div>
 </div>
 

@@ -1,0 +1,230 @@
+@page "{id:int}"
+@model OnlineLearningPlatform.RazorPages.Areas.Admin.Pages.Coupons.EditModel
+@{
+    ViewData["Title"] = "Sửa mã khuyến mãi";
+}
+
+<style>
+    .coupon-create-wrap {
+        max-width: 640px;
+        margin: 0 auto;
+    }
+    .coupon-create-wrap .page-head {
+        margin-bottom: 1.25rem;
+    }
+    .coupon-create-wrap .page-head h2 {
+        font-size: 1.35rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+    .coupon-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(0,0,0,.06);
+        border: 1px solid rgba(0,0,0,.06);
+        overflow: hidden;
+    }
+    .coupon-section {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid rgba(0,0,0,.06);
+    }
+    .coupon-section:last-of-type {
+        border-bottom: none;
+    }
+    .coupon-section-title {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: #86868b;
+        margin-bottom: 1rem;
+    }
+    .coupon-create-wrap .form-label {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #1d1d1f;
+        margin-bottom: 0.35rem;
+    }
+    .coupon-create-wrap .form-control,
+    .coupon-create-wrap .form-select {
+        border-radius: 10px;
+        font-size: 0.9375rem;
+        max-width: 100%;
+    }
+    .coupon-create-wrap .form-text {
+        font-size: 0.75rem;
+    }
+    .coupon-actions {
+        padding: 1rem 1.5rem 1.5rem;
+        background: #fafafa;
+    }
+    .coupon-actions .btn {
+        border-radius: 10px;
+        font-weight: 600;
+    }
+    #courseSelectSection {
+        display: none;
+    }
+    #courseSelectSection.show {
+        display: block;
+    }
+</style>
+
+<div class="coupon-create-wrap py-4 px-3">
+    <div class="page-head d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div>
+            <h2 class="mb-1">Sửa mã khuyến mãi</h2>
+            <p class="text-muted small mb-0">Cập nhật thông tin mã giảm giá.</p>
+        </div>
+        <a class="btn btn-sm btn-outline-secondary rounded-pill px-3" asp-area="Admin" asp-page="/Coupons/Index">
+            <i class="bi bi-arrow-left me-1"></i> Danh sách mã
+        </a>
+    </div>
+
+    <div class="coupon-card">
+        <form method="post" class="m-0">
+            <div class="coupon-section">
+                <div class="coupon-section-title">Thông tin mã</div>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label" asp-for="Code">Mã coupon <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control text-uppercase" asp-for="Code" placeholder="VD: SUMMER2026" maxlength="50" autocomplete="off" />
+                        <div class="form-text">Lưu dưới dạng chữ in hoa, không dấu cách.</div>
+                        <span class="text-danger small" asp-validation-for="Code"></span>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" asp-for="Description">Mô tả ngắn</label>
+                        <input type="text" class="form-control" asp-for="Description" placeholder="VD: Giảm 10% tháng 4" maxlength="255" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="coupon-section">
+                <div class="coupon-section-title">Giảm giá</div>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <label class="form-label" asp-for="DiscountType">Loại <span class="text-danger">*</span></label>
+                        <select class="form-select" asp-for="DiscountType" id="discountTypeSelect">
+                            <option value="Percentage">Phần trăm (%)</option>
+                            <option value="FixedAmount">Số tiền cố định (VNĐ)</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label" asp-for="DiscountValue">Giá trị <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" asp-for="DiscountValue" min="1" step="any" id="discountValueInput" />
+                        <div class="form-text" id="discountValueHint"></div>
+                    </div>
+                    <div class="col-12" id="percentageCapBlock">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" asp-for="LimitMaxDiscount" id="limitMaxDiscountCb" />
+                            <label class="form-check-label" for="limitMaxDiscountCb">Giới hạn mức giảm tối đa (VNĐ)</label>
+                            <div class="form-text">Tuỳ chọn: ví dụ “giảm 50% nhưng tối đa 100.000đ”. Không chọn thì giảm đúng theo % trên giá khóa.</div>
+                        </div>
+                        <div id="maxDiscountAmountWrapper" class="mt-2">
+                            <label class="form-label" asp-for="MaxDiscountAmount">Mức trần (VNĐ) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" asp-for="MaxDiscountAmount" min="1" step="1" placeholder="VD: 100000" />
+                            <span class="text-danger small" asp-validation-for="MaxDiscountAmount"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="coupon-section">
+                <div class="coupon-section-title">Thời gian &amp; giới hạn</div>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <label class="form-label" asp-for="StartDate">Bắt đầu <span class="text-danger">*</span></label>
+                        <input type="datetime-local" class="form-control" asp-for="StartDate" step="60" />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label" asp-for="EndDate">Kết thúc <span class="text-danger">*</span></label>
+                        <input type="datetime-local" class="form-control" asp-for="EndDate" step="60" />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label" asp-for="UsageLimit">Tổng lượt dùng</label>
+                        <input type="number" class="form-control" asp-for="UsageLimit" min="1" placeholder="Để trống = không giới hạn" />
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="form-label" asp-for="MaxUsagePerUser">Mỗi tài khoản tối đa</label>
+                        <input type="number" class="form-control" asp-for="MaxUsagePerUser" min="1" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" asp-for="MinOrderAmount">Đơn tối thiểu (VNĐ)</label>
+                        <input type="number" class="form-control" asp-for="MinOrderAmount" min="0" placeholder="VD: 100000" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="coupon-section">
+                <div class="coupon-section-title">Phạm vi áp dụng</div>
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" asp-for="IsCourseSpecific" id="isCourseSpecific" role="switch" />
+                    <label class="form-check-label" for="isCourseSpecific">Chỉ áp dụng cho <strong>một</strong> khóa học cụ thể</label>
+                </div>
+                <div id="courseSelectSection" class="@(Model.IsCourseSpecific ? "show" : "")">
+                    <label class="form-label" asp-for="CourseId">Khóa học</label>
+                    <select class="form-select" asp-for="CourseId" asp-items="Model.CourseOptions"></select>
+                    <div class="form-text">Danh sách lấy từ tất cả khóa (chưa xóa) trên hệ thống.</div>
+                    <span class="text-danger small d-block mt-1" asp-validation-for="CourseId"></span>
+                </div>
+            </div>
+
+            @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
+            {
+                <div class="px-3 pb-0">
+                    <div class="alert alert-danger small mb-0 rounded-3">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <div>@error.ErrorMessage</div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <div class="coupon-actions d-flex flex-wrap gap-2">
+                <button type="submit" class="btn btn-primary px-4">
+                    <i class="bi bi-check2-circle me-1"></i> Cập nhật
+                </button>
+                <a class="btn btn-light border" asp-area="Admin" asp-page="/Coupons/Index">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            var cb = document.getElementById('isCourseSpecific');
+            var section = document.getElementById('courseSelectSection');
+            function syncCourse() {
+                if (cb.checked) section.classList.add('show');
+                else section.classList.remove('show');
+            }
+            cb.addEventListener('change', syncCourse);
+            syncCourse();
+
+            var typeSel = document.getElementById('discountTypeSelect');
+            var pctBlock = document.getElementById('percentageCapBlock');
+            var limitCb = document.getElementById('limitMaxDiscountCb');
+            var maxWrap = document.getElementById('maxDiscountAmountWrapper');
+            var hint = document.getElementById('discountValueHint');
+            function syncDiscountType() {
+                if (!typeSel || !pctBlock) return;
+                var isPct = typeSel.value === 'Percentage';
+                pctBlock.style.display = isPct ? '' : 'none';
+                if (!isPct && limitCb) limitCb.checked = false;
+                if (hint) hint.textContent = isPct ? 'Nhập phần trăm (vd: 10 = giảm 10%).' : 'Nhập số tiền giảm (VNĐ).';
+                syncMaxCap();
+            }
+            function syncMaxCap() {
+                if (!maxWrap || !limitCb || !typeSel) return;
+                var show = typeSel.value === 'Percentage' && limitCb.checked;
+                maxWrap.style.display = show ? '' : 'none';
+            }
+            if (typeSel) typeSel.addEventListener('change', syncDiscountType);
+            if (limitCb) limitCb.addEventListener('change', syncMaxCap);
+            syncDiscountType();
+        })();
+    </script>
+}

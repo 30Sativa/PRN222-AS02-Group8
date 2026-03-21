@@ -264,15 +264,44 @@
             <div class="price-row">
                 <span class="price-label">Tổng cộng:</span>
                 @{
-                    var finalPrice = (Model.Course.DiscountPrice > 0 ? Model.Course.DiscountPrice.Value : Model.Course.Price);
+                    var basePrice = (Model.Course.DiscountPrice > 0 ? Model.Course.DiscountPrice.Value : Model.Course.Price);
+                    var displayPrice = Model.CouponApplied ? Model.FinalPrice : basePrice;
                 }
-                <span class="price-value">@(finalPrice > 0 ? finalPrice.ToString("N0") + " VNĐ" : "Miễn phí")</span>
+                <span class="price-value">@(displayPrice > 0 ? displayPrice.ToString("N0") + " VNĐ" : "Miễn phí")</span>
             </div>
 
-            @if (Model.WalletBalance > 0 && finalPrice > 0)
+            @if (Model.CouponApplied && Model.CouponDiscount > 0)
             {
-                var walletUsed = Math.Min(Model.WalletBalance, finalPrice);
-                var remaining = finalPrice - walletUsed;
+                <div class="alert alert-success d-flex align-items-center gap-2 py-2 px-3" style="border-radius:12px; font-size:0.95rem;">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <div>
+                        <strong>Mã @TempData["CouponCode"]</strong> đã được áp dụng — giảm <strong>@Model.CouponDiscount.ToString("N0") VNĐ</strong>
+                        <span class="text-muted ms-2"><s>@basePrice.ToString("N0") VNĐ</s></span>
+                    </div>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.CouponMessage))
+            {
+                <div class="alert @(Model.CouponApplied ? "alert-success" : "alert-danger") d-flex align-items-center gap-2 py-2 px-3" style="border-radius:12px; font-size:0.9rem;">
+                    <i class="bi @(Model.CouponApplied ? "bi-check-circle-fill" : "bi-exclamation-circle-fill")"></i>
+                    @Model.CouponMessage
+                </div>
+            }
+
+            <!-- Coupon input -->
+            <form method="post" asp-page-handler="ApplyCoupon" class="d-flex gap-2">
+                <input type="text" class="form-control" name="CouponCode" placeholder="Nhập mã khuyến mãi (VD: SUMMER2026)"
+                       value="@Model.CouponCode" style="text-transform:uppercase; letter-spacing:0.05em;" />
+                <button type="submit" class="btn btn-outline-primary px-3" style="border-radius:12px; white-space:nowrap;">
+                    Áp dụng
+                </button>
+            </form>
+
+            @if (Model.WalletBalance > 0 && displayPrice > 0)
+            {
+                var walletUsed = Math.Min(Model.WalletBalance, displayPrice);
+                var remaining = displayPrice - walletUsed;
 
                 <div class="wallet-box">
                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -302,7 +331,7 @@
 
             <!-- Button trigger modal -->
             <button type="button" class="btn-checkout mt-2" data-bs-toggle="modal" data-bs-target="#confirmModal">
-                @(finalPrice > 0 ? "Tiến hành thanh toán" : "Xác nhận học miễn phí")
+                @(displayPrice > 0 ? "Tiến hành thanh toán" : "Xác nhận học miễn phí")
             </button>
         </div>
     </div>

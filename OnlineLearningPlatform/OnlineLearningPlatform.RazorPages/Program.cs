@@ -79,6 +79,8 @@ namespace OnlineLearningPlatform.RazorPages
             builder.Services.AddScoped<IChatService, ChatService>();
             builder.Services.AddScoped<IAiChatService, AiChatService>();
 
+            builder.Services.AddScoped<ICouponService, CouponService>();
+            builder.Services.AddScoped<ICouponRepository, CouponRepository>();
             builder.Services.AddScoped<IEmailService, EmailService>();
 
             // ================= REPOSITORIES =================

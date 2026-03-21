@@ -60,6 +60,20 @@ namespace OnlineLearningPlatform.Models.Entities
         public ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
 
         public ICollection<Refund> Refunds { get; set; } = new List<Refund>();
+
+        /// <summary>
+        /// Mã coupon đã áp dụng cho đơn hàng này.
+        /// </summary>
+        public int? CouponId { get; set; }
+
+        /// <summary>
+        /// Số tiền được giảm từ coupon.
+        /// </summary>
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal? CouponDiscountAmount { get; set; }
+
+        [ForeignKey(nameof(CouponId))]
+        public Coupon? Coupon { get; set; }
     }
 
     /// <summary>

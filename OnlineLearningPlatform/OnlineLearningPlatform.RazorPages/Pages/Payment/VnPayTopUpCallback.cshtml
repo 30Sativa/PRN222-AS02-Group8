@@ -1,0 +1,24 @@
+@page
+@model OnlineLearningPlatform.RazorPages.Pages.Payment.VnPayTopUpCallbackModel
+@{
+    ViewData["Title"] = "Kết quả nạp tiền";
+}
+
+<div class="container py-5 text-center">
+    @if (Model.IsSuccess)
+    {
+        <div class="alert alert-success">
+            <h2>Nạp tiền thành công!</h2>
+            <p>Số dư đã được cập nhật.</p>
+            <a href="/Student/Wallet" class="btn btn-primary">Quay về ví</a>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-danger">
+            <h2>Nạp tiền thất bại</h2>
+            <p>@Model.ErrorMessage</p>
+            <a href="/Student/Wallet/TopUp" class="btn btn-primary">Thử lại</a>
+        </div>
+    }
+</div>

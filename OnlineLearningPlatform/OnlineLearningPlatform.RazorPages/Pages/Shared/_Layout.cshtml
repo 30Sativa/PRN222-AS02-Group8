@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
@@ -146,12 +146,14 @@
                     <li><a asp-area="Admin" asp-page="/Dashboard">Dashboard</a></li>
                     <li><a asp-area="Admin" asp-page="/Users/Index">Người dùng</a></li>
                     <li><a asp-area="Admin" asp-page="/Notifications/Index">Thông báo</a></li>
+                    <li><a asp-area="Admin" asp-page="/Coupons/Index">Mã khuyến mãi</a></li>
                 }
                 @if (User.IsInRole("Teacher"))
                 {
                     <li><a asp-area="Teacher" asp-page="/Dashboard">Dashboard</a></li>
                     <li><a asp-area="Teacher" asp-page="/Courses/Index">Khóa học</a></li>
                     <li><a asp-area="Teacher" asp-page="/Categories/Index">Danh mục</a></li>
+                    <li><a asp-area="Teacher" asp-page="/Coupons/Index">Mã khuyến mãi</a></li>
                     <li><a asp-area="Teacher" asp-page="/Chat">Tin nhắn</a></li>
                     <li><a asp-area="Teacher" asp-page="/Profile">Hồ sơ</a></li>
                 }
