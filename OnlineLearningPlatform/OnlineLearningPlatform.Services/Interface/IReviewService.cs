@@ -11,6 +11,7 @@ namespace OnlineLearningPlatform.Services.Interface
         Task<List<ReviewDto>> GetCourseReviewsAsync(Guid courseId, int page = 1, int pageSize = 10);
         Task<int> GetCourseReviewCountAsync(Guid courseId);
         Task<(double average, int count)> GetCourseRatingStatsAsync(Guid courseId);
+        Task<RatingBreakdownDto> GetRatingBreakdownAsync(Guid courseId);
         Task<bool> SubmitReviewAsync(string userId, Guid courseId, int rating, string comment);
         Task<bool> DeleteReviewAsync(int reviewId, string userId);
     }

@@ -25,6 +25,10 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses
         public List<OnlineLearningPlatform.Services.DTOs.Review.ReviewDto> Reviews { get; set; } = new();
         public double AverageRating { get; set; }
         public int ReviewCount { get; set; }
+        public OnlineLearningPlatform.Services.DTOs.Review.RatingBreakdownDto RatingBreakdown { get; set; } = new();
+
+        // Bộ lọc rating (0 = tất cả)
+        public int FilterRating { get; set; } = 0;
 
         public List<OnlineLearningPlatform.Services.DTOs.Discussion.DiscussionTopicDto> Topics { get; set; } = new();
         
@@ -54,9 +58,17 @@ namespace OnlineLearningPlatform.RazorPages.Areas.Teacher.Pages.Courses
             }
 
             Reviews = await reviewService.GetCourseReviewsAsync(id, 1, 100);
-            var stats = await reviewService.GetCourseRatingStatsAsync(id);
-            AverageRating = stats.average;
-            ReviewCount = stats.count;
+            RatingBreakdown = await reviewService.GetRatingBreakdownAsync(id);
+            AverageRating = RatingBreakdown.Average;
+            ReviewCount = RatingBreakdown.Total;
+
+            // Áp dụng bộ lọc theo sao nếu có
+            FilterRating = 0;
+            if (Request.Query.TryGetValue("filterRating", out var fr) && int.TryParse(fr, out var frInt) && frInt >= 1 && frInt <= 5)
+            {
+                FilterRating = frInt;
+                Reviews = Reviews.Where(r => r.Rating == FilterRating).ToList();
+            }
 
             Topics = await discussionService.GetCourseTopicsAsync(id, 1, 100);
             

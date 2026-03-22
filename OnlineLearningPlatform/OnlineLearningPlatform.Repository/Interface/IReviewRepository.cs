@@ -11,6 +11,8 @@ namespace OnlineLearningPlatform.Repository.Interface
         Task<List<Review>> GetByCourseIdAsync(Guid courseId, int skip, int take);
         Task<int> GetCountByCourseIdAsync(Guid courseId);
         Task<double> GetAverageRatingByCourseIdAsync(Guid courseId);
+        /// <summary>Trả về số lượng đánh giá theo từng mức sao (key = sao 1–5, value = count).</summary>
+        Task<Dictionary<int, int>> GetRatingBreakdownAsync(Guid courseId);
         Task<Review> CreateAsync(Review review);
         Task<bool> UpdateAsync(Review review);
         Task<bool> DeleteAsync(int reviewId);

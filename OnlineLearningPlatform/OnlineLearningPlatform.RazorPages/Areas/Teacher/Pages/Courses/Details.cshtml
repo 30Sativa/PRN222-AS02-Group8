@@ -329,49 +329,222 @@
 
             <!-- TAB 2: REVIEWS -->
             <div class="tab-pane fade" id="reviews" role="tabpanel">
-                <div class="d-flex align-items-center mb-4">
-                    <h2 class="m-0 me-3" style="font-size: 1.4rem; font-weight: 700;">Đánh giá của học viên</h2>
-                    <div class="d-flex align-items-center rounded-pill bg-light px-3 py-1">
-                        <span class="text-warning me-1">★</span>
-                        <strong class="fs-5 me-1">@Model.AverageRating.ToString("0.0")</strong>
-                        <span class="text-muted small">/ 5.0 (@Model.ReviewCount đánh giá)</span>
+
+                <style>
+                /* ── Rating summary card ── */
+                .rating-summary {
+                    display: flex; gap: var(--space-6); align-items: center;
+                    background: var(--color-surface); border: 1px solid var(--color-border-light);
+                    border-radius: var(--radius-xl); padding: var(--space-5) var(--space-6);
+                    margin-bottom: var(--space-5);
+                }
+                .rating-big-score {
+                    text-align: center; flex-shrink: 0; min-width: 90px;
+                }
+                .rating-big-score .score-num {
+                    font-size: 3.2rem; font-weight: 800; line-height: 1;
+                    color: var(--color-label-1); letter-spacing: -.04em;
+                }
+                .rating-big-score .score-stars { font-size: 1.2rem; letter-spacing: 1px; margin: 4px 0; }
+                .rating-big-score .score-total { font-size: var(--text-xs); color: var(--color-label-2); }
+                .rating-bars { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+                .rating-bar-row {
+                    display: flex; align-items: center; gap: var(--space-2);
+                    font-size: var(--text-xs); cursor: pointer;
+                    text-decoration: none; color: inherit;
+                    border-radius: var(--radius-sm);
+                    padding: 2px 4px; margin: -2px -4px;
+                    transition: background var(--transition);
+                }
+                .rating-bar-row:hover { background: var(--color-surface-2); }
+                .rating-bar-row.active-filter { background: var(--color-blue-tint); }
+                .rating-bar-label { width: 30px; flex-shrink: 0; color: var(--color-label-2); text-align: right; }
+                .rating-bar-star  { color: #fbbf24; font-size: 11px; flex-shrink: 0; }
+                .rating-bar-track {
+                    flex: 1; height: 8px; background: var(--color-border-light);
+                    border-radius: 99px; overflow: hidden;
+                }
+                .rating-bar-fill {
+                    height: 100%; border-radius: 99px;
+                    background: linear-gradient(90deg, #fbbf24, #f59e0b);
+                    transition: width .5s ease;
+                }
+                .rating-bar-count { width: 24px; flex-shrink: 0; color: var(--color-label-2); }
+
+                /* ── Filter pills ── */
+                .review-filter-bar {
+                    display: flex; gap: var(--space-2); flex-wrap: wrap;
+                    margin-bottom: var(--space-4);
+                }
+                .filter-pill {
+                    display: inline-flex; align-items: center; gap: 4px;
+                    padding: 4px 14px; border-radius: var(--radius-full);
+                    font-size: var(--text-xs); font-weight: 600; cursor: pointer;
+                    border: 1.5px solid var(--color-border);
+                    background: var(--color-surface); color: var(--color-label-2);
+                    text-decoration: none; transition: all var(--transition);
+                }
+                .filter-pill:hover { border-color: var(--color-blue); color: var(--color-blue); }
+                .filter-pill.active {
+                    background: var(--color-blue); border-color: var(--color-blue);
+                    color: #fff;
+                }
+
+                /* ── Review card ── */
+                .review-card {
+                    background: var(--color-surface);
+                    border: 1px solid var(--color-border-light);
+                    border-radius: var(--radius-xl);
+                    padding: var(--space-4) var(--space-5);
+                    transition: box-shadow var(--transition);
+                }
+                .review-card:hover { box-shadow: var(--shadow-sm); }
+                .review-card-header {
+                    display: flex; align-items: center; gap: var(--space-3);
+                    margin-bottom: var(--space-3);
+                }
+                .review-avatar {
+                    width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+                    background: linear-gradient(135deg, var(--color-blue), #7c3aed);
+                    color: #fff; font-weight: 700; font-size: 15px;
+                    display: flex; align-items: center; justify-content: center;
+                }
+                .review-meta { flex: 1; min-width: 0; }
+                .review-name {
+                    font-size: var(--text-sm); font-weight: 600;
+                    color: var(--color-label-1);
+                    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+                }
+                .review-time { font-size: 11px; color: var(--color-label-2); margin-top: 1px; }
+                .review-stars { font-size: 13px; letter-spacing: 1px; flex-shrink: 0; }
+                .star-filled { color: #fbbf24; }
+                .star-empty  { color: #d1d5db; }
+                .review-comment {
+                    font-size: var(--text-sm); color: var(--color-label-1);
+                    line-height: 1.6; margin-top: 4px;
+                }
+                .review-updated-badge {
+                    display: inline-block; margin-left: 6px;
+                    font-size: 10px; padding: 1px 6px;
+                    border-radius: var(--radius-full);
+                    background: var(--color-amber-tint); color: var(--color-amber);
+                    font-weight: 600; vertical-align: middle;
+                }
+                @@media(max-width:600px) { .rating-summary { flex-direction: column; } }
+                </style>
+
+                <!-- Rating summary -->
+                @{
+                    var rb = Model.RatingBreakdown;
+                    string StarsHtml(double avg) {
+                        var sb = new System.Text.StringBuilder();
+                        for (int i = 1; i <= 5; i++)
+                            sb.Append(i <= Math.Round(avg)
+                                ? "<span class='star-filled'>★</span>"
+                                : "<span class='star-empty'>★</span>");
+                        return sb.ToString();
+                    }
+                }
+                <div class="rating-summary">
+                    <div class="rating-big-score">
+                        <div class="score-num">@rb.Average.ToString("0.0")</div>
+                        <div class="score-stars">@Html.Raw(StarsHtml(rb.Average))</div>
+                        <div class="score-total">@rb.Total đánh giá</div>
                     </div>
+                    <div class="rating-bars">
+                        @foreach (var (star, count, pct) in new[]{
+                            (5, rb.Star5, rb.Pct5),
+                            (4, rb.Star4, rb.Pct4),
+                            (3, rb.Star3, rb.Pct3),
+                            (2, rb.Star2, rb.Pct2),
+                            (1, rb.Star1, rb.Pct1)
+                        })
+                        {
+                            var isActive = Model.FilterRating == star;
+                            var filterUrl = isActive
+                                ? $"?id={Model.Course!.CourseId}#reviews"
+                                : $"?id={Model.Course!.CourseId}&filterRating={star}#reviews";
+                            <a href="@filterUrl"
+                               class="rating-bar-row @(isActive ? "active-filter" : "")">
+                                <span class="rating-bar-label">@star</span>
+                                <span class="rating-bar-star">★</span>
+                                <span class="rating-bar-track">
+                                    <span class="rating-bar-fill" style="width:@pct.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)%"></span>
+                                </span>
+                                <span class="rating-bar-count">@count</span>
+                            </a>
+                        }
+                    </div>
+                </div>
+
+                <!-- Filter pills -->
+                <div class="review-filter-bar">
+                    <a href="?id=@Model.Course!.CourseId#reviews"
+                       class="filter-pill @(Model.FilterRating == 0 ? "active" : "")">
+                        Tất cả (@rb.Total)
+                    </a>
+                    @foreach (var s in new[]{ 5, 4, 3, 2, 1 })
+                    {
+                        var cnt = s switch { 5=>rb.Star5, 4=>rb.Star4, 3=>rb.Star3, 2=>rb.Star2, _=>rb.Star1 };
+                        <a href="?id=@Model.Course!.CourseId&filterRating=@s#reviews"
+                           class="filter-pill @(Model.FilterRating == s ? "active" : "")">
+                            @s ★ (@cnt)
+                        </a>
+                    }
                 </div>
 
                 @if (!Model.Reviews.Any())
                 {
                     <div class="empty-content">
-                        <div class="empty-content-icon" style="filter: grayscale(1); opacity: 0.5;">⭐</div>
-                        <h3>Chưa có đánh giá nào</h3>
-                        <p>Học viên chưa để lại đánh giá nào cho khóa học này.</p>
+                        <div class="empty-content-icon" style="filter:grayscale(1);opacity:.5;">⭐</div>
+                        <h3>@(Model.FilterRating > 0 ? $"Không có đánh giá {Model.FilterRating} sao" : "Chưa có đánh giá nào")</h3>
+                        <p>@(Model.FilterRating > 0 ? "Thử chọn mức sao khác." : "Học viên chưa để lại đánh giá nào cho khóa học này.")</p>
                     </div>
                 }
                 else
                 {
                     <div class="row g-3">
-                        @foreach(var review in Model.Reviews)
+                        @foreach (var review in Model.Reviews)
                         {
+                            var initials = (review.UserName.Length > 0
+                                ? review.UserName.Trim().Split(' ').Last().Substring(0, 1)
+                                : "?").ToUpper();
                             <div class="col-12 col-md-6">
-                                <div class="card border-0 shadow-sm rounded-4 h-100" style="background: var(--color-surface);">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <div class="fw-bold">@review.UserName</div>
-                                            <div class="text-warning small">
-                                                @for(int i = 0; i < 5; i++)
+                                <div class="review-card">
+                                    <div class="review-card-header">
+                                        @if (!string.IsNullOrEmpty(review.UserAvatarUrl))
+                                        {
+                                            <img src="@review.UserAvatarUrl" class="review-avatar" alt="@review.UserName" style="object-fit:cover;" />
+                                        }
+                                        else
+                                        {
+                                            <div class="review-avatar">@initials</div>
+                                        }
+                                        <div class="review-meta">
+                                            <div class="review-name">@review.UserName</div>
+                                            <div class="review-time">
+                                                @review.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                                @if (review.UpdatedAt.HasValue)
                                                 {
-                                                    <span style="color: @(i < review.Rating ? "#ffc107" : "#e4e5e9")">★</span>
+                                                    <span class="review-updated-badge">đã sửa</span>
                                                 }
                                             </div>
                                         </div>
-                                        <p class="text-muted small mb-2">@review.CreatedAt.ToString("dd/MM/yyyy")</p>
-                                        <p class="mb-0 fs-6">@review.Comment</p>
+                                        <div class="review-stars">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <span class="@(i <= review.Rating ? "star-filled" : "star-empty")">★</span>
+                                            }
+                                        </div>
                                     </div>
+                                    <p class="review-comment">@review.Comment</p>
                                 </div>
                             </div>
                         }
                     </div>
                 }
             </div> <!-- End TAB 2 -->
+
 
             <!-- TAB 3: DISCUSSIONS -->
             <div class="tab-pane fade" id="discussions" role="tabpanel">

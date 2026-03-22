@@ -51,6 +51,22 @@ namespace OnlineLearningPlatform.Repository.Implement
                 .AverageAsync(r => r.Rating);
         }
 
+        public async Task<Dictionary<int, int>> GetRatingBreakdownAsync(Guid courseId)
+        {
+            var grouped = await _context.Reviews
+                .Where(r => r.CourseId == courseId && !r.IsDeleted)
+                .GroupBy(r => r.Rating)
+                .Select(g => new { Rating = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            // Đảm bảo trả về đủ 5 mức, kể cả mức có 0 đánh giá
+            return Enumerable.Range(1, 5)
+                .ToDictionary(
+                    star => star,
+                    star => grouped.FirstOrDefault(g => g.Rating == star)?.Count ?? 0
+                );
+        }
+
         public async Task<Review> CreateAsync(Review review)
         {
             _context.Reviews.Add(review);
